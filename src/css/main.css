@@ -1,0 +1,40 @@
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	padding: 0;
+	transition: opacity .7s;
+	height: 100vh;
+}
+body.loading {
+	opacity: 0;
+}
+
+#worldCanvas {
+	position: fixed;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+	box-shadow: 30px 30px 30px rgba(0, 0, 0, .05);
+	border-radius: 10px;
+}
+
+
+#panelHolder {
+	position: relative;
+	margin: auto;
+	top: 200vh;
+	width: 70vw;
+	display: flex;
+	justify-content: space-between;
+}
+.panel {
+	box-sizing: border-box;
+	width: 180px;
+	padding: 20px;
+	aspect-ratio: .7586;
+	border-radius: 5px;
+	background: rgb(255,89,100);
+	box-shadow: 10px 10px 30px rgba(0, 0, 0, .05);
+}
