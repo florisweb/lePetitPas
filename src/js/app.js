@@ -31,7 +31,7 @@ const App = new class {
 
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog( 0xffffff, 0, 150 );
+// scene.fog = new THREE.Fog( 0xffffff, 0, 150 );
 const renderer = new THREE.WebGLRenderer({antialias: true});
 
 
@@ -60,19 +60,25 @@ const Camera = new THREE.PerspectiveCamera(
 	0.1,
 	1000
 );
-Camera.position.x = 2;
-Camera.position.y = 2;
+Camera.position.x = 70;
+Camera.position.y = 0;
 Camera.position.z = 0;
 Camera.lookAt(0, 0, 0);
 
 
 
-let light = new THREE.PointLight(0xffffff, 300, 0, 2);
-light.position.set(10, 5, 0);
-scene.add(light);
+// let light = new THREE.PointLight(0xffffff, 5000, 0, 2);
+// light.position.set(0, 0, 100);
+// scene.add(light);
 
-// let ambientLight = new THREE.AmbientLight(0xffffff, .6);
-// scene.add(ambientLight);
+const sunDistance = 100;
+let sunLight = new THREE.PointLight(0xffaa55, 10000, 0, 2);
+sunLight.position.set(0, 0, sunDistance);
+scene.add(sunLight);
+window.sunLight = sunLight;
+
+let ambientLight = new THREE.AmbientLight(0xffffff, .1);
+scene.add(ambientLight);
 
 
 
@@ -80,10 +86,11 @@ scene.add(light);
 
 
 const blockSize = 1;
-let cursorGeometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
 
-let material = new THREE.MeshLambertMaterial({color: 0xff0000});
-let BuildMesh = new THREE.Mesh(cursorGeometry, material);
+const planetGeo = new THREE.SphereGeometry( 30, 50, 50 );
+
+let material = new THREE.MeshLambertMaterial({color: 0xcccccc});
+let BuildMesh = new THREE.Mesh(planetGeo, material);
 
 BuildMesh.position.x = -blockSize/2;
 BuildMesh.position.z = -blockSize/2;
@@ -91,7 +98,25 @@ BuildMesh.position.y = -blockSize/2;
 
 scene.add(BuildMesh);
 
-renderer.render(scene, Camera);
+
+let sunAngle = 0;
+
+function update() {
+	sunAngle += 0.01;
+
+
+
+	sunLight.position.set(Math.sin(sunAngle) * sunDistance, 0, Math.cos(sunAngle) * sunDistance);
+
+
+
+	// sunLight.position.rotateZ
+
+
+	renderer.render(scene, Camera);
+	requestAnimationFrame(update);
+}
+update();
 
 
 
