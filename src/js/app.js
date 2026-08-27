@@ -314,7 +314,7 @@ window.Perlin3 = Perlin3;
 
 
 
-const segCount = 20;
+const segCount = 100;
 const planetRad = 20;
 // const planetRadialFunc = (theta, phi) => (1 + 
 // 	Perlin1.get(theta, phi) * 0.1 + 
@@ -323,19 +323,22 @@ const planetRad = 20;
 // 	) * planetRad;
 
 
-const planetRadialFunc = (theta, phi) => {
-
-	const wavelength = 0.2;
+function calcPlanetPerlin(theta, phi, targetWavelength) {
 	const relCircumference = Math.sin(phi);
-	const realWavelength = wavelength/relCircumference;
-	const fittedWavelength = 1/Math.round(1/realWavelength); // 1 / wavelength should be an integer to fit
+	const realWavelength = targetWavelength / relCircumference;
+	const fittedFreq = Math.round(1/realWavelength); // 1 / wavelength should be an integer to wrap nicely
 
+	return Perlin.get(theta / Math.PI / 2 * fittedFreq, phi / Math.PI * fittedFreq);
 
-	// return planetRad + 5 * Perlin.get(theta / 2 / Math.PI / wavelength, phi / Math.PI / fittedWavelength);
-	// return planetRad + 5 * Perlin.get(0, phi / Math.PI / fittedWavelength);
-	return planetRad;//+ 5 * Perlin.get(phi / Math.PI / wavelength);
-
-	// return planetRad + 1 * Math.cos(theta * 1/fittedWavelength);
+}
+const planetRadialFunc = (theta, phi) => {
+	const baseRad = planetRad * (
+				1 + 
+				0.15 * calcPlanetPerlin(theta, phi, 0.05) +
+				0.03 * calcPlanetPerlin(theta, phi, 0.01) +
+				0.01 * calcPlanetPerlin(theta, phi, 0.001)
+	);
+	return baseRad;
 }
 
 
