@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Star from './star.js';
+import Sun from './sun.js';
 
 import Perlin from './perlin.js';
 window.Perlin = Perlin;
@@ -101,28 +102,6 @@ Camera.position.z = 0;
 Camera.lookAt(0, 0, 0);
 
 
-const sunDistance = 100;
-// let sunLight = new THREE.PointLight(0xffffff, sunDistance**2 * 1, 0, 2);
-// sunLight.position.set(0, 0, sunDistance);
-// sunLight.castShadow = true;
-
-const sunLight = new THREE.SpotLight( 0xffffff, sunDistance**2 * 1);
-sunLight.castShadow = true;
-sunLight.shadow.mapSize.width = 1024 * 4;
-sunLight.shadow.mapSize.height = 1024 * 4;
-sunLight.shadow.camera.near = 50;
-sunLight.shadow.camera.far = 150;
-sunLight.shadow.camera.fov = 5;
-sunLight.shadow.bias = -0.01;  // Start with a small negative value
-sunLight.shadow.normalBias = 0.02;  // Helps with detailed geometry
-
-sunLight.shadow.camera.left = -20;
-sunLight.shadow.camera.right = 20;
-sunLight.shadow.camera.top = 20;
-sunLight.shadow.camera.bottom = -20;
-
-window.sunLight = sunLight;
-
 
 // sunLight.shadow.mapSize.width = 2048;
 // sunLight.shadow.mapSize.height = 2048;
@@ -130,8 +109,7 @@ window.sunLight = sunLight;
 // sunLight.shadow.mapSize.height = 100;
 
 
-scene.add(sunLight);
-window.sunLight = sunLight;
+
 
 // let ambientLight = new THREE.AmbientLight(0xffffff, .1);
 // scene.add(ambientLight);
@@ -406,12 +384,14 @@ scene.add(planetMesh);
 window.planetMesh = planetMesh;
 
 
+const stars = [];
 for (let i = 0; i < 500; i++)
 {
 	const star = new Star();
 	star.addToScene(scene);
+	stars.push(star);
 }
-
+window.stars = stars;
 
 const controls = new OrbitControls( Camera, renderer.domElement );
 
@@ -422,46 +402,46 @@ const controls = new OrbitControls( Camera, renderer.domElement );
 
 
 
-// // 3. Set up bloom post-processing
-// import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-// import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-// import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+// 3. Set up bloom post-processing
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
-// const composer = new EffectComposer(renderer);
-// const renderPass = new RenderPass(scene, Camera);
-// composer.addPass(renderPass);
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, Camera);
+composer.addPass(renderPass);
 
-// const bloomPass = new UnrealBloomPass(
-//   new THREE.Vector2(window.innerWidth, window.innerHeight),
-//   1.5,    // strength
-//   .4,    // radius
-//   0.85    // threshold
-// );
-// composer.addPass(bloomPass);
-
-
-
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  1.5,    // strength
+  0.1,    // radius
+  // 0.85    // threshold
+  0.85    // threshold
+);
+composer.addPass(bloomPass);
 
 
 
 
 
-let sunAngle = 0;
+
+const sun = new Sun();
+sun.addToScene(scene);
+
 // planetMesh.rotateX((Math.random() * 2 - 1) * Math.PI);
-planetMesh.rotateZ(-0.1 * Math.PI);
+planetMesh.rotateZ(random() * Math.PI * 2);
 
 function update() {
-	sunAngle += 0.01;
-	sunAngle = sunAngle % (2 * Math.PI);
+	
+	sun.update();
+	for (let star of stars) star.update();
 
 
-	sunLight.position.set(Math.sin(sunAngle) * sunDistance, 0, Math.cos(sunAngle) * sunDistance);
-
-	// planetMesh.rotateY(-0.01);
+	planetMesh.rotateY(-0.001);
 
 	controls.update();
-	renderer.render(scene, Camera);
-	// composer.render();
+	// renderer.render(scene, Camera);
+	composer.render();
 	requestAnimationFrame(update);
 }
 update();

@@ -4,6 +4,8 @@ import * as THREE from 'three';
 export default class Star {
 	#mesh;
 	#light;
+	#twinkleOffset = Math.random() * 100;
+	#twinkleSpeed = 0.0001 + 0.0001 * Math.random();
 
 	constructor() {
 		const starRad = (Math.random() * 0.2 + 0.1) * 5;
@@ -12,9 +14,9 @@ export default class Star {
 		const color = Math.round(((Math.random() * 55 + 200) << 16) + ((Math.random() * 55 + 200) << 8) + (Math.random() * 120 + 135));
 		const starMaterial = new THREE.MeshStandardMaterial({
 		  emissive: color,        // Yellow glow
-		  emissiveIntensity: 200000,      // Brightness of the glow
+		  emissiveIntensity: 1,      // Brightness of the glow
 		  color: color,            // Base color
-			toneMapped: false          // Important for bloom
+			// toneMapped: false          // Important for bloom
 		});
 		this.#mesh = new THREE.Mesh(starGeo, starMaterial);
 
@@ -26,17 +28,19 @@ export default class Star {
 		this.#mesh.position.y = starDistance * Math.cos(phi);
 		this.#mesh.position.z = starDistance * Math.sin(phi) * Math.sin(theta);
 		
-
-		// this.#mesh.position.z = 25;
-		// this.#mesh.position.x = 15;
-
-
-		this.#light = new THREE.PointLight(0xffff00, 1, 10000);
-		this.#light.position.copy(this.#mesh.position);
 	}
+
 	addToScene(scene) {
 		scene.add(this.#mesh);
-		// scene.add(this.#light);
+	}
+
+	update() {
+		const time = Date.now() * this.#twinkleSpeed + this.#twinkleOffset;
+		const intensity = (1 + 
+						0.6 * Math.sin(time * 0.5) +
+						0.3 * Math.sin(time * 2.3) +
+						0.1 * Math.sin(time * 5.7)) * 1;
+    this.#mesh.material.emissiveIntensity = intensity;
 	}
 }
 
