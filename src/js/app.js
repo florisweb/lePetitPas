@@ -391,11 +391,12 @@ for (let i = 0; i < 500; i++)
 	star.addToScene(scene);
 	stars.push(star);
 }
-window.stars = stars;
 
 const controls = new OrbitControls( Camera, renderer.domElement );
-
-
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.1;
 
 
 
