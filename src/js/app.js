@@ -66,6 +66,10 @@ const scene = new THREE.Scene();
 // scene.fog = new THREE.Fog( 0xaaaaaa, 0, 150);
 // scene.fog = new THREE.Fog( 0x333333, 0, 150);
 const renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;  // Better filtering
+
+
 
 
 // renderer.setClearColor('#e5e5e5');
@@ -95,9 +99,35 @@ Camera.position.z = 0;
 Camera.lookAt(0, 0, 0);
 
 
-const sunDistance = 10000;
-let sunLight = new THREE.PointLight(0xffffff, sunDistance**2 * 1, 0, 2);
-sunLight.position.set(0, 0, sunDistance);
+const sunDistance = 100;
+// let sunLight = new THREE.PointLight(0xffffff, sunDistance**2 * 1, 0, 2);
+// sunLight.position.set(0, 0, sunDistance);
+// sunLight.castShadow = true;
+
+const sunLight = new THREE.SpotLight( 0xffffff, sunDistance**2 * 1);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.width = 1024 * 4;
+sunLight.shadow.mapSize.height = 1024 * 4;
+sunLight.shadow.camera.near = 50;
+sunLight.shadow.camera.far = 150;
+sunLight.shadow.camera.fov = 5;
+sunLight.shadow.bias = -0.01;  // Start with a small negative value
+sunLight.shadow.normalBias = 0.02;  // Helps with detailed geometry
+
+sunLight.shadow.camera.left = -20;
+sunLight.shadow.camera.right = 20;
+sunLight.shadow.camera.top = 20;
+sunLight.shadow.camera.bottom = -20;
+
+window.sunLight = sunLight;
+
+
+// sunLight.shadow.mapSize.width = 2048;
+// sunLight.shadow.mapSize.height = 2048;
+// sunLight.shadow.mapSize.width = 100;
+// sunLight.shadow.mapSize.height = 100;
+
+
 scene.add(sunLight);
 window.sunLight = sunLight;
 
@@ -360,6 +390,9 @@ material.side = THREE.DoubleSide; // Fix cliping issues
 
 
 let planetMesh = new THREE.Mesh(planetGeo, material);
+planetMesh.castShadow = true;
+planetMesh.receiveShadow = true;
+
 // let planetMesh = new THREE.Mesh(wireframeGeo, material);
 
 
@@ -380,6 +413,9 @@ let starMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
 let starMesh = new THREE.Mesh(starGeo, starMaterial);
 starMesh.position.z = 25;
 starMesh.position.x = 15;
+starMesh.castShadow = true;
+starMesh.receiveShadow = true;
+
 scene.add(starMesh);
 
 window.starMesh = starMesh;
@@ -396,13 +432,13 @@ let sunAngle = 0;
 planetMesh.rotateZ(-0.1 * Math.PI);
 
 function update() {
-	sunAngle += 0.01;
+	sunAngle += 0.002;
 	sunAngle = sunAngle % (2 * Math.PI);
 
 
 	sunLight.position.set(Math.sin(sunAngle) * sunDistance, 0, Math.cos(sunAngle) * sunDistance);
 
-	planetMesh.rotateY(-0.01);
+	// planetMesh.rotateY(-0.01);
 
 	controls.update();
 	renderer.render(scene, Camera);
