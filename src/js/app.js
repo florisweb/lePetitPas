@@ -1,4 +1,7 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+
 import Perlin from './perlin.js';
 window.Perlin = Perlin;
 
@@ -100,6 +103,8 @@ window.sunLight = sunLight;
 
 // let ambientLight = new THREE.AmbientLight(0xffffff, .1);
 // scene.add(ambientLight);
+
+
 
 
 
@@ -346,7 +351,6 @@ const planetRadialFunc = (theta, phi) => {
 
 const planetGeo = generatePLanetGeometry(planetRadialFunc, segCount * 2, segCount);
 // const planetGeo = generatePLanetGeometry(planetRad, segCount * 2, segCount);
-const wireframeGeo = new THREE.WireframeGeometry(planetGeo);
 
 let material = new THREE.MeshLambertMaterial({color: 0xffffff});
 // let material = new THREE.MeshPhongMaterial({color: 0xffffff, flatShading: false});
@@ -367,6 +371,26 @@ scene.add(planetMesh);
 window.planetMesh = planetMesh;
 
 
+
+
+
+
+const starGeo = new THREE.SphereGeometry(5, 16, 16);
+let starMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+let starMesh = new THREE.Mesh(starGeo, starMaterial);
+starMesh.position.z = 25;
+starMesh.position.x = 15;
+scene.add(starMesh);
+
+window.starMesh = starMesh;
+
+window.THREE = THREE;
+
+const controls = new OrbitControls( Camera, renderer.domElement );
+
+
+
+
 let sunAngle = 0;
 // planetMesh.rotateX((Math.random() * 2 - 1) * Math.PI);
 planetMesh.rotateZ(-0.1 * Math.PI);
@@ -380,7 +404,7 @@ function update() {
 
 	planetMesh.rotateY(-0.01);
 
-
+	controls.update();
 	renderer.render(scene, Camera);
 	requestAnimationFrame(update);
 }
