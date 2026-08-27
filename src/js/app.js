@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
+import Star from './star.js';
 
 import Perlin from './perlin.js';
 window.Perlin = Perlin;
@@ -78,10 +78,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
 window.addEventListener('resize', function() {
-	// Camera.resize();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	
 	Camera.aspect = window.innerWidth / window.innerHeight;
 	Camera.updateProjectionMatrix();
 });
+
 
 
 
@@ -404,25 +406,42 @@ scene.add(planetMesh);
 window.planetMesh = planetMesh;
 
 
+for (let i = 0; i < 500; i++)
+{
+	const star = new Star();
+	star.addToScene(scene);
+}
 
-
-
-
-const starGeo = new THREE.SphereGeometry(5, 16, 16);
-let starMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
-let starMesh = new THREE.Mesh(starGeo, starMaterial);
-starMesh.position.z = 25;
-starMesh.position.x = 15;
-starMesh.castShadow = true;
-starMesh.receiveShadow = true;
-
-scene.add(starMesh);
-
-window.starMesh = starMesh;
-
-window.THREE = THREE;
 
 const controls = new OrbitControls( Camera, renderer.domElement );
+
+
+
+
+
+
+
+
+// // 3. Set up bloom post-processing
+// import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+// import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+// import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+// const composer = new EffectComposer(renderer);
+// const renderPass = new RenderPass(scene, Camera);
+// composer.addPass(renderPass);
+
+// const bloomPass = new UnrealBloomPass(
+//   new THREE.Vector2(window.innerWidth, window.innerHeight),
+//   1.5,    // strength
+//   .4,    // radius
+//   0.85    // threshold
+// );
+// composer.addPass(bloomPass);
+
+
+
+
 
 
 
@@ -432,7 +451,7 @@ let sunAngle = 0;
 planetMesh.rotateZ(-0.1 * Math.PI);
 
 function update() {
-	sunAngle += 0.002;
+	sunAngle += 0.01;
 	sunAngle = sunAngle % (2 * Math.PI);
 
 
@@ -442,6 +461,7 @@ function update() {
 
 	controls.update();
 	renderer.render(scene, Camera);
+	// composer.render();
 	requestAnimationFrame(update);
 }
 update();
