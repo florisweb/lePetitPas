@@ -49,16 +49,13 @@ const seeds = [
 	1136128467.3685474,
 	3203140060.045385,
 	2691260000.207778,
-	Math.random()*2**32
-]
+];
+seeds[0] *= Math.random();
+seeds[1] *= Math.random();
+seeds[2] *= Math.random();
+seeds[3] *= Math.random();
 const random = sfc32(...seeds);
 window.random = random;
-
-// for(let i=0; i<10; i++) console.log(random());
-
-
-
-
 
 
 
@@ -74,15 +71,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
 window.addEventListener('resize', function() {
-	// World.renderer.setSize(window.innerWidth, window.innerHeight);
-	
-
 	// Camera.resize();
 	Camera.aspect = window.innerWidth / window.innerHeight;
 	Camera.updateProjectionMatrix();
 });
-
-
 
 
 
@@ -106,16 +98,12 @@ sunLight.position.set(0, 0, sunDistance);
 scene.add(sunLight);
 window.sunLight = sunLight;
 
-// let ambientLight = new THREE.AmbientLight(0xffffff, .01);
+// let ambientLight = new THREE.AmbientLight(0xffffff, .1);
 // scene.add(ambientLight);
-let ambientLight = new THREE.AmbientLight(0xffffff, .1);
-scene.add(ambientLight);
 
 
 
 
-
-const blockSize = 1;
 
 
 // function generatePLanetGeometry(baseRadius, widthSegments = 32, heightSegments = 16) {
@@ -293,35 +281,22 @@ function generatePLanetGeometry(radiusFunction, widthSegments = 32, heightSegmen
 }
 
 
+let craters = [];
+window.craters = craters;
 
-function _perlin(_frequency) {
-	this.f = _frequency; 
-	this.get = function(theta, phi) { // Input: 0 - 2pi, 0 - pi
-		const u = theta / (2 * Math.PI);
-		const v = phi / Math.PI;
-
-		const compFreqU = this.f * Math.sin(phi)**0.2;
-		
-		return Perlin.get(u * compFreqU, v * this.f) * Math.abs(Math.sin(theta)) * Math.abs(Math.sin(phi));
-	}
+for (let i = 0; i < 3 + Math.ceil(random() * 30); i++)
+{
+	craters.push({
+		pos: [random() * 2 * Math.PI, random() * Math.PI], 
+		rad: random() * 0.2 + 0.05, 
+		height: 1 + random() * 0.5
+	})
 }
-let Perlin1 = new _perlin(5);
-let Perlin2 = new _perlin(15);
-let Perlin3 = new _perlin(50);
-window.Perlin1 = Perlin1;
-window.Perlin2 = Perlin2;
-window.Perlin3 = Perlin3;
 
 
-
+// const segCount = 100;
 const segCount = 100;
 const planetRad = 20;
-// const planetRadialFunc = (theta, phi) => (1 + 
-// 	Perlin1.get(theta, phi) * 0.1 + 
-// 	Perlin2.get(theta, phi) * 0.07 + 
-// 	Perlin3.get(theta, phi) * 0.03
-// 	) * planetRad;
-
 
 function calcPlanetPerlin(theta, phi, targetWavelength) {
 	const relCircumference = Math.sin(phi);
@@ -332,12 +307,38 @@ function calcPlanetPerlin(theta, phi, targetWavelength) {
 
 }
 const planetRadialFunc = (theta, phi) => {
-	const baseRad = planetRad * (
-				1 + 
-				0.15 * calcPlanetPerlin(theta, phi, 0.05) +
-				0.03 * calcPlanetPerlin(theta, phi, 0.01) +
-				0.01 * calcPlanetPerlin(theta, phi, 0.001)
+	let baseRad = planetRad * (
+				1 
+				+ 0.1 * calcPlanetPerlin(theta, phi, 0.05)
+				+ 0.03 * calcPlanetPerlin(theta, phi, 0.01)
+				+ 0.01 * calcPlanetPerlin(theta, phi, 0.001)
 	);
+
+	for (let c = 0; c < craters.length; c++)
+	{
+		const craterPos = craters[c].pos;
+		const craterRad = craters[c].rad;
+		const craterHeight = craters[c].height; 
+
+
+		// planetRad
+		// const centerDist = 1 * Math.acos(
+		// 	Math.sin(craterPos[0]) * Math.sin(theta) + Math.cos(Math.abs(craterPos[1] - phi)) * Math.cos(craterPos[0]) * Math.cos(theta)
+		// 	// Math.sin(craterPos[0]) * Math.sin(theta) + Math.cos(Math.abs(craterPos[1] - phi)) * Math.cos(craterPos[0]) * Math.cos(theta)
+		// );
+		// let dist = Math.abs(craterRad - centerDist);
+		let dist = Math.abs(
+			craterRad - Math.sqrt(
+				((craterPos[0] - theta) % (2 * Math.PI))**2 + 
+				((craterPos[1] - phi) % (2 * Math.PI))**2
+			)
+		);
+		
+	
+		const baseWidth = 0.03;
+		const widthPerc = 1;
+		baseRad += craterHeight * Math.min((widthPerc + 1) * (1 - Math.min(Math.abs(dist / baseWidth), 1)), 1);	
+	}
 	return baseRad;
 }
 
@@ -368,17 +369,16 @@ window.planetMesh = planetMesh;
 
 let sunAngle = 0;
 // planetMesh.rotateX((Math.random() * 2 - 1) * Math.PI);
-planetMesh.rotateZ(0.3 * Math.PI);
+planetMesh.rotateZ(-0.1 * Math.PI);
 
 function update() {
 	sunAngle += 0.01;
 	sunAngle = sunAngle % (2 * Math.PI);
 
 
-	// sunLight.position.set(Math.sin(sunAngle) * sunDistance, 0, Math.cos(sunAngle) * sunDistance);
+	sunLight.position.set(Math.sin(sunAngle) * sunDistance, 0, Math.cos(sunAngle) * sunDistance);
 
-
-	planetMesh.rotateX(-0.005);
+	planetMesh.rotateY(-0.01);
 
 
 	renderer.render(scene, Camera);
