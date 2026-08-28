@@ -1,9 +1,11 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
 import Star from './star.js';
 import Sun from './sun.js';
 import Planet from './planet.js';
-import { Perlin, random } from './random.js';
+import { random } from './random.js';
+import Camera from './camera.js';
+
 
 const App = new class {
 	constructor() {
@@ -14,20 +16,6 @@ const App = new class {
 
 	async setup() {
 		
-	}
-
-	update(_dt) {
-		
-	}
-
-	get scene() {
-		return scene;
-	}
-	get camera() {
-		return Camera;
-	}
-	get renderer() {
-		return renderer;
 	}
 }
 
@@ -51,25 +39,11 @@ window.addEventListener('resize', () => resize());
 
 function resize() {
 	renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight);
-	
-	Camera.aspect = renderer.domElement.width / renderer.domElement.height;
-	Camera.updateProjectionMatrix();
+	Camera.onResize();
 }
 window.resize = resize;
 
 
-
-
-const Camera = new THREE.PerspectiveCamera(
-	75,
-	window.innerWidth / window.innerHeight,
-	0.1,
-	1000
-);
-Camera.position.x = 70;
-Camera.position.y = 0;
-Camera.position.z = 0;
-Camera.lookAt(0, 0, 0);
 
 
 
@@ -81,6 +55,9 @@ document.body.onscroll = (_e) => {
 	// renderer.domElement.height = Math.round(scroller.getBoundingClientRect().y + 30);
 	resize();
 };
+
+
+const camera = new Camera({renderer});
 
 const sun = new Sun();
 sun.addToScene(scene);
@@ -97,12 +74,8 @@ for (let i = 0; i < 500; i++)
 	stars.push(star);
 }
 
-const controls = new OrbitControls( Camera, renderer.domElement );
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.autoRotate = true;
-controls.autoRotateSpeed = 0.2;
-window.controls = controls;
+
+
 
 
 
@@ -112,7 +85,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass(scene, Camera);
+const renderPass = new RenderPass(scene, camera.camera);
 composer.addPass(renderPass);
 
 const bloomPass = new UnrealBloomPass(
@@ -128,15 +101,14 @@ composer.addPass(bloomPass);
 
 
 
-
 function update() {
 	planet.update();
 	sun.update();
 	for (let star of stars) star.update();
 
 
-	controls.update();
-	// renderer.render(scene, Camera);
+	camera.update();
+	// renderer.render(scene, camera.camera);
 	composer.render();
 	requestAnimationFrame(update);
 }
