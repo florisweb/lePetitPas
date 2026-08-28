@@ -6,7 +6,7 @@ export default class Sun {
 	#light;
 	#sunDistance = 1000;
 	#sunAngle = 0;
-	#sunSpeed = 0.005;
+	#sunSpeed = 0.003;
 
 
 	constructor() {

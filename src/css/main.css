@@ -1,40 +1,63 @@
 * {
 	box-sizing: border-box;
 }
+
+:root {
+	--screenMargin: 20px;
+}
+
 body {
 	margin: 0;
 	padding: 0;
 	transition: opacity .7s;
 	height: 100vh;
+	background: #000;
 }
 body.loading {
 	opacity: 0;
 }
 
-#worldCanvas {
+canvas {
 	position: fixed;
 	top: 0;
 	width: 100vw;
 	height: 100vh;
-	box-shadow: 30px 30px 30px rgba(0, 0, 0, .05);
-	border-radius: 10px;
 }
 
-
-#panelHolder {
-	position: relative;
-	margin: auto;
-	top: 200vh;
-	width: 70vw;
-	display: flex;
-	justify-content: space-between;
-}
 .panel {
-	box-sizing: border-box;
-	width: 180px;
+	position: absolute;
+
+	bottom: -45vh;
+	/*width: calc(100% - var(--screenMargin) * 2);*/
+	width: calc(100%);
+
+
 	padding: 20px;
-	aspect-ratio: .7586;
-	border-radius: 5px;
-	background: rgb(255,89,100);
+	height: 50vh;
+	
+	/*border-radius: 5px;*/
+	border-radius: 30px 30px 0 0;
+
+
+	background: rgb(45, 45, 45);
 	box-shadow: 10px 10px 30px rgba(0, 0, 0, .05);
+	z-index: 10;
 }
+
+
+/*
+.panel {
+	position: relative;
+
+	width: calc(100% - var(--screenMargin) * 2);
+	margin: var(--screenMargin);
+
+
+	padding: 20px;
+	height: 80px;
+	
+	border-radius: 5px;
+	background: rgb(45, 45, 45);
+	box-shadow: 10px 10px 30px rgba(0, 0, 0, .05);
+	z-index: 10;
+}*/
