@@ -63,6 +63,7 @@ const sun = new Sun();
 sun.addToScene(scene);
 
 const planet = new Planet();
+window.planet = planet;
 planet.addToScene(scene);
 
 
@@ -90,8 +91,8 @@ composer.addPass(renderPass);
 
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
-  1.5,    // strength
-  0.1,    // radius
+  0.5,    // strength
+  0.01,    // radius
   // 0.85    // threshold
   0.5    // threshold
 );

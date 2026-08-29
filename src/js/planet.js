@@ -208,6 +208,8 @@ export default class Planet {
 	baseRadius = 20;
 
 	#mesh;
+	#coreMesh;
+	#creationTime = new Date();
 
 	constructor() {
 		this.#generateMesh();
@@ -216,11 +218,12 @@ export default class Planet {
 
 	update() {
 		this.#mesh.rotateY(-0.001);
-
+		this.#animateCreation();
 	}
 
 	addToScene(scene) {
 		scene.add(this.#mesh);
+		scene.add(this.#coreMesh);
 	}
 
 
@@ -233,11 +236,20 @@ export default class Planet {
 		this.#mesh.castShadow = true;
 		this.#mesh.receiveShadow = true;
 
-
 		this.#mesh.position.x = 0;
 		this.#mesh.position.z = 0;
 		this.#mesh.position.y = 0;
 		this.#mesh.rotateZ(0.1 * random() * Math.PI * 2);
+
+		const coreGeometry = new THREE.SphereGeometry(this.baseRadius * 1.02, Planet.segCount * 2, Planet.segCount);
+		const coreMaterial = new THREE.MeshStandardMaterial({
+			emissive: 0xff5000, 
+			emissiveIntensity: 1.9,
+			color: 0xff5000,            // Base color
+			toneMapped: false          // Important for bloom
+		});
+		
+		this.#coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
 	}
 
 
@@ -275,6 +287,20 @@ export default class Planet {
 			baseRad += craterHeight * Math.min((widthPerc + 1) * (1 - Math.min(Math.abs(dist / baseWidth), 1)), 1);	
 		}
 		return baseRad;
+	}
+
+	get coreMesh() {
+		return this.#coreMesh;
+	}
+
+
+	#animateCreation() {
+		let dt = new Date() - this.#creationTime;
+		let perc = Math.min(dt / 100000, 1);
+		let scale = 0.7 + 0.3 * Math.exp(-perc)
+		this.#coreMesh.scale.x = scale;
+		this.#coreMesh.scale.y = scale;
+		this.#coreMesh.scale.z = scale;	
 	}
 
 
