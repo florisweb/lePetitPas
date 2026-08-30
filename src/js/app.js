@@ -37,9 +37,11 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 window.addEventListener('resize', () => resize());
 
+
 function resize() {
+	console.log('resize');
 	renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight);
-	Camera.onResize();
+	camera.onResize();
 }
 window.resize = resize;
 

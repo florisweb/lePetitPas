@@ -18,8 +18,15 @@ export default class Sun {
 		this.#light.shadow.camera.near = 50;
 		this.#light.shadow.camera.far = 5000;
 		this.#light.shadow.camera.fov = 5;
-		this.#light.shadow.bias = -0.01;  // Start with a small negative value
-		this.#light.shadow.normalBias = 0.02;  // Helps with detailed geometry
+
+
+		// Vulcano has shadow
+		this.#light.shadow.bias = -0.00001; 
+		this.#light.shadow.normalBias = -2;
+
+		// // Stable: vulcano does not have shadow		
+		// this.#light.shadow.bias = -0.01;
+		// this.#light.shadow.normalBias = 0.02;
 
 		this.#light.shadow.camera.left = -20;
 		this.#light.shadow.camera.right = 20;

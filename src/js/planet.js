@@ -210,11 +210,13 @@ class Vulcano {
 
 	#height;
 	#radius;
+	#creationTime = Date.now() + Math.random() * 1000;
+
 	constructor({radius, height}, _planet) {
 		this.#planet = _planet;
 		this.#height = height;
 		this.#radius = radius;
-		this.#position = [random() * Math.PI * 2, random() * Math.PI];
+		this.#position = [random() * Math.PI * 2, (random() * 0.5 + 0.25) * Math.PI];
 
 		// Ensure that the position of the vulcano matches well with the segment grid of the planet -> TODO: does not work well yet
 		this.#position[0] = Math.round(this.#position[0] / (Math.PI / Planet.segCount)) * (Math.PI / Planet.segCount);
@@ -222,6 +224,23 @@ class Vulcano {
 
 
 		this.#generateMesh({radius, height});
+	}
+
+	#animateCreation() {
+		let dt = new Date() - this.#creationTime;
+		const perc = Math.min(dt / 5000, 1);
+		
+		const bendingPointPerc = 0.8;
+		const popupPercShare = 0.5; // Specify what percentage of the animation represents the popup;
+		const emissivePercShare = 0.5;
+
+		let popupPerc = 1 / (1 + Math.exp(-(perc / popupPercShare - 0.5) * 10))
+		this.#mesh.scale.x = popupPerc;
+		this.#mesh.scale.y = popupPerc;
+		this.#mesh.scale.z = popupPerc;
+
+		let emissivePerc = 1 / (1 + Math.exp(((perc - (1 - emissivePercShare)) / emissivePercShare) * 10))
+		this.#vulcMesh.material.emissiveIntensity = 3 * emissivePerc;
 	}
 
 	#vulcRadialFunction(theta, phi) {
@@ -311,8 +330,10 @@ class Vulcano {
 
 	#generateMesh({radius, height}) {
 		let vulcGeo = this.#generateGeometry({radius, height, segDensityMultiplier: 4}, (theta, phi) => this.#vulcRadialFunction(theta, phi));
-		let vulcMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
-		// let material = new THREE.MeshLambertMaterial({color: 0xff0000});
+		let vulcMaterial = new THREE.MeshLambertMaterial({
+			emissive: 0xff5000,
+			color: 0xffffff
+		});
 		vulcMaterial.side = THREE.DoubleSide; // Fix cliping issues
 		this.#vulcMesh = new THREE.Mesh(vulcGeo, vulcMaterial);
 
@@ -325,7 +346,7 @@ class Vulcano {
 			emissive: 0xff5000, 
 			emissiveIntensity: 1.9,
 			color: 0xff5000, 
-			toneMapped: false   
+			toneMapped: false
 		});
 		lavaMaterial.side = THREE.DoubleSide; // Fix cliping issues
 		this.#lavaMesh = new THREE.Mesh(lavaGeo, lavaMaterial);
@@ -345,6 +366,7 @@ class Vulcano {
 
 	update() {
 		this.#lavaMesh.material.emissiveIntensity = 1.85 + (1 + Math.sin(Date.now() / 1000 * 3)) / 2 * 0.01 + (1 + Math.sin(Date.now() / 1000)) / 2 * 0.01;
+		this.#animateCreation();
 	}
 }
 
@@ -363,7 +385,7 @@ export default class Planet {
 
 	constructor() {
 		this.#generateMesh();
-		this.vulcanos.push(new Vulcano({radius: 4, height: 5}, this));
+		for (let i = 0; i < 1; i++) this.vulcanos.push(new Vulcano({radius: 4, height: 5}, this));
 
 		this.#group = new THREE.Group();
 		this.#group.add(this.#mesh);
@@ -397,7 +419,7 @@ export default class Planet {
 		this.#mesh.position.y = 0;
 		this.#mesh.rotateZ(0.1 * random() * Math.PI * 2);
 
-		const coreGeometry = new THREE.SphereGeometry(this.baseRadius * 1.02 * 0.5, Planet.segCount * 2, Planet.segCount); // FIXME
+		const coreGeometry = new THREE.SphereGeometry(this.baseRadius * 1.02, Planet.segCount * 2, Planet.segCount);
 		const coreMaterial = new THREE.MeshStandardMaterial({
 			emissive: 0xff5000, 
 			emissiveIntensity: 1.9,
@@ -452,11 +474,11 @@ export default class Planet {
 
 	#animateCreation() {
 		let dt = new Date() - this.#creationTime;
-		let perc = Math.min(dt / 100000, 1);
-		let scale = 0.7 + 0.3 * Math.exp(-perc)
+		let perc = Math.min(dt / 5000, 1);
+		let scale = 0.7 + 0.3 * Math.exp(-perc / 3)
 		this.#coreMesh.scale.x = scale;
 		this.#coreMesh.scale.y = scale;
-		this.#coreMesh.scale.z = scale;	
+		this.#coreMesh.scale.z = scale;
 	}
 }
 
