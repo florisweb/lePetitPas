@@ -200,6 +200,126 @@ function calcPlanetPerlin(theta, phi, targetWavelength) {
 
 
 
+class Vulcano {
+	#mesh;
+	get mesh() {return this.#mesh};
+	#position;
+	#planet;
+
+	#height;
+	#radius;
+	constructor({radius, height}, _planet) {
+		this.#planet = _planet;
+		this.#height = height;
+		this.#radius = radius;
+		this.#position = [random() * Math.PI * 2, random() * Math.PI];
+		console.log(this.#position[0], this.#position[1], 'dtheta', 2 * Math.PI / (2 * Planet.segCount));
+
+		// Ensure that the position of the vulcano matches well with the segment grid of the planet
+		this.#position[0] = Math.round(this.#position[0] / (Math.PI / Planet.segCount)) * (Math.PI / Planet.segCount);
+		this.#position[1] = Math.round(this.#position[1] / (Math.PI / Planet.segCount)) * (Math.PI / Planet.segCount);
+
+		console.log(this.#position[0], this.#position[1]);
+		// integers on -> (y / heightSegments) * Math.PI; // 0 to π (top to bottom) -> so must be on Math.PI / heightSegments
+
+
+		this.#generateMesh({radius, height});
+	}
+
+	#radialFunction(theta, phi) {
+		const patchSize = this.#radius * 2;
+		const xArcLength = patchSize / this.#planet.baseRadius;
+
+		let radius = this.#planet.radialFunction(theta, phi);
+
+
+		const rTheta = theta - this.#position[0]; // Relative theta
+		const rPhi = phi - this.#position[1]; // Relative phi
+
+		const patchRadius = this.#radius / (this.#planet.baseRadius); // Convert to units of angles
+		const vulcanoRadius = patchRadius;
+
+		let distFromCenter = Math.abs(
+			 Math.sqrt(
+				(rTheta % (2 * Math.PI))**2 + 
+				(rPhi % (2 * Math.PI))**2
+			)
+		);
+		
+		const baseWidth = 0.7 * vulcanoRadius;
+		const topWidth = 0.2 * vulcanoRadius;
+		let curEdgeFrac = (distFromCenter - (vulcanoRadius - baseWidth)) / baseWidth;
+		if (curEdgeFrac < 0) curEdgeFrac = -10 * curEdgeFrac; // Make the hole in the vulcano steeper
+		radius += this.#height * Math.min((topWidth + 1) * (1 - Math.min(curEdgeFrac, 1)), 1);	
+
+		return radius;
+	}
+
+	#generateMesh({radius, height}) {
+		const patchSize = radius * 2;
+		const segDensity = Planet.segCount / (Math.PI * this.#planet.baseRadius) * 4;
+
+		const segCount = Math.round(patchSize * segDensity);
+		const xArcLength = patchSize / this.#planet.baseRadius;
+		const yArcLength = patchSize / this.#planet.baseRadius;
+
+
+		const geometry = new THREE.BufferGeometry();
+		const vertices = [];
+		const indices = [];
+
+		// Generate vertices
+		for (let y = 0; y <= segCount; y++) 
+		{
+			const rPhi = (y / segCount - 0.5) * yArcLength; // 0 to π (top to bottom)
+			const phi = this.#position[1] + rPhi;
+			for (let x = 0; x <= segCount; x++) 
+			{
+				const rTheta = (x / segCount - 0.5) * xArcLength; // 0 to 2π (around) | temp + 1
+				const theta = this.#position[0] + rTheta;
+				// Get radius from the custom function
+				const radius = this.#radialFunction(theta, phi);
+
+				// Convert spherical coordinates to Cartesian
+				const posX = radius * Math.sin(phi) * Math.cos(theta);
+				const posY = radius * Math.cos(phi);
+				const posZ = radius * Math.sin(phi) * Math.sin(theta);
+
+				vertices.push(posX, posY, posZ);
+			}
+		}
+		// Generate indices for triangles
+		for (let y = 0; y < segCount; y++) 
+		{
+			for (let x = 0; x < segCount; x++) 
+			{
+				const a = y * (segCount + 1) + x;
+				const b = a + segCount + 1;
+				indices.push(a, b, a + 1); 
+				indices.push(a + 1, b, b + 1);
+			}
+		}
+
+		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+		geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+		geometry.computeVertexNormals();
+
+
+
+		let material = new THREE.MeshLambertMaterial({color: 0xffffff});
+		// let material = new THREE.MeshLambertMaterial({color: 0xff0000});
+		material.side = THREE.DoubleSide; // Fix cliping issues
+
+		this.#mesh = new THREE.Mesh(geometry, material);
+		this.#mesh.castShadow = true;
+		this.#mesh.receiveShadow = true;
+
+		this.#mesh.position.x = 0;
+		this.#mesh.position.z = 0;
+		this.#mesh.position.y = 0;	
+	}
+}
+
 
 
 
@@ -208,22 +328,30 @@ export default class Planet {
 	baseRadius = 20;
 
 	#mesh;
+	#group;
 	#coreMesh;
 	#creationTime = new Date();
+	vulcanos = [];
 
 	constructor() {
 		this.#generateMesh();
+		this.vulcanos.push(new Vulcano({radius: 4, height: 5}, this));
+
+		this.#group = new THREE.Group();
+		this.#group.add(this.#mesh);
+		this.#group.add(this.#coreMesh);
+		for (let vulc of this.vulcanos) this.#group.add(vulc.mesh);
 	}
 
 
 	update() {
-		this.#mesh.rotateY(-0.001);
+		// this.#mesh.rotateY(-0.001);
+		this.#group.rotateY(-0.001);
 		this.#animateCreation();
 	}
 
 	addToScene(scene) {
-		scene.add(this.#mesh);
-		scene.add(this.#coreMesh);
+		scene.add(this.#group);
 	}
 
 
@@ -241,7 +369,7 @@ export default class Planet {
 		this.#mesh.position.y = 0;
 		this.#mesh.rotateZ(0.1 * random() * Math.PI * 2);
 
-		const coreGeometry = new THREE.SphereGeometry(this.baseRadius * 1.02, Planet.segCount * 2, Planet.segCount);
+		const coreGeometry = new THREE.SphereGeometry(this.baseRadius * 1.02 * 0.5, Planet.segCount * 2, Planet.segCount); // FIXME
 		const coreMaterial = new THREE.MeshStandardMaterial({
 			emissive: 0xff5000, 
 			emissiveIntensity: 1.9,
@@ -302,9 +430,6 @@ export default class Planet {
 		this.#coreMesh.scale.y = scale;
 		this.#coreMesh.scale.z = scale;	
 	}
-
-
-
 }
 
 
