@@ -202,6 +202,8 @@ function calcPlanetPerlin(theta, phi, targetWavelength) {
 
 class Vulcano {
 	#mesh;
+	#lavaMesh;
+	#vulcMesh;
 	get mesh() {return this.#mesh};
 	#position;
 	#planet;
@@ -213,20 +215,16 @@ class Vulcano {
 		this.#height = height;
 		this.#radius = radius;
 		this.#position = [random() * Math.PI * 2, random() * Math.PI];
-		console.log(this.#position[0], this.#position[1], 'dtheta', 2 * Math.PI / (2 * Planet.segCount));
 
-		// Ensure that the position of the vulcano matches well with the segment grid of the planet
+		// Ensure that the position of the vulcano matches well with the segment grid of the planet -> TODO: does not work well yet
 		this.#position[0] = Math.round(this.#position[0] / (Math.PI / Planet.segCount)) * (Math.PI / Planet.segCount);
 		this.#position[1] = Math.round(this.#position[1] / (Math.PI / Planet.segCount)) * (Math.PI / Planet.segCount);
-
-		console.log(this.#position[0], this.#position[1]);
-		// integers on -> (y / heightSegments) * Math.PI; // 0 to π (top to bottom) -> so must be on Math.PI / heightSegments
 
 
 		this.#generateMesh({radius, height});
 	}
 
-	#radialFunction(theta, phi) {
+	#vulcRadialFunction(theta, phi) {
 		const patchSize = this.#radius * 2;
 		const xArcLength = patchSize / this.#planet.baseRadius;
 
@@ -255,9 +253,14 @@ class Vulcano {
 		return radius;
 	}
 
-	#generateMesh({radius, height}) {
+	#lavaRadialFunction(theta, phi) {
+		let radius = this.#planet.radialFunction(theta, phi) + 0.5 * this.#height;
+		return radius;
+	}
+
+	#generateGeometry({radius, height, segDensityMultiplier}, radialFunction) {
 		const patchSize = radius * 2;
-		const segDensity = Planet.segCount / (Math.PI * this.#planet.baseRadius) * 4;
+		const segDensity = Planet.segCount / (Math.PI * this.#planet.baseRadius) * segDensityMultiplier;
 
 		const segCount = Math.round(patchSize * segDensity);
 		const xArcLength = patchSize / this.#planet.baseRadius;
@@ -278,7 +281,7 @@ class Vulcano {
 				const rTheta = (x / segCount - 0.5) * xArcLength; // 0 to 2π (around) | temp + 1
 				const theta = this.#position[0] + rTheta;
 				// Get radius from the custom function
-				const radius = this.#radialFunction(theta, phi);
+				const radius = radialFunction(theta, phi);
 
 				// Convert spherical coordinates to Cartesian
 				const posX = radius * Math.sin(phi) * Math.cos(theta);
@@ -303,20 +306,45 @@ class Vulcano {
 		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
 		geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
 		geometry.computeVertexNormals();
+		return geometry;
+	}
 
-
-
-		let material = new THREE.MeshLambertMaterial({color: 0xffffff});
+	#generateMesh({radius, height}) {
+		let vulcGeo = this.#generateGeometry({radius, height, segDensityMultiplier: 4}, (theta, phi) => this.#vulcRadialFunction(theta, phi));
+		let vulcMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
 		// let material = new THREE.MeshLambertMaterial({color: 0xff0000});
-		material.side = THREE.DoubleSide; // Fix cliping issues
+		vulcMaterial.side = THREE.DoubleSide; // Fix cliping issues
+		this.#vulcMesh = new THREE.Mesh(vulcGeo, vulcMaterial);
 
-		this.#mesh = new THREE.Mesh(geometry, material);
-		this.#mesh.castShadow = true;
-		this.#mesh.receiveShadow = true;
+		this.#vulcMesh.castShadow = true;
+		this.#vulcMesh.receiveShadow = true;
 
+
+		let lavaGeo = this.#generateGeometry({radius: radius * 0.3, height, segDensityMultiplier: 10}, (theta, phi) => this.#lavaRadialFunction(theta, phi));
+		let lavaMaterial = new THREE.MeshLambertMaterial({
+			emissive: 0xff5000, 
+			emissiveIntensity: 1.9,
+			color: 0xff5000, 
+			toneMapped: false   
+		});
+		lavaMaterial.side = THREE.DoubleSide; // Fix cliping issues
+		this.#lavaMesh = new THREE.Mesh(lavaGeo, lavaMaterial);
+		window.lavaMesh = this.#lavaMesh;
+
+		this.#vulcMesh.castShadow = true;
+		this.#vulcMesh.receiveShadow = true;
+		
+
+		this.#mesh = new THREE.Group();
+		this.#mesh.add(this.#vulcMesh);
+		this.#mesh.add(this.#lavaMesh);
 		this.#mesh.position.x = 0;
 		this.#mesh.position.z = 0;
-		this.#mesh.position.y = 0;	
+		this.#mesh.position.y = 0;
+	}
+
+	update() {
+		this.#lavaMesh.material.emissiveIntensity = 1.85 + (1 + Math.sin(Date.now() / 1000 * 3)) / 2 * 0.01 + (1 + Math.sin(Date.now() / 1000)) / 2 * 0.01;
 	}
 }
 
@@ -345,9 +373,9 @@ export default class Planet {
 
 
 	update() {
-		// this.#mesh.rotateY(-0.001);
 		this.#group.rotateY(-0.001);
 		this.#animateCreation();
+		for (let vulc of this.vulcanos) vulc.update();
 	}
 
 	addToScene(scene) {
