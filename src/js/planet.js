@@ -249,7 +249,6 @@ class Vulcano {
 
 		let radius = this.#planet.radialFunction(theta, phi);
 
-
 		const rTheta = theta - this.#position[0]; // Relative theta
 		const rPhi = phi - this.#position[1]; // Relative phi
 
@@ -287,6 +286,7 @@ class Vulcano {
 
 
 		const geometry = new THREE.BufferGeometry();
+		const uvs = [];
 		const vertices = [];
 		const indices = [];
 
@@ -308,9 +308,10 @@ class Vulcano {
 				const posZ = radius * Math.sin(phi) * Math.sin(theta);
 
 				vertices.push(posX, posY, posZ);
+				uvs.push(x / segCount, y / segCount);
 			}
 		}
-		// Generate indices for triangles
+
 		for (let y = 0; y < segCount; y++) 
 		{
 			for (let x = 0; x < segCount; x++) 
@@ -321,19 +322,54 @@ class Vulcano {
 				indices.push(a + 1, b, b + 1);
 			}
 		}
-
+		
 		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
 		geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
 		geometry.computeVertexNormals();
 		return geometry;
 	}
 
+	#createTexture() {
+		const canvas = document.createElement('canvas');
+		canvas.width = 128;
+		canvas.height = 128;
+		const ctx = canvas.getContext('2d');
+
+		const minRadPerc = 0.3;
+		for (let x = 0; x < canvas.width; x++)
+		{
+			let rx = (x - canvas.width / 2) / canvas.width;
+			for (let y = 0; y < canvas.height; y++)
+			{
+				let ry = (y - canvas.height / 2) / canvas.height;
+				let dist = Math.sqrt(rx**2 + ry**2) * Math.sqrt(2);
+				const colorP = 1 / (1 + Math.exp(10 * (dist - 0.5))) + 0.2 * (1 + Perlin.get(rx * 5, ry * 5));
+				let color = Math.round((1 - Math.min(colorP, 1)) * 235 + 20);
+
+				ctx.fillStyle = 'rgb(' + color + ', ' + color + ', ' + color + ')';
+
+				ctx.fillRect(x, y, 1, 1);
+			}
+		}
+	
+		const texture = new THREE.CanvasTexture(canvas);
+		return texture;
+	}
+
+
 	#generateMesh({radius, height}) {
+		const vulcTexture = this.#createTexture();
 		let vulcGeo = this.#generateGeometry({radius, height, segDensityMultiplier: 4}, (theta, phi) => this.#vulcRadialFunction(theta, phi));
+		// let vulcMaterial = new THREE.MeshLambertMaterial({
+		// 	emissive: 0xff5000,
+		// 	color: 0xffffff
+		// });
 		let vulcMaterial = new THREE.MeshLambertMaterial({
-			emissive: 0xff5000,
-			color: 0xffffff
+			map: vulcTexture,
 		});
+
+
 		vulcMaterial.side = THREE.DoubleSide; // Fix cliping issues
 		this.#vulcMesh = new THREE.Mesh(vulcGeo, vulcMaterial);
 
