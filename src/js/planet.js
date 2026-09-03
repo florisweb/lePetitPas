@@ -209,6 +209,9 @@ export default class Planet {
 	#coreMesh;
 	#creationTime = new Date();
 	vulcanos = [];
+	get group() {
+		return this.#group;
+	}
 
 	constructor() {
 		this.#generateMesh();
@@ -222,7 +225,8 @@ export default class Planet {
 
 
 	update() {
-		this.#group.rotateY(-0.001);
+		// this.#group.rotateY(-0.001);
+		this.#group.rotateY(-0.0003);
 		this.#animateCreation();
 		for (let vulc of this.vulcanos) vulc.update();
 	}

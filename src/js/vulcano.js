@@ -8,6 +8,14 @@ export default class Vulcano {
 	#lavaMesh;
 	#vulcMesh;
 	get mesh() {return this.#mesh};
+	get relPosition() {
+		const planRot = [this.#planet.group.rotation.y, this.#planet.group.rotation.x, this.#planet.group.rotation.z]
+		return [
+			this.#planet.baseRadius * Math.sin(this.#position[1] + planRot[1]) * Math.cos(this.#position[0] - planRot[0]),
+			this.#planet.baseRadius * Math.cos(this.#position[1] + planRot[1]),
+			this.#planet.baseRadius * Math.sin(this.#position[1] + planRot[1]) * Math.sin(this.#position[0] - planRot[0])
+		];
+	}
 	#position;
 	#planet;
 
