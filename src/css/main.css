@@ -1,9 +1,11 @@
 * {
 	box-sizing: border-box;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
 
 :root {
 	--screenMargin: 20px;
+	--spaceBackground: rgb(0, 0, 15);
 }
 
 body {
@@ -24,27 +26,96 @@ canvas {
 	height: 100vh;
 }
 
-.panel {
+
+.panelHolder {
 	position: absolute;
+	left: 0;
+	top: 0;
+	margin: 20px;
+	width: calc(50%);
+	max-width: 300px;
 
-	bottom: -45vh;
-	/*width: calc(100% - var(--screenMargin) * 2);*/
-	width: calc(100%);
-
-
-	padding: 20px;
 	height: 50vh;
+	z-index: 100;
+}
+#trackedHabit {
+	position: fixed;
+	transition: transform 0.3s, opacity 0.3s;
+	transform: translate(0, -50%);
+}
+#trackedHabit.hide {
+	pointer-events: none;
+	transform: scale(0.95) translate(0, -50%);;
+	opacity: 0;
+}
+#trackedHabit.attachedOnLeft {
+	transform: translate(-100%, -50%);
+}
+
+#trackedHabit.attachedOnLeft.hide {
+	transform: scale(0.95) translate(-100%, -50%);;
+}
+
+
+.panel {
+	padding: 10px 20px;
+	margin-bottom: 10px;
 	
-	/*border-radius: 5px;*/
-	border-radius: 30px 30px 0 0;
+	border-radius: 10px;
 
 
-	background: rgb(45, 45, 45);
+	background: rgba(0, 0, 15, 0.7);
+	backdrop-filter: blur(20px);
+
+	border: 1px solid #223;
 	box-shadow: 10px 10px 30px rgba(0, 0, 0, .05);
 	z-index: 10;
 }
 
 
+.habitListHolder {
+	display: flex;
+	flex-direction: column;
+}
+
+.habitItem {
+	position: relative;
+	height: 35px;
+	display: grid;
+	grid-template-areas: 
+		'status title'
+		'status subTitle';
+	--textColor: #aaa;
+	grid-template-rows: 21px 14px;
+	grid-template-columns: 35px auto;
+}
+
+.habitItem .statusHolder {
+	grid-area: status;
+}
+.habitItem .statusRing {
+	position: relative;
+	top: 50%;
+	left: 0px;
+	transform: translateY(-50%);
+	border: 1.5px solid #777;
+	height: 22px;
+	aspect-ratio: 1;
+	border-radius: 100%;
+}
+
+.habitItem .title {
+	grid-area: title;
+	font-size: 14px;
+	color: var(--textColor);
+}
+
+.habitItem .subTitle {
+	grid-area: subTitle;
+	font-size: 10px;
+	color: var(--textColor);
+	opacity: .7;
+}
 /*
 .panel {
 	position: relative;
