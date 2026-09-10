@@ -2,37 +2,23 @@ import * as THREE from 'three';
 import { Perlin, random } from './random.js';
 import Planet from './planet.js';
 import { generatePatchGeometry } from './geometryGenerator.js';
+import PlanetObject from './planetObject.js'
 
-
-export default class Vulcano {
+export default class Vulcano extends PlanetObject {
 	#mesh;
 	#lavaMesh;
 	#vulcMesh;
 	get mesh() {return this.#mesh};
-	get relPosition() {
-		const planRot = [this.#planet.group.rotation.y, this.#planet.group.rotation.x, this.#planet.group.rotation.z]
-		return [
-			this.#planet.baseRadius * Math.sin(this.#position[1] + planRot[1]) * Math.cos(this.#position[0] - planRot[0]),
-			this.#planet.baseRadius * Math.cos(this.#position[1] + planRot[1]),
-			this.#planet.baseRadius * Math.sin(this.#position[1] + planRot[1]) * Math.sin(this.#position[0] - planRot[0])
-		];
-	}
-	#position;
-	#planet;
-
+	
 	#height;
 	#radius;
 	#creationTime = Date.now() + Math.random() * 1000;
 
 	constructor({radius, height}, _planet) {
-		this.#planet = _planet;
+		let position = [random() * Math.PI * 2, (random() * 0.5 + 0.25) * Math.PI];
+		super(position, _planet)
 		this.#height = height;
 		this.#radius = radius;
-		this.#position = [random() * Math.PI * 2, (random() * 0.5 + 0.25) * Math.PI];
-
-		// Ensure that the position of the vulcano matches well with the segment grid of the planet -> TODO: does not work well yet
-		this.#position[0] = Math.round(this.#position[0] / (Math.PI / Planet.segCount)) * (Math.PI / Planet.segCount);
-		this.#position[1] = Math.round(this.#position[1] / (Math.PI / Planet.segCount)) * (Math.PI / Planet.segCount);
 
 
 		this.#generateMesh({radius, height});
@@ -57,14 +43,14 @@ export default class Vulcano {
 
 	#vulcRadialFunction(theta, phi) {
 		const patchSize = this.#radius * 2;
-		const xArcLength = patchSize / this.#planet.baseRadius;
+		const xArcLength = patchSize / this._planet.baseRadius;
 
-		let radius = this.#planet.radialFunction(theta, phi);
+		let radius = this._planet.radialFunction(theta, phi);
 
-		const rTheta = theta - this.#position[0]; // Relative theta
-		const rPhi = phi - this.#position[1]; // Relative phi
+		const rTheta = theta - this.position[0]; // Relative theta
+		const rPhi = phi - this.position[1]; // Relative phi
 
-		const patchRadius = this.#radius / (this.#planet.baseRadius); // Convert to units of angles
+		const patchRadius = this.#radius / (this._planet.baseRadius); // Convert to units of angles
 		const vulcanoRadius = patchRadius;
 
 		let distFromCenter = Math.abs(
@@ -84,14 +70,14 @@ export default class Vulcano {
 	}
 
 	#lavaRadialFunction(theta, phi) {
-		let radius = this.#planet.radialFunction(theta, phi) + 0.5 * this.#height;
+		let radius = this._planet.radialFunction(theta, phi) + 0.5 * this.#height;
 		return radius;
 	}
 
 	#generateGeometry({radius, segDensityMultiplier}, radialFunction) {
 		const patchSize = radius * 2;
-		const segDensity = Planet.segCount / (Math.PI * this.#planet.baseRadius) * segDensityMultiplier;
-		return generatePatchGeometry((theta, phi) => radialFunction(theta, phi), [patchSize, patchSize], this.#position, segDensity, this.#planet.baseRadius);
+		const segDensity = Planet.segCount / (Math.PI * this._planet.baseRadius) * segDensityMultiplier;
+		return generatePatchGeometry((theta, phi) => radialFunction(theta, phi), [patchSize, patchSize], this.position, segDensity, this._planet.baseRadius);
 	}
 
 	#createTexture() {
