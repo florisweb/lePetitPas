@@ -39,6 +39,9 @@ window.addEventListener('resize', () => resize());
 
 
 function resize() {
+	let panel = document.querySelector('.UIPanel');
+	document.documentElement.style.setProperty('--panelHeight', panel.offsetHeight + 'px');
+
 	console.log('resize');
 	renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight, false); // FIXME
 	camera.onResize();

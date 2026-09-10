@@ -8,7 +8,7 @@
 	--spaceBackground: rgb(0, 0, 15);
 
 	--panelHeight: 330px;
-	--navBarHeight: 80px;
+	/*--navBarHeight: 80px;*/
 }
 
 body {
@@ -170,7 +170,7 @@ canvas {
 		position: fixed;
 		top: 0;
 		width: 100vw;
-		height: calc(100vh - var(--panelHeight));
+		height: calc(100vh - var(--panelHeight) + 20px);
 	}
 
 	#header {
@@ -181,12 +181,18 @@ canvas {
 		position: fixed;
 		bottom: 0;
 		z-index: 100;
-		background: rgba(30, 30, 30, .9);
-		backdrop-filter: blur(50px);
+		/*background: rgba(30, 30, 30, .9);*/
+		/*backdrop-filter: blur(50px);*/
+
+		background: linear-gradient(180deg,rgba(17,17,19,.95) 10%,rgba(17,17,19,.75));
+		backdrop-filter: blur(20px);
+
+		/*border: 1px solid #223;*/
+
 		width: 100vw;
 		padding: 30px;
 		padding-top: 25px;
-		height: var(--panelHeight);
+		/*height: var(--panelHeight);*/
 		border-radius: 20px 20px 0 0;
 		padding-bottom: var(--navBarHeight);
 	}
@@ -259,6 +265,7 @@ canvas {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-around;
+		display: none;
 	}
 
 	.navBar .navItem {
