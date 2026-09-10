@@ -28,7 +28,8 @@ export default class Rose extends PlanetObject {
 	#creationTime = Date.now() + Math.random() * 1000;
 
 	constructor({}, _planet) {
-		let position = [random() * Math.PI * 2, (random() * 0.2 + 0) * Math.PI];
+		// let position = [random() * Math.PI * 2, (random() * 0.2 + 0) * Math.PI];
+		let position = [random() * Math.PI * 2, (random() * 0.5 + 0.25) * Math.PI];
 		super(position, _planet)
 
 
@@ -219,10 +220,7 @@ export default class Rose extends PlanetObject {
 			) * (1 - petalFlare)
 			+ petalFlare * thetaFrac
 		) * _radius
-		
-
-		// (Math.sin(yFrac * Math.PI * 0.25) * 0.7 + 0.1 * thetaFrac) * _radius;
-		
+				
 
 		// Generate vertices
 		for (let y = 0; y <= heightSegments; y++) 

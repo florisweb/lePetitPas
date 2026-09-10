@@ -65,6 +65,20 @@ const camera = new Camera({renderer});
 const sun = new Sun();
 sun.addToScene(scene);
 
+
+for (let a = 0; a < Math.PI * 2; a += Math.PI * 2 / 3)
+{
+	const spotLight = new THREE.SpotLight( 0xffffff, 400 );
+	const dist = 100;
+	spotLight.position.set( Math.cos(a) * dist, 0, Math.sin(a) * dist );
+	spotLight.castShadow = true;
+	spotLight.lookAt(0, 0, 0);
+	spotLight.shadow.bias = -0.00001; 
+	spotLight.shadow.normalBias = -2;
+	scene.add(spotLight);
+}
+
+
 const planet = new Planet();
 window.planet = planet;
 planet.addToScene(scene);
