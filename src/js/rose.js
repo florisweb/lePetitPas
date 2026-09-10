@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+
+
+
 import { Perlin, random } from './random.js';
 import Planet from './planet.js';
 import { generatePatchGeometry } from './geometryGenerator.js';
@@ -8,6 +12,7 @@ export default class Rose extends PlanetObject {
 	#mesh;
 	#hillMesh;
 	#stemMesh;
+	#flowerMesh;
 
 
 	get mesh() {return this.#mesh};
@@ -16,6 +21,9 @@ export default class Rose extends PlanetObject {
 	#hillHeight = 0.7;
 	#hillRadius = 2.0;
 	#stemLength = 4;
+	#stemRadius = 0.1;
+
+	#flowerHeight = 0.5;
 	#creationTime = Date.now() + Math.random() * 1000;
 
 	constructor({}, _planet) {
@@ -101,11 +109,14 @@ export default class Rose extends PlanetObject {
 
 
 
+	#stemRadFunc(_yFrac) {
+		return (_yFrac * 0.8 + 0.2) * this.#stemRadius;;
+	}
+	#stemOffsetFunc(_yFrac) {
+		return [Math.cos(_yFrac * 2 * Math.PI) * 0.15, Math.sin(_yFrac * Math.PI) * 0.1]; // offset in xz plane
+	}
+
 	#createStemGeometry(_height, _thickness) {
-		const stemRadius = 0.1;
-		// let geometry = new THREE.CylinderGeometry(stemRadius, stemRadius, this.#stemLength, 32, 16);
-
-
 		const radialSegments = 16;
 		const heightSegments = 32;
 
@@ -115,16 +126,12 @@ export default class Rose extends PlanetObject {
 		const indices = [];
 
 
-		const thicknessFunc = (yFrac) => (yFrac * 0.8 + 0.2) * stemRadius;
-		const offsetFunc = (yFrac) => [Math.cos(yFrac * 2 * Math.PI) * 0.15, Math.sin(yFrac * Math.PI) * 0.1]; // offset in xz plane
-
-
 		// Generate vertices
 		for (let y = 0; y <= heightSegments; y++) 
 		{
 			const curYFrac = y / heightSegments;
-			const radius = thicknessFunc(1 - curYFrac); // Invert mapping such that yFrac = 1 is at the top 
-			const offset = offsetFunc(1 - curYFrac);
+			const radius = this.#stemRadFunc(1 - curYFrac); // Invert mapping such that yFrac = 1 is at the top 
+			const offset = this.#stemOffsetFunc(1 - curYFrac);
 
 			for (let x = 0; x <= radialSegments; x++) 
 			{
@@ -155,23 +162,138 @@ export default class Rose extends PlanetObject {
 		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
 		geometry.computeVertexNormals();
 		return geometry;
-
-
-
-
-		return geometry;
 	}
 
+	
 	#createStemMesh() {
 		let geometry = this.#createStemGeometry(this.#stemLength);
 		let material = new THREE.MeshLambertMaterial({color: 0x50c040});
 
 		material.side = THREE.DoubleSide; // Fix cliping issues
 		let mesh = new THREE.Mesh(geometry, material);
-		let pos = this.calcPosAtRad(this._planet.baseRadius + (this.#stemLength + this.#hillHeight) / 2);
-		mesh.position.x = this.relPosition[0];
-		mesh.position.y = this.relPosition[1];
-		mesh.position.z = this.relPosition[2];
+		let pos = this.calcPosAtRad(this._planet.baseRadius);
+		mesh.position.x = pos[0];
+		mesh.position.y = pos[1];
+		mesh.position.z = pos[2];
+
+		const normal = new THREE.Vector3(
+			Math.sin(this.position[1]) * Math.cos(this.position[0]), 
+			Math.cos(this.position[1]), 
+			Math.sin(this.position[1]) * Math.sin(this.position[0])
+		);
+
+		const quaternion = new THREE.Quaternion();
+		quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+		mesh.quaternion.copy(quaternion);
+		mesh.castShadow = true;
+		mesh.receiveShadow = true;
+		return mesh;
+	}
+
+
+
+
+	#createPetalGeometry(_radius, _height, _dTheta) {
+		const dTheta = _dTheta; // Angle over which the petal curves
+
+		const radialSegments = 16;
+		const heightSegments = 32;
+
+		const geometry = new THREE.BufferGeometry();
+		const uvs = [];
+		const vertices = [];
+		const indices = [];
+
+
+		
+		const topStemRad = this.#stemRadFunc(1);
+
+		// const radFunc = (yFrac, thetaFrac) => (Math.sin(yFrac * Math.PI * 0.25) * 0.7 + 0.1 * thetaFrac) * petalRad + topStemRad;
+		const radFunc = (yFrac, thetaFrac) => (Math.sin(yFrac * Math.PI * 0.25) * 0.7 + 0.1 * thetaFrac) * _radius;
+		
+		
+
+
+		// Generate vertices
+		for (let y = 0; y <= heightSegments; y++) 
+		{
+			const curYFrac = y / heightSegments;
+			
+
+			for (let x = 0; x <= radialSegments; x++) 
+			{
+				const theta = x / radialSegments * dTheta;
+				const radius = radFunc(curYFrac, x / radialSegments); // Invert mapping such that yFrac = 1 is at the top 
+
+				const posX = radius * Math.cos(theta);
+				const posY = curYFrac * _height;
+				const posZ = radius * Math.sin(theta);
+
+				vertices.push(posX, posY, posZ);
+				uvs.push(x / radialSegments, curYFrac);
+			}
+		}
+
+		for (let y = 0; y < heightSegments; y++) 
+		{
+			for (let x = 0; x < radialSegments; x++) 
+			{
+				const a = y * (radialSegments + 1) + x;
+				const b = a + radialSegments + 1;
+				indices.push(a, b, a + 1); 
+				indices.push(a + 1, b, b + 1);
+			}
+		}
+		
+		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+		geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+		geometry.computeVertexNormals();
+		return geometry;
+	}
+
+
+
+
+	#createFlowerMesh() {
+		const topStemOffset = this.#stemOffsetFunc(1);
+
+		
+		const innerPetalCount = 3;
+		const innerRadius = 0.5;
+		const petalOverlapFrac = 0.5;
+		const petalArcLength = innerRadius * 2 * Math.PI / (innerPetalCount * (1 - petalOverlapFrac));
+		const layerCount = 5;
+		let geometries = [];
+		for (let l = 0; l < layerCount; l++)
+		{
+			const radius = (l + 1) * innerRadius;
+			const height = ((layerCount - l) * 0.5 + 0.5) * this.#flowerHeight;
+			const petalCount = radius / innerRadius * innerPetalCount;
+			const curArc = radius * 2 * Math.PI;
+			const dTheta = petalArcLength / curArc * 2 * Math.PI;
+
+			for (let p = 0; p < petalCount; p++)
+			{
+				let curGeo = this.#createPetalGeometry(radius, height, dTheta);
+				curGeo.rotateY(p * dTheta);
+				geometries.push(curGeo);
+			}
+		}
+
+		let geometry = mergeGeometries(geometries);
+		geometries.x = topStemOffset[0];
+		geometries.z = topStemOffset[1];
+
+
+		let material = new THREE.MeshLambertMaterial({color: 0xc05040});
+
+		material.side = THREE.DoubleSide; // Fix cliping issues
+		let mesh = new THREE.Mesh(geometry, material);
+		let pos = this.calcPosAtRad(this._planet.baseRadius + this.#stemLength); // TODO 
+		mesh.position.x = pos[0];
+		mesh.position.y = pos[1];
+		mesh.position.z = pos[2];
 
 		const normal = new THREE.Vector3(
 			Math.sin(this.position[1]) * Math.cos(this.position[0]), 
@@ -192,13 +314,13 @@ export default class Rose extends PlanetObject {
 	#generateMesh() {
 		this.#hillMesh = this.#generateHillMesh();
 		this.#stemMesh = this.#createStemMesh();
-
-
+		this.#flowerMesh = this.#createFlowerMesh();
 
 
 		this.#mesh = new THREE.Group();
 		this.#mesh.add(this.#hillMesh);
 		this.#mesh.add(this.#stemMesh);
+		this.#mesh.add(this.#flowerMesh);
 		this.#mesh.position.x = 0;
 		this.#mesh.position.z = 0;
 		this.#mesh.position.y = 0;
