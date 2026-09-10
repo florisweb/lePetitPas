@@ -48,7 +48,7 @@ export default class Camera {
 		if (dTheta < -Math.PI) dTheta += Math.PI * 2;
 		if (dTheta > Math.PI) dTheta -= Math.PI * 2;
 
-		camera.controls.rotateLeft(dTheta);		
+		camera.controls.rotateLeft(dTheta);
 	}
 }
 

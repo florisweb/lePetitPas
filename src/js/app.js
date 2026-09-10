@@ -61,10 +61,9 @@ document.body.onscroll = (_e) => {
 
 
 const camera = new Camera({renderer});
-
-const sun = new Sun();
+const sun = new Sun({camera});
 sun.addToScene(scene);
-
+window.sun = sun;
 
 for (let a = 0; a < Math.PI * 2; a += Math.PI * 2 / 3)
 {
@@ -320,13 +319,6 @@ const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera.camera);
 composer.addPass(renderPass);
 
-// const bloomPass = new UnrealBloomPass(
-//   new THREE.Vector2(window.innerWidth, window.innerHeight),
-//   0.5,    // strength
-//   0.01,    // radius
-//   // 0.85    // threshold
-//   0.5    // threshold
-// );
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
   0.5,    // strength
@@ -334,7 +326,7 @@ const bloomPass = new UnrealBloomPass(
   // 0.85    // threshold
   0.5    // threshold
 );
-composer.addPass(bloomPass);
+
 
 
 
