@@ -28,8 +28,7 @@ export default class Rose extends PlanetObject {
 	#creationTime = Date.now() + Math.random() * 1000;
 
 	constructor({}, _planet) {
-		// let position = [random() * Math.PI * 2, (random() * 0.2 + 0) * Math.PI];
-		let position = [random() * Math.PI * 2, (random() * 0.5 + 0.25) * Math.PI];
+		let position = [random() * Math.PI * 2, (random() * 0.3 + 0.1) * Math.PI];
 		super(position, _planet)
 
 

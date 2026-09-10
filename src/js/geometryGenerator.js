@@ -4,8 +4,6 @@ import { Perlin, random } from './random.js';
 
 // export function generatePatchGeometry({radius, height, segDensityMultiplier}, radialFunction) {
 export function generatePatchGeometry(radiusFunction, size, anglePos, segDensity, patchCenterDist) {
-
-	
 	const segCount = Math.round(size[0] * segDensity); // TODO
 	const xArcLength = size[0] / patchCenterDist;
 	const yArcLength = size[1] / patchCenterDist;

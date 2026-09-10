@@ -6,6 +6,7 @@ export default class Camera {
 	camera;
 	#renderer;
 	constructor({renderer}) {
+		window.camera = this;
 		this.#renderer = renderer;
 		this.camera = new THREE.PerspectiveCamera(
 			75,
@@ -21,10 +22,12 @@ export default class Camera {
 
 
 		this.controls = new OrbitControls( this.camera, renderer.domElement );
+		this.controls.enablePan = false;
 		this.controls.enableDamping = true;
 		this.controls.dampingFactor = 0.05;
 		this.controls.autoRotate = true;
 		this.controls.autoRotateSpeed = 0.2;
+		this.controls.minZoom = 5;
 	}
 
 	update() {
@@ -34,6 +37,18 @@ export default class Camera {
 	onResize() {
 		this.camera.aspect = this.#renderer.domElement.width / this.#renderer.domElement.height;
 		this.camera.updateProjectionMatrix();
+	}
+
+	zoomToObject(_obj) {
+		let dPhi = camera.controls.getPolarAngle() - _obj.absoluteAnglePos[1];
+		camera.controls.rotateUp(dPhi);
+
+		let theta = -(camera.controls.getAzimuthalAngle() - 0.5 * Math.PI); // Convert azimuth angle to our angle system
+		let dTheta = -(theta - _obj.absoluteAnglePos[0]);
+		if (dTheta < -Math.PI) dTheta += Math.PI * 2;
+		if (dTheta > Math.PI) dTheta -= Math.PI * 2;
+
+		camera.controls.rotateLeft(dTheta);		
 	}
 }
 

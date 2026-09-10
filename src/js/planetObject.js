@@ -18,7 +18,12 @@ export default class PlanetObject {
 			_rad * Math.sin(this.position[1] + planRot[1]) * Math.sin(this.position[0] - planRot[0])
 		];
 	}
-
+	get absoluteAnglePos() {
+		return [
+			this.position[0] + this._planet.group.rotation.y,
+			this.position[1] + this._planet.group.rotation.x
+		];
+	}
 	position = []; // Position defined in 2D polar coordinates: (theta, phi)
 	_planet;
 

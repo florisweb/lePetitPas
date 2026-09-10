@@ -320,6 +320,13 @@ const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera.camera);
 composer.addPass(renderPass);
 
+// const bloomPass = new UnrealBloomPass(
+//   new THREE.Vector2(window.innerWidth, window.innerHeight),
+//   0.5,    // strength
+//   0.01,    // radius
+//   // 0.85    // threshold
+//   0.5    // threshold
+// );
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
   0.5,    // strength
@@ -336,6 +343,10 @@ window.THREE = THREE;
 let time = 0;
 
 const trackedElements = document.querySelectorAll('.panel.tracked');
+for (let i = 0; i < trackedElements.length; i++)
+{
+	trackedElements[i].addEventListener('click', () => camera.zoomToObject(planet.objects[i]));
+}
 function update() {
 	planet.update();
 	sun.update();
