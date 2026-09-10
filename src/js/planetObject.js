@@ -3,13 +3,22 @@ import Planet from './planet.js';
 
 export default class PlanetObject {
 	get relPosition() {
-		const planRot = [this._planet.group.rotation.y, this._planet.group.rotation.x, this._planet.group.rotation.z]
+		return this.calcPosAtRad(this._planet.baseRadius);
+	}
+	calcPosAtRad(_rad) {
+		let planRot = [0, 0, 0];
+		if (this._planet.group)
+		{
+			planRot =[this._planet.group.rotation.y, this._planet.group.rotation.x, this._planet.group.rotation.z];
+		}
+
 		return [
-			this._planet.baseRadius * Math.sin(this.position[1] + planRot[1]) * Math.cos(this.position[0] - planRot[0]),
-			this._planet.baseRadius * Math.cos(this.position[1] + planRot[1]),
-			this._planet.baseRadius * Math.sin(this.position[1] + planRot[1]) * Math.sin(this.position[0] - planRot[0])
+			_rad * Math.sin(this.position[1] + planRot[1]) * Math.cos(this.position[0] - planRot[0]),
+			_rad * Math.cos(this.position[1] + planRot[1]),
+			_rad * Math.sin(this.position[1] + planRot[1]) * Math.sin(this.position[0] - planRot[0])
 		];
 	}
+
 	position = []; // Position defined in 2D polar coordinates: (theta, phi)
 	_planet;
 

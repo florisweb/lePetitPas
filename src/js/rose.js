@@ -7,12 +7,15 @@ import PlanetObject from './planetObject.js'
 export default class Rose extends PlanetObject {
 	#mesh;
 	#hillMesh;
+	#stemMesh;
+
 
 	get mesh() {return this.#mesh};
 
 	
 	#hillHeight = 0.7;
 	#hillRadius = 2.0;
+	#stemLength = 4;
 	#creationTime = Date.now() + Math.random() * 1000;
 
 	constructor({}, _planet) {
@@ -24,6 +27,24 @@ export default class Rose extends PlanetObject {
 	}
 	
 
+
+
+	#generateHillMesh() {
+		const patchSize = this.#hillRadius * 2;
+		const segDensity = Planet.segCount / (Math.PI * this._planet.baseRadius) * 3.0;
+		let geometry = generatePatchGeometry((theta, phi) => this.#hillRadialFunction(theta, phi), [patchSize, patchSize], this.position, segDensity, this._planet.baseRadius);
+		
+		let material = new THREE.MeshLambertMaterial({
+			map: this.#createHillTexture(),
+		});
+
+		material.side = THREE.DoubleSide; // Fix cliping issues
+		let mesh = new THREE.Mesh(geometry, material);
+
+		mesh.castShadow = true;
+		mesh.receiveShadow = true;
+		return mesh;
+	}
 	#hillRadialFunction(theta, phi) {
 		const patchSize = this.#hillRadius * 2;
 		const xArcLength = patchSize / this._planet.baseRadius;
@@ -49,12 +70,6 @@ export default class Rose extends PlanetObject {
 		radius += this.#hillHeight * Math.min((topWidth + 1) * (1 - curEdgeFrac), 1);	
 
 		return radius;
-	}
-
-	#generateHillGeometry(radialFunction) {
-		const patchSize = this.#hillRadius * 2;
-		const segDensity = Planet.segCount / (Math.PI * this._planet.baseRadius) * 3.0;
-		return generatePatchGeometry((theta, phi) => this.#hillRadialFunction(theta, phi), [patchSize, patchSize], this.position, segDensity, this._planet.baseRadius);
 	}
 
 	#createHillTexture() {
@@ -84,23 +99,51 @@ export default class Rose extends PlanetObject {
 	}
 
 
+
+
+	#createStemGeometry(_height, _thickness) {
+		const stemRadius = 0.1;
+		let geometry = new THREE.CylinderGeometry(stemRadius, stemRadius, this.#stemLength, 32, 16);
+		return geometry;
+	}
+
+	#createStemMesh() {
+		let geometry = this.#createStemGeometry();
+		let material = new THREE.MeshLambertMaterial({color: 0x50c040});
+
+		material.side = THREE.DoubleSide; // Fix cliping issues
+		let mesh = new THREE.Mesh(geometry, material);
+		let pos = this.calcPosAtRad(this._planet.baseRadius + (this.#stemLength + this.#hillHeight) / 2);
+		mesh.position.x = this.relPosition[0];
+		mesh.position.y = this.relPosition[1];
+		mesh.position.z = this.relPosition[2];
+
+		const normal = new THREE.Vector3(
+			Math.sin(this.position[1]) * Math.cos(this.position[0]), 
+			Math.cos(this.position[1]), 
+			Math.sin(this.position[1]) * Math.sin(this.position[0])
+		);
+
+		const quaternion = new THREE.Quaternion();
+		quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+		mesh.quaternion.copy(quaternion);
+		mesh.castShadow = true;
+		mesh.receiveShadow = true;
+		return mesh;
+	}
+
+
+
 	#generateMesh() {
-		let hillGeo = this.#generateHillGeometry();
-		
-		let hillMaterial = new THREE.MeshLambertMaterial({
-			map: this.#createHillTexture(),
-		});
+		this.#hillMesh = this.#generateHillMesh();
+		this.#stemMesh = this.#createStemMesh();
 
 
-		hillMaterial.side = THREE.DoubleSide; // Fix cliping issues
-		this.#hillMesh = new THREE.Mesh(hillGeo, hillMaterial);
-
-		this.#hillMesh.castShadow = true;
-		this.#hillMesh.receiveShadow = true;
 
 
 		this.#mesh = new THREE.Group();
 		this.#mesh.add(this.#hillMesh);
+		this.#mesh.add(this.#stemMesh);
 		this.#mesh.position.x = 0;
 		this.#mesh.position.z = 0;
 		this.#mesh.position.y = 0;

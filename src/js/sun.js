@@ -12,6 +12,7 @@ export default class Sun {
 	constructor() {
 		const sunColour = 0xffff00;
 		this.#light = new THREE.SpotLight(0xffeeeee, this.#sunDistance**2 * 1);
+		// TODO SunLight | https://threejs.org/docs/?q=sunlig#SunLight
 		this.#light.castShadow = true;
 		this.#light.shadow.mapSize.width = 1024 * 4;
 		this.#light.shadow.mapSize.height = 1024 * 4;
