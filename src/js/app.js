@@ -326,6 +326,7 @@ const bloomPass = new UnrealBloomPass(
   // 0.85    // threshold
   0.5    // threshold
 );
+composer.addPass(bloomPass);
 
 
 

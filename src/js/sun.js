@@ -16,8 +16,7 @@ export default class Sun {
 	constructor({camera}) {
 		this.#camera = camera;
 		const sunColour = 0xffff33;
-		// this.#light = new THREE.SpotLight(0xffeeeee, this.#sunDistance**2 * 1.5);
-		this.#light = new THREE.SpotLight(0xffeeeee, this.#sunDistance**2 * 1.5);
+		this.#light = new THREE.SpotLight(0xffeeeee, this.#sunDistance**2 * 1);
 		// TODO SunLight | https://threejs.org/docs/?q=sunlig#SunLight
 		this.#light.castShadow = true;
 		this.#light.shadow.mapSize.width = 1024 * 4;
@@ -45,7 +44,7 @@ export default class Sun {
 
 		const sunMaterial = new THREE.MeshStandardMaterial({
 			emissive: sunColour,        // Yellow glow
-			emissiveIntensity: 5,      // Brightness of the glow
+			// emissiveIntensity: 5,      // Brightness of the glow
 			color: sunColour,            // Base color
 			toneMapped: false          // Important for bloom
 		});
@@ -56,26 +55,22 @@ export default class Sun {
 
 
 
-		const textureLoader = new THREE.TextureLoader();
-		const textures = [
-			textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare0.png'),
-			textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare1.png'),
-			textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare2.png'),
-			textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare3.png')
-		];
-		const offsets = [0, 0.6, 1.6, 0];
+		// const textureLoader = new THREE.TextureLoader();
+		// const textures = [
+		// 	textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare0.png'),
+		// ];
+		// const offsets = [0, 0.6, 1.6, 0];
 
-		let lensflare = new Lensflare();
-		for (let i = 0; i < textures.length; i++)
-		{
-			let element = new LensflareElement(textures[i],  this.#lensFlareSizes[i], offsets[i]);
-			this.#lensflareElements.push(element);
-			lensflare.addElement(element);
-		}
+		// let lensflare = new Lensflare();
+		// for (let i = 0; i < textures.length; i++)
+		// {
+		// 	let element = new LensflareElement(textures[i], this.#lensFlareSizes[i], offsets[i]);
+		// 	this.#lensflareElements.push(element);
+		// 	lensflare.addElement(element);
+		// }
 		
-		this.#light.add(lensflare);
+		// this.#light.add(lensflare);
 	}
-
 
 	addToScene(scene) {
 		scene.add(this.#mesh);
@@ -88,18 +83,17 @@ export default class Sun {
 		this.#light.position.set(Math.sin(this.#sunAngle) * (this.#sunDistance - this.#sunRad), 0, Math.cos(this.#sunAngle) * (this.#sunDistance - this.#sunRad));
 
 
-		const sunPos = this.#mesh.position.clone();
-		const toSun = sunPos.normalize();
-		const cameraDir = this.#camera.camera.position.clone().normalize();
-		const alignment = toSun.dot(cameraDir);
+		// const sunPos = this.#mesh.position.clone();
+		// const toSun = sunPos.normalize();
+		// const cameraDir = this.#camera.camera.position.clone().normalize();
+		// const alignment = toSun.dot(cameraDir);
 
-		const flareStrength = 0.2 * (1 - Math.abs(alignment))**-1;
-		console.log(alignment, flareStrength);
+		// const flareStrength = 0.2 * (1 - Math.abs(alignment))**-1;
+		// console.log(alignment, flareStrength);
 		
-	  	this.#lensflareElements.forEach((element, i) => {
-		    element.size = this.#lensFlareSizes[i] * (flareStrength);  // Grows as sun approaches edge
-	  	});
-
+	  	// this.#lensflareElements.forEach((element, i) => {
+		//     element.size = this.#lensFlareSizes[i] * (flareStrength);  // Grows as sun approaches edge
+	  	// });
 	}
 }
 
