@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Perlin, random } from './random.js';
 import Vulcano from './vulcano.js';
+import Rose from './rose.js';
 
 import { generatePlanetGeometry } from './geometryGenerator.js';
 
@@ -36,19 +37,20 @@ export default class Planet {
 	#group;
 	#coreMesh;
 	#creationTime = new Date();
-	vulcanos = [];
+	objects = [];
 	get group() {
 		return this.#group;
 	}
 
 	constructor() {
 		this.#generateMesh();
-		for (let i = 0; i < 1; i++) this.vulcanos.push(new Vulcano({radius: 4, height: 5}, this));
+		for (let i = 0; i < 1; i++) this.objects.push(new Vulcano({radius: 4, height: 5}, this));
+		for (let i = 0; i < 1; i++) this.objects.push(new Rose({radius: 4, height: 5}, this));
 
 		this.#group = new THREE.Group();
 		this.#group.add(this.#mesh);
 		this.#group.add(this.#coreMesh);
-		for (let vulc of this.vulcanos) this.#group.add(vulc.mesh);
+		for (let obj of this.objects) this.#group.add(obj.mesh);
 	}
 
 
@@ -56,7 +58,7 @@ export default class Planet {
 		// this.#group.rotateY(-0.001);
 		this.#group.rotateY(-0.0003);
 		this.#animateCreation();
-		for (let vulc of this.vulcanos) vulc.update();
+		for (let vulc of this.objects) vulc.update();
 	}
 
 	addToScene(scene) {

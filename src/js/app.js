@@ -321,14 +321,14 @@ composer.addPass(bloomPass);
 window.THREE = THREE;
 let time = 0;
 
-const trackedHabitElement = document.querySelector('#trackedHabit');
+const trackedElements = document.querySelectorAll('.panel.tracked');
 function update() {
 	planet.update();
 	sun.update();
 	for (let star of stars) star.update();
 
 
-	const vulcPos = planet.vulcanos[0].relPosition;
+	const vulcPos = planet.objects[0].relPosition;
 
 	time += 0.016;
 
@@ -352,25 +352,26 @@ function update() {
 
 
 
-
-	let absVulcPos = new THREE.Vector3(...planet.vulcanos[0].relPosition).multiplyScalar(1.2);
 	let centerPos = new THREE.Vector3(0, 0, 0);
-	let center = centerPos.project(camera.camera);
-	let relPxPos = absVulcPos.project(camera.camera);
-	const attachedOnLeft = relPxPos.x < 0;
-	
-	const vulcX = (1 + relPxPos.x) / 2 * renderer.domElement.width;
-	const vulcY = (1 - relPxPos.y) / 2 * renderer.domElement.height;
-	const labelX = vulcX + 50 * (attachedOnLeft ? -1 : 1);
-	// console.log(relPxPos.x);
-	trackedHabitElement.style.left = labelX + 'px';
-	trackedHabitElement.style.top = vulcY + 'px';
+	let center = centerPos.project(camera.camera);	
+	for (let i = 0; i < trackedElements.length; i++)
+	{
+		let absPos = new THREE.Vector3(...planet.objects[i].relPosition).multiplyScalar(1.2);
+		let relPxPos = absPos.project(camera.camera);
+		const attachedOnLeft = relPxPos.x < 0;
+		
+		const objX = (1 + relPxPos.x) / 2 * renderer.domElement.width;
+		const objY = (1 - relPxPos.y) / 2 * renderer.domElement.height;
+		const labelX = objX + 50 * (attachedOnLeft ? -1 : 1);
 
-	
-	let dz = (center.z - relPxPos.z);
-	trackedHabitElement.classList.toggle('hide', dz < 0 || center.z > 0.9985 || center.z < 0.995);
-	trackedHabitElement.classList.toggle('attachedOnLeft', attachedOnLeft);
+		trackedElements[i].style.left = labelX + 'px';
+		trackedElements[i].style.top = objY + 'px';
 
+		
+		let dz = (center.z - relPxPos.z);
+		trackedElements[i].classList.toggle('hide', dz < 0 || center.z > 0.9985 || center.z < 0.995);
+		trackedElements[i].classList.toggle('attachedOnLeft', attachedOnLeft);
+	}
 
 
 

@@ -39,21 +39,21 @@ canvas {
 	display: inline-table;
 	z-index: 100;
 }
-#trackedHabit {
+.panel.tracked {
 	position: fixed;
 	transition: transform 0.3s, opacity 0.3s;
 	transform: translate(0, -50%);
 }
-#trackedHabit.hide {
+.panel.tracked.hide {
 	pointer-events: none;
 	transform: scale(0.95) translate(0, -50%);;
 	opacity: 0;
 }
-#trackedHabit.attachedOnLeft {
+.panel.tracked.attachedOnLeft {
 	transform: translate(-100%, -50%);
 }
 
-#trackedHabit.attachedOnLeft.hide {
+.panel.tracked.attachedOnLeft.hide {
 	transform: scale(0.95) translate(-100%, -50%);;
 }
 
