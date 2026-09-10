@@ -23,7 +23,8 @@ export default class Rose extends PlanetObject {
 	#stemLength = 4;
 	#stemRadius = 0.1;
 
-	#flowerHeight = 0.5;
+	#flowerHeight = 1.5;
+	#flowerRad = 1.2;
 	#creationTime = Date.now() + Math.random() * 1000;
 
 	constructor({}, _planet) {
@@ -193,7 +194,7 @@ export default class Rose extends PlanetObject {
 
 
 
-	#createPetalGeometry(_radius, _height, _dTheta) {
+	#createPetalGeometry(_radius, _height, _dTheta, _ringFrac) {
 		const dTheta = _dTheta; // Angle over which the petal curves
 
 		const radialSegments = 16;
@@ -209,10 +210,19 @@ export default class Rose extends PlanetObject {
 		const topStemRad = this.#stemRadFunc(1);
 
 		// const radFunc = (yFrac, thetaFrac) => (Math.sin(yFrac * Math.PI * 0.25) * 0.7 + 0.1 * thetaFrac) * petalRad + topStemRad;
-		const radFunc = (yFrac, thetaFrac) => (Math.sin(yFrac * Math.PI * 0.25) * 0.7 + 0.1 * thetaFrac) * _radius;
-		
+		// const radFunc = (yFrac, thetaFrac) => (Math.sin(yFrac * Math.PI * 0.25) * 0.7 + 0.1 * thetaFrac) * _radius;
+		const petalFlare = 0.2; // How much a petal twists inwards over its radial axis
+		const radFunc = (yFrac, thetaFrac, ringFrac) => (
+			(
+				(1 - Math.cos(2.5 * yFrac * (ringFrac * 0.3 + 0.7))) * 0.5 + 
+				Math.sin(3.15 * yFrac) * 0.5
+			) * (1 - petalFlare)
+			+ petalFlare * thetaFrac
+		) * _radius
 		
 
+		// (Math.sin(yFrac * Math.PI * 0.25) * 0.7 + 0.1 * thetaFrac) * _radius;
+		
 
 		// Generate vertices
 		for (let y = 0; y <= heightSegments; y++) 
@@ -223,10 +233,10 @@ export default class Rose extends PlanetObject {
 			for (let x = 0; x <= radialSegments; x++) 
 			{
 				const theta = x / radialSegments * dTheta;
-				const radius = radFunc(curYFrac, x / radialSegments); // Invert mapping such that yFrac = 1 is at the top 
+				const radius = radFunc(curYFrac, x / radialSegments, _ringFrac); // Invert mapping such that yFrac = 1 is at the top 
 
 				const posX = radius * Math.cos(theta);
-				const posY = curYFrac * _height;
+				const posY = curYFrac * _height * (0.8 + 0.2 * Math.sin(x / radialSegments * Math.PI));
 				const posZ = radius * Math.sin(theta);
 
 				vertices.push(posX, posY, posZ);
@@ -258,32 +268,32 @@ export default class Rose extends PlanetObject {
 	#createFlowerMesh() {
 		const topStemOffset = this.#stemOffsetFunc(1);
 
-		
 		const innerPetalCount = 3;
-		const innerRadius = 0.5;
-		const petalOverlapFrac = 0.5;
+		const layerCount = 3;
+		// const layerCount = 1;
+		const innerRadius = this.#flowerRad / layerCount;
+		const petalOverlapFrac = 0.6;
 		const petalArcLength = innerRadius * 2 * Math.PI / (innerPetalCount * (1 - petalOverlapFrac));
-		const layerCount = 5;
 		let geometries = [];
 		for (let l = 0; l < layerCount; l++)
 		{
 			const radius = (l + 1) * innerRadius;
-			const height = ((layerCount - l) * 0.5 + 0.5) * this.#flowerHeight;
+			const height = ((layerCount - l) / layerCount * 0.2 + 0.8) * this.#flowerHeight;
 			const petalCount = radius / innerRadius * innerPetalCount;
+			// const petalCount = 1;
 			const curArc = radius * 2 * Math.PI;
 			const dTheta = petalArcLength / curArc * 2 * Math.PI;
 
 			for (let p = 0; p < petalCount; p++)
 			{
-				let curGeo = this.#createPetalGeometry(radius, height, dTheta);
+				let curGeo = this.#createPetalGeometry(radius, height, dTheta, l / layerCount);
 				curGeo.rotateY(p * dTheta);
 				geometries.push(curGeo);
 			}
 		}
 
 		let geometry = mergeGeometries(geometries);
-		geometries.x = topStemOffset[0];
-		geometries.z = topStemOffset[1];
+		geometry.translate(topStemOffset[0], 0, topStemOffset[1]);
 
 
 		let material = new THREE.MeshLambertMaterial({color: 0xc05040});
