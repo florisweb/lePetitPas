@@ -111,7 +111,7 @@ export default class Rose extends PlanetObject {
 
 
 	#stemRadFunc(_yFrac) {
-		return (_yFrac * 0.8 + 0.2) * this.#stemRadius;;
+		return (_yFrac * 0.6 + 0.4) * this.#stemRadius;
 	}
 	#stemOffsetFunc(_yFrac) {
 		return [Math.cos(_yFrac * 2 * Math.PI) * 0.15, Math.sin(_yFrac * Math.PI) * 0.1]; // offset in xz plane
@@ -267,6 +267,8 @@ export default class Rose extends PlanetObject {
 
 	#createFlowerMesh() {
 		const topStemOffset = this.#stemOffsetFunc(1);
+		const topStemOffsetDy = this.#stemOffsetFunc(1 + 0.01);
+		let stemNormal = new THREE.Vector3(topStemOffsetDy[0] - topStemOffset[0], 0.01 * this.#flowerHeight, topStemOffsetDy[1] - topStemOffset[1]).normalize();
 
 		const innerPetalCount = 3;
 		const layerCount = 3;
@@ -312,7 +314,7 @@ export default class Rose extends PlanetObject {
 		);
 
 		const quaternion = new THREE.Quaternion();
-		quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+		quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal.addScaledVector(stemNormal, 1));
 		mesh.quaternion.copy(quaternion);
 		mesh.castShadow = true;
 		mesh.receiveShadow = true;
