@@ -109,6 +109,8 @@ canvas {
 	grid-area: title;
 	font-size: 14px;
 	color: var(--textColor);
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .habitItem .subTitle {
@@ -116,6 +118,8 @@ canvas {
 	font-size: 10px;
 	color: var(--textColor);
 	opacity: .7;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 /*
 .panel {

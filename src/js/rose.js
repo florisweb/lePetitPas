@@ -19,7 +19,7 @@ export default class Rose extends PlanetObject {
 	#creationTime = Date.now() + Math.random() * 1000;
 
 	constructor({}, _planet) {
-		let position = [random() * Math.PI * 2, (random() * 0.5 + 0.25) * Math.PI];
+		let position = [random() * Math.PI * 2, (random() * 0.2 + 0) * Math.PI];
 		super(position, _planet)
 
 
@@ -103,12 +103,67 @@ export default class Rose extends PlanetObject {
 
 	#createStemGeometry(_height, _thickness) {
 		const stemRadius = 0.1;
-		let geometry = new THREE.CylinderGeometry(stemRadius, stemRadius, this.#stemLength, 32, 16);
+		// let geometry = new THREE.CylinderGeometry(stemRadius, stemRadius, this.#stemLength, 32, 16);
+
+
+		const radialSegments = 16;
+		const heightSegments = 32;
+
+		const geometry = new THREE.BufferGeometry();
+		const uvs = [];
+		const vertices = [];
+		const indices = [];
+
+
+		const thicknessFunc = (yFrac) => (yFrac * 0.8 + 0.2) * stemRadius;
+		const offsetFunc = (yFrac) => [Math.cos(yFrac * 2 * Math.PI) * 0.15, Math.sin(yFrac * Math.PI) * 0.1]; // offset in xz plane
+
+
+		// Generate vertices
+		for (let y = 0; y <= heightSegments; y++) 
+		{
+			const curYFrac = y / heightSegments;
+			const radius = thicknessFunc(1 - curYFrac); // Invert mapping such that yFrac = 1 is at the top 
+			const offset = offsetFunc(1 - curYFrac);
+
+			for (let x = 0; x <= radialSegments; x++) 
+			{
+				const theta = x / radialSegments * 2 * Math.PI;
+
+				const posX = radius * Math.cos(theta) + offset[0];
+				const posY = curYFrac * _height;
+				const posZ = radius * Math.sin(theta) + offset[1];
+
+				vertices.push(posX, posY, posZ);
+				uvs.push(x / radialSegments, curYFrac);
+			}
+		}
+
+		for (let y = 0; y < heightSegments; y++) 
+		{
+			for (let x = 0; x < radialSegments; x++) 
+			{
+				const a = y * (radialSegments + 1) + x;
+				const b = a + radialSegments + 1;
+				indices.push(a, b, a + 1); 
+				indices.push(a + 1, b, b + 1);
+			}
+		}
+		
+		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+		geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+		geometry.computeVertexNormals();
+		return geometry;
+
+
+
+
 		return geometry;
 	}
 
 	#createStemMesh() {
-		let geometry = this.#createStemGeometry();
+		let geometry = this.#createStemGeometry(this.#stemLength);
 		let material = new THREE.MeshLambertMaterial({color: 0x50c040});
 
 		material.side = THREE.DoubleSide; // Fix cliping issues
