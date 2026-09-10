@@ -7,7 +7,8 @@
 	--screenMargin: 20px;
 	--spaceBackground: rgb(0, 0, 15);
 
-	--panelHeight: 300px;
+	--panelHeight: 330px;
+	--navBarHeight: 80px;
 }
 
 body {
@@ -160,7 +161,11 @@ canvas {
 
 
 
+
 @media screen and (max-width: 600px) {
+
+
+
 	canvas {
 		position: fixed;
 		top: 0;
@@ -176,18 +181,103 @@ canvas {
 		position: fixed;
 		bottom: 0;
 		z-index: 100;
-		background: rgba(20, 20, 20, .9);
+		background: rgba(30, 30, 30, .9);
 		backdrop-filter: blur(50px);
 		width: 100vw;
 		padding: 30px;
-		padding-top: 40px;
+		padding-top: 25px;
 		height: var(--panelHeight);
 		border-radius: 20px 20px 0 0;
+		padding-bottom: var(--navBarHeight);
+	}
+	.UIPanel .dateHolder {
+		font-size: 18px;
+		color: #ccc;
 	}
 
 	.UIPanel .habitItem {
 		margin-bottom: 20px;
+		--textColor: #ccc;
 	}
+	.UIPanel .habitListHolder {
+		margin-top: 25px;
+	}
+
+	.habitItem .title {
+		font-size: 16px;
+		color: var(--textColor);
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	.habitItem .subTitle {
+		color: var(--textColor);
+		opacity: .7;
+	}
+
+	.UIPanel .habitItem.addHabit {
+		margin-top: 10px;
+		grid-template-rows: 35px 0;
+		grid-template-columns: 35px auto;
+		opacity: .6;
+	}
+	.UIPanel .habitItem.addHabit:before {
+		position: absolute;
+		margin-top: -10px;
+		left: 50%;
+		content: '';
+		width: 80px;
+		height: 3px;
+		border-radius: 2px;
+
+		transform: translate(-50%, -50%);
+		background: rgba(255, 255, 255, 0.3);
+	}
+	.habitItem.addHabit .title {
+		line-height: 35px;
+	}
+	.habitItem.addHabit .statusRing {
+		border: 1.5px dashed #777;
+		line-height: 18px;
+		text-align: center;
+		color: #888;
+		font-size: 14px;
+	}
+
+
+	.navBar {
+		position: fixed;
+		bottom: 0;
+		z-index: 100;
+		backdrop-filter: blur(50px);
+
+		width: 100vw;
+		height: 80px;
+		padding: 10px 30px;
+		padding-bottom: 0;
+
+		display: flex;
+		flex-direction: row;
+		justify-content: space-around;
+	}
+
+	.navBar .navItem {
+		width: 25%;
+		max-width: 90px;
+		aspect-ratio: 1;
+		padding-bottom: 20px;
+	}
+
+	.navBar .navItem.active {
+		border-radius: 20px 20px 0 0;
+		background: rgb(40, 40, 40);
+	}
+
+
+
+
+
+
 
 	.panelHolder {
 		top: 100vh;
