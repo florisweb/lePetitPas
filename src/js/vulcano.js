@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Perlin, random } from './random.js';
 import Planet from './planet.js';
+import { generatePatchGeometry } from './geometryGenerator.js';
 
 
 export default class Vulcano {
@@ -87,58 +88,10 @@ export default class Vulcano {
 		return radius;
 	}
 
-	#generateGeometry({radius, height, segDensityMultiplier}, radialFunction) {
+	#generateGeometry({radius, segDensityMultiplier}, radialFunction) {
 		const patchSize = radius * 2;
 		const segDensity = Planet.segCount / (Math.PI * this.#planet.baseRadius) * segDensityMultiplier;
-
-		const segCount = Math.round(patchSize * segDensity);
-		const xArcLength = patchSize / this.#planet.baseRadius;
-		const yArcLength = patchSize / this.#planet.baseRadius;
-
-
-		const geometry = new THREE.BufferGeometry();
-		const uvs = [];
-		const vertices = [];
-		const indices = [];
-
-		// Generate vertices
-		for (let y = 0; y <= segCount; y++) 
-		{
-			const rPhi = (y / segCount - 0.5) * yArcLength; // 0 to π (top to bottom)
-			const phi = this.#position[1] + rPhi;
-			for (let x = 0; x <= segCount; x++) 
-			{
-				const rTheta = (x / segCount - 0.5) * xArcLength; // 0 to 2π (around) | temp + 1
-				const theta = this.#position[0] + rTheta;
-				// Get radius from the custom function
-				const radius = radialFunction(theta, phi);
-
-				// Convert spherical coordinates to Cartesian
-				const posX = radius * Math.sin(phi) * Math.cos(theta);
-				const posY = radius * Math.cos(phi);
-				const posZ = radius * Math.sin(phi) * Math.sin(theta);
-
-				vertices.push(posX, posY, posZ);
-				uvs.push(x / segCount, y / segCount);
-			}
-		}
-
-		for (let y = 0; y < segCount; y++) 
-		{
-			for (let x = 0; x < segCount; x++) 
-			{
-				const a = y * (segCount + 1) + x;
-				const b = a + segCount + 1;
-				indices.push(a, b, a + 1); 
-				indices.push(a + 1, b, b + 1);
-			}
-		}
-		
-		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
-		geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
-		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
-		geometry.computeVertexNormals();
-		return geometry;
+		return generatePatchGeometry((theta, phi) => radialFunction(theta, phi), [patchSize, patchSize], this.#position, segDensity, this.#planet.baseRadius);
 	}
 
 	#createTexture() {
@@ -171,7 +124,7 @@ export default class Vulcano {
 
 	#generateMesh({radius, height}) {
 		const vulcTexture = this.#createTexture();
-		let vulcGeo = this.#generateGeometry({radius, height, segDensityMultiplier: 4}, (theta, phi) => this.#vulcRadialFunction(theta, phi));
+		let vulcGeo = this.#generateGeometry({radius, segDensityMultiplier: 4}, (theta, phi) => this.#vulcRadialFunction(theta, phi));
 		// let vulcMaterial = new THREE.MeshLambertMaterial({
 		// 	emissive: 0xff5000,
 		// 	color: 0xffffff
@@ -188,7 +141,7 @@ export default class Vulcano {
 		this.#vulcMesh.receiveShadow = true;
 
 
-		let lavaGeo = this.#generateGeometry({radius: radius * 0.3, height, segDensityMultiplier: 10}, (theta, phi) => this.#lavaRadialFunction(theta, phi));
+		let lavaGeo = this.#generateGeometry({radius: radius * 0.3, segDensityMultiplier: 10}, (theta, phi) => this.#lavaRadialFunction(theta, phi));
 		let lavaMaterial = new THREE.MeshLambertMaterial({
 			emissive: 0xff5000, 
 			emissiveIntensity: 1.9,
