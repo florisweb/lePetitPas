@@ -39,7 +39,7 @@ export default class Camera {
 		this.camera.updateProjectionMatrix();
 	}
 
-	zoomToObject(_obj) {
+	panToObject(_obj) {
 		let dPhi = camera.controls.getPolarAngle() - _obj.absoluteAnglePos[1];
 		camera.controls.rotateUp(dPhi);
 
@@ -49,6 +49,27 @@ export default class Camera {
 		if (dTheta > Math.PI) dTheta -= Math.PI * 2;
 
 		camera.controls.rotateLeft(dTheta);
+		this.zoomTo(55);
+	}
+
+	zoomTo(_distance) {
+		let initialDist = this.camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
+		const dDist = _distance - initialDist;
+		let startTime = new Date();
+		let panDuration = 200 + 5 * Math.abs(dDist);
+		
+		let update = () => {
+			let curTimePerc = (new Date() - startTime) / panDuration;
+			let curProgressPerc = 1 / (1 + Math.exp(-(curTimePerc - 0.5) * 10));
+
+			this.camera.position.setLength(initialDist * (1 - curProgressPerc) + _distance * curProgressPerc);
+			if (curTimePerc > 1) {
+				this.camera.position.setLength(_distance);
+				return;
+			}
+			requestAnimationFrame(update);
+		}
+		requestAnimationFrame(update);
 	}
 }
 

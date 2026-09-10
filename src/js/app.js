@@ -31,9 +31,8 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;  // Better filtering
 
 window.renderer = renderer;
-// renderer.setClearColor('#e5e5e5');
+renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.setClearColor('#000000');
-renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
 window.addEventListener('resize', () => resize());
@@ -41,9 +40,10 @@ window.addEventListener('resize', () => resize());
 
 function resize() {
 	console.log('resize');
-	renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight);
+	renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight, false); // FIXME
 	camera.onResize();
 }
+
 window.resize = resize;
 
 
@@ -329,6 +329,11 @@ const bloomPass = new UnrealBloomPass(
 composer.addPass(bloomPass);
 
 
+function setup() {
+	resize();
+}
+
+
 
 
 
@@ -338,7 +343,7 @@ let time = 0;
 const trackedElements = document.querySelectorAll('.panel.tracked');
 for (let i = 0; i < trackedElements.length; i++)
 {
-	trackedElements[i].addEventListener('click', () => camera.zoomToObject(planet.objects[i]));
+	trackedElements[i].addEventListener('click', () => camera.panToObject(planet.objects[i]));
 }
 function update() {
 	planet.update();
@@ -395,12 +400,11 @@ function update() {
 
 
 
-
-
-
-
 	requestAnimationFrame(update);
 }
+
+
+setup();
 update();
 
 

@@ -1,0 +1,35 @@
+{
+  "name": "Le Petit Pas",
+  "short_name": "Petit Pas",
+  "description": "Little Prince Habit Tracker",
+
+  "start_url": "./index.html?isPWA=true",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#9f59f7",
+
+  "icons": [
+    {
+      "src": "./images/appLogo.png",
+      "sizes": "300x300",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./images/screenshots/home_desktop.png",
+      "sizes": "2876x1556",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Landing page."
+    },
+    {
+      "src": "./images/screenshots/home_phone.png",
+      "sizes": "606x1302",
+      "type": "image/png",
+      "platform": "ios",
+      "label": "Landing page."
+    }
+  ]
+}
