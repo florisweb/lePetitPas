@@ -15,6 +15,11 @@ async function main() {
   return gulp.src(["src/index.html"])
     .pipe(gulp.dest("dist"));
 }
+async function images() {
+  return gulp.src(['src/images/*'])
+    .pipe(gulp.dest("dist/images"));
+}
+
 
 async function javascript() {
   return webpack_stream(WPConfig, webpack)
@@ -27,7 +32,7 @@ function css() {
     .pipe(gulp.dest("dist"));
 }
 
-let compile = gulp.series(main, javascript, css);
+let compile = gulp.series(main, javascript, css, images);
 export default gulp.series(compile, watch);
 
 

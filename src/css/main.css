@@ -147,17 +147,33 @@ canvas {
 #header {
 	position: absolute;
 	z-index: 1000;
-	height: 70px;
+	height: 90px;
 	padding: 20px;
 	width: 100vw;
-
-	color: #eee;
-	font-size: 20px;
-	line-height: 30px;
 	pointer-events: none;
 }
 
+#header .logo {
+	position: relative;
+	display: inline-flex;
+	height: 100%;
+}
+#header .logo img {
+	height: 100%;
+	width: auto;
+}
 
+#header .logo .appName {
+	position: relative;
+	top: 50%;
+	margin-left: 5px;
+	margin-top: -1px;
+	line-height: 0;
+	height: 0px;
+
+	color: #ccc;
+	font-size: 18px;
+}
 
 
 
@@ -173,8 +189,10 @@ canvas {
 		height: calc(100vh - var(--panelHeight) + 20px);
 	}
 
-	#header {
-		text-align: center;
+	
+	#header .logo {
+		left: 50%;
+		transform: translateX(-50%);
 	}
 
 	.UIPanel {
