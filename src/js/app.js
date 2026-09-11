@@ -8,6 +8,8 @@ import Camera from './camera.js';
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
 
 
+
+
 const App = new class {
 	constructor() {
 		window.App = this;
@@ -405,6 +407,19 @@ function update() {
 
 	requestAnimationFrame(update);
 }
+
+
+
+
+
+
+
+import HabitElement from './UI/customElements/habit.js';
+import HabitCreateButtonElement from './UI/customElements/habitCreateButton.js';
+let habitListHolder = document.querySelector('.habitListHolder');
+habitListHolder.append(new HabitElement({title: 'Piano spelen?'}));
+habitListHolder.append(new HabitCreateButtonElement());
+
 
 
 setup();
