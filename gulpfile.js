@@ -19,6 +19,10 @@ async function images() {
   return gulp.src(['src/images/*'])
     .pipe(gulp.dest("dist/images"));
 }
+async function manifest() {
+  return gulp.src(['src/manifest.json'])
+    .pipe(gulp.dest("dist"));
+}
 
 
 async function javascript() {
@@ -32,7 +36,7 @@ function css() {
     .pipe(gulp.dest("dist"));
 }
 
-let compile = gulp.series(main, javascript, css, images);
+let compile = gulp.series(main, javascript, css, images, manifest);
 export default gulp.series(compile, watch);
 
 
