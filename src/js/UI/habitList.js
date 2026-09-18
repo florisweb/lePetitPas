@@ -1,4 +1,4 @@
-import HabitManager from '../habitManager.js';
+import HabitManager from '../data/habitManager.js';
 import HabitElement from './customElements/habit.js';
 import HabitCreateButtonElement from './customElements/HabitCreateButton.js';
 // Create a class for the element
@@ -11,7 +11,6 @@ export default class HabitList extends HTMLElement {
     console.log('hey');
     // this.attachShadow({ mode: 'open' });
     // this.shadowRoot.innerHTML = ``;
-    
   }
 
 
@@ -21,7 +20,8 @@ export default class HabitList extends HTMLElement {
     this.#updateContents();
   }
 
-  #updateContents() {
+  async #updateContents() {
+    await HabitManager.isSetUp;
 
     let habits = HabitManager.getHabitsOnDate(new Date());
     for (let habit of habits)
