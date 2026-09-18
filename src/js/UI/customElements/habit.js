@@ -11,8 +11,6 @@ export default class HabitElement extends HTMLElement {
 
 
   connectedCallback() {
-    console.log("Custom element added to page.");
-
     this.innerHTML = `
       <div class="statusHolder">
         <div class="statusRing"></div>
@@ -22,12 +20,18 @@ export default class HabitElement extends HTMLElement {
     `;
     this.#fillData();
     this.querySelector('.statusHolder').addEventListener('click', () => {
-      this.setAttribute('finished', this.getAttribute('finished') === 'true' ? false : true);
-    })
+      let oldState = this.getAttribute('finished') === 'true';
+      this.setAttribute('finished', !oldState);
+      this.#habit.curState = !oldState;
+
+      this.#fillData();
+    });
 
   }
   #fillData() {
     this.querySelector('.title').innerHTML = this.#habit.name; // FIXME
+    this.querySelector('.subTitle').innerHTML = this.#habit.curStreakLength + ' day streak'; // FIXME
+    this.setAttribute('finished', this.#habit.curState);
   }
 
   disconnectedCallback() {

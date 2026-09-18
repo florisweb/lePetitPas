@@ -13,6 +13,18 @@ const HabitManager = new class extends DataManager {
 		return this._data.filter((h) => h.todoOnDate(_date));
 	}
 
+
+	update(_habit) {
+		let index = this._data.findIndex((h) => h.id === _habit.id);
+		if (index === -1)
+		{
+			this._data.push(_habit);
+		} else {
+			this._data[index] = _habit;
+		}
+		this.writeData();
+	}
+
 }
 
 
