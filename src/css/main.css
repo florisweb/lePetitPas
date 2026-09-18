@@ -77,10 +77,6 @@ canvas {
 }
 
 
-.habitListHolder {
-	display: flex;
-	flex-direction: column;
-}
 
 .habitItem {
 	position: relative;
@@ -223,7 +219,7 @@ canvas {
 		margin-bottom: 20px;
 		--textColor: #ccc;
 	}
-	.UIPanel .habitListHolder {
+	.UIPanel habit-list {
 		margin-top: 25px;
 	}
 

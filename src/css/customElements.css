@@ -1,0 +1,128 @@
+/* HABIT ELEMENT  */
+
+habit-element,
+habit-create-button {
+	position: relative;
+	height: 35px;
+	display: grid;
+	grid-template-areas: 
+		'status title'
+		'status subTitle';
+	--textColor: #aaa;
+	grid-template-rows: 21px 14px;
+	grid-template-columns: 35px auto;
+}
+habit-create-button {
+	grid-template-areas: 'status title';
+	grid-template-rows: 35px;
+}
+
+habit-element .statusHolder,
+habit-create-button .statusHolder {
+	grid-area: status;
+	cursor: pointer;
+}
+habit-element .statusRing,
+habit-create-button .statusRing {
+	position: relative;
+	top: 50%;
+	left: 0px;
+	transform: translateY(-50%);
+	border: 1.5px solid #777;
+	height: 22px;
+	aspect-ratio: 1;
+	border-radius: 100%;
+}
+
+habit-element[finished="true"] .statusRing {
+	background: #555;
+}
+
+habit-element .title,
+habit-create-button .title, {
+	grid-area: title;
+	font-size: 14px;
+	color: var(--textColor);
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+habit-element .subTitle {
+	grid-area: subTitle;
+	font-size: 10px;
+	color: var(--textColor);
+	opacity: .7;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+habit-create-button {
+	margin-top: 10px;
+	grid-template-rows: 35px 0;
+	grid-template-columns: 35px auto;
+	opacity: .6;
+}
+habit-create-button:before {
+	position: absolute;
+	margin-top: -10px;
+	left: 50%;
+	content: '';
+	width: 80px;
+	height: 3px;
+	border-radius: 2px;
+
+	transform: translate(-50%, -50%);
+	background: rgba(255, 255, 255, 0.3);
+}
+habit-create-button .title {
+	line-height: 35px;
+}
+habit-create-button .statusRing {
+	border: 1.5px dashed #777;
+	line-height: 18px;
+	text-align: center;
+	color: #888;
+	font-size: 14px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+habit-list {
+	display: flex;
+	flex-direction: column;
+}
+
+
+
+
+
+
+
+
+
+@media screen and (max-width: 600px) {
+	habit-element .title,
+	habit-create-button .title {
+		font-size: 16px;
+		color: var(--textColor);
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	habit-element .subTitle {
+		color: var(--textColor);
+		opacity: .7;
+	}
+}
+
+

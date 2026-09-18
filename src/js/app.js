@@ -7,7 +7,7 @@ import { random } from './random.js';
 import Camera from './camera.js';
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
 
-
+import HabitList from './UI/habitList.js';
 
 
 const App = new class {
@@ -410,15 +410,6 @@ function update() {
 
 
 
-
-
-
-
-import HabitElement from './UI/customElements/habit.js';
-import HabitCreateButtonElement from './UI/customElements/habitCreateButton.js';
-let habitListHolder = document.querySelector('.habitListHolder');
-habitListHolder.append(new HabitElement({title: 'Piano spelen?'}));
-habitListHolder.append(new HabitCreateButtonElement());
 
 
 

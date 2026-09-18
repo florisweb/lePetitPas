@@ -1,12 +1,12 @@
 // Create a class for the element
 export default class HabitElement extends HTMLElement {
   static observedAttributes = ["finished"];
-  #title;
-  constructor({title}) {
+  #habit;
+  constructor(_habit) {
     super();
     // this.attachShadow({ mode: 'open' });
     // this.shadowRoot.innerHTML = ``;
-    this.#title = title;
+    this.#habit = _habit;
   }
 
 
@@ -27,7 +27,7 @@ export default class HabitElement extends HTMLElement {
 
   }
   #fillData() {
-    this.querySelector('.title').innerHTML = this.#title;
+    this.querySelector('.title').innerHTML = this.#habit.name; // FIXME
   }
 
   disconnectedCallback() {
