@@ -22,7 +22,7 @@ export default class HabitElement extends HTMLElement {
     this.querySelector('.statusHolder').addEventListener('click', () => {
       let oldState = this.getAttribute('finished') === 'true';
       this.setAttribute('finished', !oldState);
-      this.#habit.curState = !oldState;
+      this.#habit.setStateWithAnimation(!oldState);
 
       this.#fillData();
     });

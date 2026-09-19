@@ -1,5 +1,6 @@
 import DataObject from './dataObject.js';
 import HabitManager from './habitManager.js';
+
 export default class Habit extends DataObject {
 	id = Math.round(Math.random() * 100000000);
 	name = '' + Math.random();
@@ -38,6 +39,11 @@ export default class Habit extends DataObject {
 			});
 		}
 		HabitManager.update(this);
+	}
+
+	setStateWithAnimation(_newState) {
+		this.curState = _newState;
+		camera.panToObject(this.#planetObject); // TODO proper link
 	}
 
 	get curStreakLength() {
