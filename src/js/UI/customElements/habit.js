@@ -27,6 +27,11 @@ export default class HabitElement extends HTMLElement {
       this.#fillData();
     });
 
+    this.addEventListener('click', (_e) => {
+      console.log(_e);
+      if (_e.target.className.includes('status')) return;
+      this.#habit.panToPlanetObject();
+    });
   }
   #fillData() {
     this.querySelector('.title').innerHTML = this.#habit.name; // FIXME
