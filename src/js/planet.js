@@ -44,13 +44,10 @@ export default class Planet {
 
 	constructor() {
 		this.#generateMesh();
-		for (let i = 0; i < 1; i++) this.objects.push(new Vulcano({radius: 4, height: 5}, this));
-		for (let i = 0; i < 1; i++) this.objects.push(new Rose({radius: 4, height: 5}, this));
 
 		this.#group = new THREE.Group();
 		this.#group.add(this.#mesh);
 		this.#group.add(this.#coreMesh);
-		for (let obj of this.objects) this.#group.add(obj.mesh);
 	}
 
 
@@ -59,6 +56,14 @@ export default class Planet {
 		// this.#group.rotateY(-0.0003);
 		this.#animateCreation();
 		for (let vulc of this.objects) vulc.update();
+	}
+
+	addHabitObject(_habit) {
+		let objectConstructor = _habit.type === "vulcano" ? Vulcano : Rose;
+		let curObject = new objectConstructor(_habit.objectInfo, this);
+		_habit.setPlanetObject(curObject);
+		this.objects.push(curObject);
+		this.#group.add(curObject.mesh);
 	}
 
 	addToScene(scene) {

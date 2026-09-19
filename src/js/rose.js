@@ -27,10 +27,8 @@ export default class Rose extends PlanetObject {
 	#flowerRad = 1.2;
 	#creationTime = Date.now() + Math.random() * 1000;
 
-	constructor({}, _planet) {
-		let position = [random() * Math.PI * 2, (random() * 0.3 + 0.1) * Math.PI];
+	constructor({position}, _planet) {
 		super(position, _planet)
-
 
 		this.#generateMesh();
 	}

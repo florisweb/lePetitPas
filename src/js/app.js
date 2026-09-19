@@ -8,17 +8,23 @@ import Camera from './camera.js';
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
 
 import HabitList from './UI/habitList.js';
+import HabitManager from './data/habitManager.js';
 
 
 const App = new class {
 	constructor() {
 		window.App = this;
-
-		this.setup().then(() => document.body.classList.remove('loading'));
 	}
 
 	async setup() {
-		
+		resize();
+
+		await HabitManager.isSetUp;
+
+		for (let habit of HabitManager.data) planet.addHabitObject(habit);
+
+		update();
+		document.body.classList.remove('loading');
 	}
 }
 
@@ -334,9 +340,6 @@ const bloomPass = new UnrealBloomPass(
 composer.addPass(bloomPass);
 
 
-function setup() {
-	resize();
-}
 
 
 
@@ -413,8 +416,8 @@ function update() {
 
 
 
-setup();
-update();
+App.setup();
+
 
 
 

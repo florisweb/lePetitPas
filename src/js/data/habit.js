@@ -4,6 +4,10 @@ export default class Habit extends DataObject {
 	id = Math.round(Math.random() * 100000000);
 	name = '' + Math.random();
 	type = 'vulcano';  // vulcano, rose...
+	objectInfo = { // Specifies the information for rendering the planet object
+		position: [0, 0],
+	}
+
 	valueType = 'check'; // check: 0, 1. Count: 0 ... n, 
 
 	#stateHistory = []; // Format: {date, value}
@@ -14,6 +18,8 @@ export default class Habit extends DataObject {
 		this.#stateHistory = stateHistory;
 	}
 	createDate = new Date();
+
+	#planetObject;
 
 
 	get curState() {
@@ -79,7 +85,7 @@ export default class Habit extends DataObject {
 
 
 
-	constructor({id, name, type, valueType, createDate, stateHistory} = {}) {
+	constructor({id, name, type, valueType, createDate, stateHistory, objectInfo} = {}) {
 		super();
 		this.id = id ?? this.id;
 		this.name = name ?? this.name;
@@ -87,6 +93,23 @@ export default class Habit extends DataObject {
 		this.valueType = valueType ?? this.valueType;
 		this.createDate = new Date(createDate) ?? this.createDate;
 		this.#stateHistory = stateHistory || [];
+
+		if (objectInfo)
+		{
+			this.objectInfo = objectInfo;
+		} else {
+			// this.objectInfo.position = [random() * Math.PI * 2, (random() * 0.3 + 0.1) * Math.PI];
+			// let position = [random() * Math.PI * 2, (random() * 0.5 + 0.25) * Math.PI];
+			this.objectInfo.position = [Math.random() * Math.PI * 2, (Math.random() * 0.3 + 0.1) * Math.PI];
+
+			// --- Vulcano ---
+			this.objectInfo.radius = 4;
+			this.objectInfo.height = 5;
+		}
+	}
+
+	setPlanetObject(_planetObject) {
+		this.#planetObject = _planetObject;
 	}
 
 	todoOnDate(_date) {
@@ -100,7 +123,8 @@ export default class Habit extends DataObject {
 			type: this.type,
 			valueType: this.valueType,
 			createDate: this.createDate.getTime(),
-			stateHistory: this.#stateHistory
+			stateHistory: this.#stateHistory,
+			objectInfo: this.objectInfo
 		}
 	}
 

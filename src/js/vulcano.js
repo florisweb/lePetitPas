@@ -14,8 +14,7 @@ export default class Vulcano extends PlanetObject {
 	#radius;
 	#creationTime = Date.now() + Math.random() * 1000;
 
-	constructor({radius, height}, _planet) {
-		let position = [random() * Math.PI * 2, (random() * 0.5 + 0.25) * Math.PI];
+	constructor({position, radius, height}, _planet) {
 		super(position, _planet)
 		this.#height = height;
 		this.#radius = radius;
