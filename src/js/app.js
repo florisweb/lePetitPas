@@ -10,12 +10,16 @@ import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRe
 import HabitList from './UI/habitList.js';
 import HabitManager from './data/habitManager.js';
 
+// --- Load Elements so they are registered to the DOM ---
 import Popup from './UI/customElements/popup.js';
+import HabitListPanel from './UI/habitListPanel.js';
 
 
 const App = new class {
 	constructor() {
 		window.App = this;
+		this.habitListPanel = new HabitListPanel();
+
 	}
 
 	async setup() {
@@ -24,6 +28,9 @@ const App = new class {
 		await HabitManager.isSetUp;
 
 		for (let habit of HabitManager.data) planet.addHabitObject(habit);
+	
+		document.body.append(this.habitListPanel);
+	
 
 		update();
 		document.body.classList.remove('loading');
@@ -49,8 +56,8 @@ window.addEventListener('resize', () => resize());
 
 
 function resize() {
-	let panel = document.querySelector('.UIPanel');
-	document.documentElement.style.setProperty('--panelHeight', panel.offsetHeight + 'px');
+	// let panel = document.querySelector('.UIPanel');
+	// document.documentElement.style.setProperty('--panelHeight', panel.offsetHeight + 'px');
 
 	console.log('resize');
 	renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight, false); // FIXME

@@ -1,35 +1,46 @@
-import HabitManager from '../data/habitManager.js';
+
 import HabitElement from './customElements/habit.js';
 import HabitCreateButtonElement from './customElements/HabitCreateButton.js';
 // Create a class for the element
 export default class HabitList extends HTMLElement {
   static observedAttributes = [];
   #contentHolder;
-  
-  constructor() {
+  #habits = [];
+  #date = new Date();
+  set date(_date) {
+    this.#date = _date;
+    this.#update();
+  }
+
+  set habits(_habits) {
+    this.#habits = _habits || [];
+    this.#update();
+  }
+
+  constructor(_habits) {
     super();
-    console.log('hey');
     // this.attachShadow({ mode: 'open' });
     // this.shadowRoot.innerHTML = ``;
+    this.habits = _habits;
+  }
+
+  #update() {
+    this.innerHTML = '';
+    for (let habit of this.#habits)
+    {
+      this.append(new HabitElement(habit, this.#date));
+    }
+    this.append(new HabitCreateButtonElement());
+
   }
 
 
   connectedCallback() {
     console.log("Custom element added to page.");
 
-    this.#updateContents();
   }
 
-  async #updateContents() {
-    await HabitManager.isSetUp;
-
-    let habits = HabitManager.getHabitsOnDate(new Date());
-    for (let habit of habits)
-    {
-      this.append(new HabitElement(habit));
-    }
-    this.append(new HabitCreateButtonElement());
-  }
+  
 
  
   disconnectedCallback() {

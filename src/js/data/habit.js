@@ -12,12 +12,6 @@ export default class Habit extends DataObject {
 	valueType = 'check'; // check: 0, 1. Count: 0 ... n, 
 
 	#stateHistory = []; // Format: {date, value}
-	get stateHistory() {
-		return this.#stateHistory;
-	}
-	set stateHistory(stateHistory) {
-		this.#stateHistory = stateHistory;
-	}
 	createDate = new Date();
 
 	#planetObject;
@@ -28,29 +22,27 @@ export default class Habit extends DataObject {
 	}
 
 	set curState(_newState) {
-		let foundHistItem = this.#foundLatestStateItemOnDate(new Date());
-		if (foundHistItem) // Update today's stateitem if it exists
-		{
-			foundHistItem.value = _newState;
-		} else {
-			this.#stateHistory.push({
-				date: new Date().getTime(),
-				value: _newState
-			});
-		}
-		HabitManager.update(this);
+		return this.setStateOnDate(_newState, new Date())
 	}
 
-	setStateWithAnimation(_newState) {
-		this.curState = _newState;
+	setStateWithAnimation(_newState, _date = new Date()) {
+		this.setStateOnDate(_newState, _date)
 		this.panToPlanetObject();	
 	}
 	panToPlanetObject() {
 		camera.panToObject(this.#planetObject); // TODO proper link
 	}
+	resetStateHistory() {
+		this.#stateHistory = [];
+		HabitManager.update(this);
+	}
 
 	get curStreakLength() {
-		let curPointerDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
+		return this.getStreakLengthOnDate(new Date());
+	}
+
+	getStreakLengthOnDate(_date) {
+		let curPointerDate = new Date(_date.getTime() - 24 * 60 * 60 * 1000);
 		let streakLength = 0;
 		while (this.#foundLatestStateItemOnDate(curPointerDate)?.value)
 		{
@@ -58,9 +50,8 @@ export default class Habit extends DataObject {
 			curPointerDate = new Date(curPointerDate.getTime() - 24 * 60 * 60 * 1000);
 		}
 
-		if (this.curState) streakLength++;
+		if (this.getStateOnDate(_date)) streakLength++;
 		return streakLength;
-
 	}
 
 	#foundLatestStateItemOnDate(_date) {
@@ -74,7 +65,7 @@ export default class Habit extends DataObject {
 		for (let hItem of hist)
 		{
 			if (hItem.date < _date.getTime()) continue;
-			if (hItem.date > _date.getTime() + 24 * 60 * 60 * 1000) continue;
+			if (hItem.date >= _date.getTime() + 24 * 60 * 60 * 1000) continue;
 			return hItem;
 		}
 	}
@@ -90,6 +81,19 @@ export default class Habit extends DataObject {
 		} else {
 			return foundHistItem.value;
 		}
+	}
+	setStateOnDate(_newState, _date = new Date()) {
+		let foundHistItem = this.#foundLatestStateItemOnDate(_date);
+		if (foundHistItem) // Update today's stateitem if it exists
+		{
+			foundHistItem.value = _newState;
+		} else {
+			this.#stateHistory.push({
+				date: _date.getTime(),
+				value: _newState
+			});
+		}
+		HabitManager.update(this);
 	}
 
 

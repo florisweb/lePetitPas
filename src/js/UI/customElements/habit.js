@@ -2,10 +2,12 @@
 export default class HabitElement extends HTMLElement {
   static observedAttributes = ["finished"];
   #habit;
-  constructor(_habit) {
+  #date;
+  constructor(_habit, _date) {
     super();
     // this.attachShadow({ mode: 'open' });
     // this.shadowRoot.innerHTML = ``;
+    this.#date = _date || new Date();
     this.#habit = _habit;
   }
 
@@ -22,7 +24,7 @@ export default class HabitElement extends HTMLElement {
     this.querySelector('.statusHolder').addEventListener('click', () => {
       let oldState = this.getAttribute('finished') === 'true';
       this.setAttribute('finished', !oldState);
-      this.#habit.setStateWithAnimation(!oldState);
+      this.#habit.setStateWithAnimation(!oldState, this.#date);
 
       this.#fillData();
     });
@@ -35,8 +37,8 @@ export default class HabitElement extends HTMLElement {
   }
   #fillData() {
     this.querySelector('.title').innerHTML = this.#habit.name; // FIXME
-    this.querySelector('.subTitle').innerHTML = this.#habit.curStreakLength + ' day streak'; // FIXME
-    this.setAttribute('finished', this.#habit.curState);
+    this.querySelector('.subTitle').innerHTML = this.#habit.getStreakLengthOnDate(this.#date) + ' day streak'; // FIXME
+    this.setAttribute('finished', this.#habit.getStateOnDate(this.#date));
   }
 
   disconnectedCallback() {
