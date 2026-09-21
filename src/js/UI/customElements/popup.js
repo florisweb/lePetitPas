@@ -28,7 +28,7 @@ export default class Popup extends HTMLElement {
 
     this.addEventListener('click', (_e) => {
       if (!_e.target.classList.contains('popupOverlay')) return;
-
+      this.openState = false;
     });
   }
   
