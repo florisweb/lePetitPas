@@ -1,7 +1,10 @@
 import DataObject from './dataObject.js';
 import HabitManager from './habitManager.js';
 
+
 export default class Habit extends DataObject {
+	static HABIT_SKIPPED_VALUE = "HABIT_SKIPPED";
+
 	id = Math.round(Math.random() * 100000000);
 	name = '' + Math.random();
 	type = 'vulcano';  // vulcano, rose...
@@ -44,13 +47,16 @@ export default class Habit extends DataObject {
 	getStreakLengthOnDate(_date) {
 		let curPointerDate = new Date(_date.getTime() - 24 * 60 * 60 * 1000);
 		let streakLength = 0;
-		while (this.#foundLatestStateItemOnDate(curPointerDate)?.value)
+		let curStateItem = this.#foundLatestStateItemOnDate(curPointerDate);
+		while (curStateItem?.value)
 		{
-			streakLength++;
+			if (curStateItem.value !== Habit.HABIT_SKIPPED_VALUE) streakLength++;
 			curPointerDate = new Date(curPointerDate.getTime() - 24 * 60 * 60 * 1000);
+			curStateItem = this.#foundLatestStateItemOnDate(curPointerDate);
 		}
 
-		if (this.getStateOnDate(_date)) streakLength++;
+		let curState = this.getStateOnDate(_date);
+		if (curState && curState !== Habit.HABIT_SKIPPED_VALUE) streakLength++;
 		return streakLength;
 	}
 
