@@ -18,12 +18,18 @@ habit-list-panel {
 
 	overflow: auto;
 	scroll-snap-type: x mandatory;
+	scrollbar-width: none;  /* Firefox */
 }
+habit-list-panel::-webkit-scrollbar {
+	display: none;
+}
+
 
 habit-list-panel .tabHolder {
 	position: relative;
 	display: flex;
 	width: 300%;
+	margin-bottom: 30px;
 }
 habit-list-panel .dayTab {
 	padding: 0 30px;
@@ -35,13 +41,14 @@ habit-list-panel .dayTab {
 habit-list-panel .dateHolder {
 	font-size: 18px;
 	color: #ccc;
+	margin-bottom: 5px;
 }
 
-habit-list-panel habit-item {
-	margin-bottom: 20px;
+habit-list-panel habit-element {
+	margin-bottom: 5px;
 	--textColor: #ccc;
 }
-habit-list-panel habit-list {
-	margin-top: 25px;
+habit-list-panel habit-element {
+	margin-top: 10px;
 }
 

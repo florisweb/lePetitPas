@@ -49,7 +49,7 @@ export default class Camera {
 		if (dTheta > Math.PI) dTheta -= Math.PI * 2;
 
 		camera.controls.rotateLeft(dTheta);
-		this.zoomTo(55);
+		this.zoomTo(70); // 55
 	}
 
 	zoomTo(_distance) {

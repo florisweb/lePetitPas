@@ -66,7 +66,7 @@ export default class HabitListPanel extends HTMLElement {
 
   #onScroll() {
     let perc = this.scrollLeft / this.scrollWidth;
-    const margin = 1e-2;
+    const margin = 0.001;
     if (perc < margin)
     {
       this.scrollLeft = 1 / 3 * this.scrollWidth;
