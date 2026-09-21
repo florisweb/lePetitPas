@@ -10,15 +10,28 @@ habit-list-panel {
 	background: linear-gradient(180deg,rgba(17,17,19,.95) 10%,rgba(17,17,19,.75));
 	backdrop-filter: blur(20px);
 
-	/*border: 1px solid #223;*/
-
 	width: 100vw;
-	padding: 30px;
+	padding: 30px 0;
 	padding-top: 25px;
-	/*height: var(--panelHeight);*/
 	border-radius: 20px 20px 0 0;
 	padding-bottom: var(--navBarHeight);
+
+	overflow: auto;
+	scroll-snap-type: x mandatory;
 }
+
+habit-list-panel .tabHolder {
+	position: relative;
+	display: flex;
+	width: 300%;
+}
+habit-list-panel .dayTab {
+	padding: 0 30px;
+	scroll-snap-align: center;
+	width: 100vw;
+}
+
+
 habit-list-panel .dateHolder {
 	font-size: 18px;
 	color: #ccc;

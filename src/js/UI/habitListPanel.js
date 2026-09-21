@@ -4,9 +4,14 @@ import HabitList from './habitList.js';
 // Create a class for the element
 export default class HabitListPanel extends HTMLElement {
   static observedAttributes = [];
-  #habitList;
+  #prevHabitList;
+  #curHabitList;
+  #nextHabitList;
+  #habitLists = [];
+
   #date = new DatePlus();
   set date(_date) {
+    console.log('set date', _date);
     this.#date = new DatePlus(_date);
     this.#update();
   }
@@ -16,23 +21,61 @@ export default class HabitListPanel extends HTMLElement {
   
   constructor() {
     super();
-    this.#habitList = new HabitList([]);
+    this.#prevHabitList = new HabitList([]);
+    this.#curHabitList = new HabitList([]);
+    this.#nextHabitList = new HabitList([]);
+    this.#habitLists = [this.#prevHabitList, this.#curHabitList, this.#nextHabitList];
   }
 
 
   connectedCallback() {
+
     this.innerHTML = `
-      <div class='dateHolder'>test</div>
+      <div class='tabHolder'>
+        <div class='dayTab prev'>
+          <div class='dateHolder'></div>
+        </div>
+        <div class='dayTab cur'>
+          <div class='dateHolder'></div>
+        </div>
+        <div class='dayTab next'>
+          <div class='dateHolder'></div>
+        </div>
+      </div>
     `;
-    this.append(this.#habitList);
+    for (let i = 0; i < this.#habitLists.length; i++)
+    {
+      this.querySelectorAll('.dayTab')[i].append(this.#habitLists[i]);
+    }
+    
     this.#update();
+    this.addEventListener('scroll', () => this.#onScroll());
+    this.scrollLeft = 1 / 3 * this.scrollWidth;
   }
 
   async #update() {
     await HabitManager.isSetUp;
-    this.#habitList.date = this.#date;
-    this.#habitList.habits = HabitManager.getHabitsOnDate(this.#date);
-    this.querySelector('.dateHolder').innerHTML = this.#date.getDayName() + ' ' + this.#date.getDate() + ' ' + this.#date.getMonthName();
+    for (let i = 0; i < this.#habitLists.length; i++)
+    {
+      let curDate = new DatePlus(this.#date.getTime() + (i - 1) * 24 * 60 * 60 * 1000);
+      this.#habitLists[i].date = curDate;
+      this.#habitLists[i].habits = HabitManager.getHabitsOnDate(curDate);
+      this.querySelectorAll('.dayTab .dateHolder')[i].innerHTML = curDate.getDayName() + ' ' + curDate.getDate() + ' ' + curDate.getMonthName();
+    }
+  }
+
+  #onScroll() {
+    let perc = this.scrollLeft / this.scrollWidth;
+    const margin = 1e-2;
+    if (perc < margin)
+    {
+      this.scrollLeft = 1 / 3 * this.scrollWidth;
+      this.date = new DatePlus(this.#date.getTime() - 24 * 60 * 60 * 1000);
+    } else if (perc > 2 / 3 - margin)
+    {
+      this.scrollLeft = 1 / 3 * this.scrollWidth;
+      this.date = new DatePlus(this.#date.getTime() + 24 * 60 * 60 * 1000);
+    }
   }
 
  

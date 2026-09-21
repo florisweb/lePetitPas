@@ -23,17 +23,23 @@ const App = new class {
 	}
 
 	async setup() {
-		resize();
-
 		await HabitManager.isSetUp;
 
-		for (let habit of HabitManager.data) planet.addHabitObject(habit);
-	
+		for (let habit of HabitManager.data) planet.addHabitObject(habit);	
 		document.body.append(this.habitListPanel);
-	
 
+		this.resize();
+	
 		update();
 		document.body.classList.remove('loading');
+	}
+
+	resize() {
+		let panel = document.querySelector('habit-list-panel');
+		if (panel) document.documentElement.style.setProperty('--panelHeight', panel.offsetHeight + 'px');
+
+		renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight, false); // FIXME
+		camera.onResize();
 	}
 }
 
@@ -52,20 +58,7 @@ renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.setClearColor('#000000');
 
 document.body.appendChild(renderer.domElement);
-window.addEventListener('resize', () => resize());
-
-
-function resize() {
-	// let panel = document.querySelector('.UIPanel');
-	// document.documentElement.style.setProperty('--panelHeight', panel.offsetHeight + 'px');
-
-	console.log('resize');
-	renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight, false); // FIXME
-	camera.onResize();
-}
-
-window.resize = resize;
-
+window.addEventListener('resize', () => App.resize());
 
 
 
