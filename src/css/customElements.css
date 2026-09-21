@@ -104,7 +104,42 @@ habit-list {
 
 
 
+popup-element .popupOverlay {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
 
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 10000;
+}
+
+popup-element[openState="false"] .popupOverlay {
+	opacity: 0;
+	pointer-events: none;
+}
+
+popup-element .popup {
+	position: relative;
+	top: 50vh;
+	margin: auto;
+	transform: translateY(-50%);
+
+	display: flex;
+	max-width: 90vw;
+	padding: 30px;
+
+
+	border-radius: var(--UIBorderRad);
+	background: #fff;
+	box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
+	transition: opacity 0.3s, transform 0.3s;
+}
+popup-element[openState="false"] .popup {
+	opacity: 0;
+	transform: translateY(-50%) scale(0.8);
+}
 
 
 

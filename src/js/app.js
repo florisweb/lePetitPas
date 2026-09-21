@@ -10,6 +10,8 @@ import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRe
 import HabitList from './UI/habitList.js';
 import HabitManager from './data/habitManager.js';
 
+import Popup from './UI/customElements/popup.js';
+
 
 const App = new class {
 	constructor() {
