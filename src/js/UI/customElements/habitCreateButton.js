@@ -1,3 +1,4 @@
+import App from '../../app.js';
 
 export default class HabitCreateButtonElement extends HTMLElement {
   constructor() {
@@ -11,6 +12,7 @@ export default class HabitCreateButtonElement extends HTMLElement {
       </div>
       <div class="title">Add habit</div>
     `;
+    this.addEventListener('click', () => App.habitEditPanel.open());
   }
 }
 

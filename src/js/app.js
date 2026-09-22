@@ -15,6 +15,7 @@ import HabitManager from './data/habitManager.js';
 import Popup from './UI/customElements/popup.js';
 import HabitListPanel from './UI/habitListPanel.js';
 import HabitInfoPanel from './UI/habitInfoPanel.js';
+import HabitEditPanel from './UI/habitEditPanel.js';
 
 
 const App = new class {
@@ -22,6 +23,7 @@ const App = new class {
 		window.App = this;
 		this.habitListPanel = new HabitListPanel();
 		this.habitInfoPanel = new HabitInfoPanel();
+		this.habitEditPanel = new HabitEditPanel();
 	}
 
 	async setup() {
@@ -30,11 +32,13 @@ const App = new class {
 		for (let habit of HabitManager.data) planet.addHabitObject(habit);	
 		document.body.append(this.habitListPanel);
 		document.body.append(this.habitInfoPanel);
+		document.body.append(this.habitEditPanel);
 
 		this.resize();
 	
 		update();
 		document.body.classList.remove('loading');
+		renderer.domElement.addEventListener('click', () => this.habitInfoPanel.openState = false);
 	}
 
 	resize() {

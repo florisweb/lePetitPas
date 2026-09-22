@@ -32,17 +32,32 @@ export default class HabitInfoPanel extends HTMLElement {
     this.#date = _date;
     this.openState = true;
   }
+  close() {
+    this.openState = false;
+  }
 
 
   connectedCallback() {
     this.classList.add('UIPanel');
     this.openState = false;
     this.innerHTML = `
-      <div class='habitIconHolder'></div>
+      <img class='habitIconHolder'>
       <div class='habitNameHolder panelTitle'></div>
+      <button class='editButton' filled>edit</button>
+      <button class='deleteButton' filled>delete</button>
       <button class='skipButton' filled>Skip</button>
     `;
     this.querySelector('.skipButton').addEventListener('click', () => this.habit.setSkipStateOnDate(this.#date));
+    this.querySelector('.deleteButton').addEventListener('click', async () => {
+      await HabitManager.remove(this.habit.id)
+      this.close();
+    });
+    this.querySelector('.editButton').addEventListener('click', async () => {
+      let habit = await App.habitEditPanel.openEdit(this.habit);
+      console.log('habit', habit);
+      if (!habit) return;
+      this.habit = habit;
+    });
   }
 
   async #update() {
