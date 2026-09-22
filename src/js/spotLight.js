@@ -1,11 +1,13 @@
 import * as THREE from 'three';
+import { animateSigmoidally } from './animator.js';
 
 export default class SpotLight {
 	#light;
 	#distance = 100;
+	#fullIntensity = 5000;
 	
 	constructor() {
-		this.#light = new THREE.SpotLight( 0xffffff, 10000 );
+		this.#light = new THREE.SpotLight( 0xffffff, 5000 );
 
 		this.#light.position.set(0, 0, 0)
 		this.#light.castShadow = true;
@@ -28,11 +30,11 @@ export default class SpotLight {
 		this.#light.lookAt(0, 0, 0);
 
 		this.#light.angle = Math.atan(_radius / this.#distance);
-
+		animateSigmoidally(400, (_perc) => this.#light.intensity = this.#fullIntensity * _perc);
 	}
 	hide() {
-		this.#light.position.set(0, 0, 0);
-
+		let curIntensity = this.#light.intensity;
+		animateSigmoidally(300, (_perc) => this.#light.intensity = curIntensity * (1 - _perc));
 	}
 	addToScene(scene) {
 		scene.add(this.#light);

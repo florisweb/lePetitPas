@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { animateSigmoidally } from './animator.js';
 
 export default class Camera {
 	static defaultZoomLevel = 70;
@@ -44,7 +45,7 @@ export default class Camera {
 	putObjectInFocus(_obj, _angle = 0.1 * Math.PI) { // Looks at object from this angle (0 = from the top)
 		// Update target
 		let targetPos = _obj.calcPosAtRad(planet.baseRadius); // Position we want to have in the centre of the screen
-		let animateTime = this.zoomTo(30); 
+		let animateTime = this.zoomTo(35); 
 		this.#animateTargetPos(new THREE.Vector3(...targetPos), animateTime);
 		let maxLoops = 1;
 
@@ -75,7 +76,7 @@ export default class Camera {
 		 
 		let delta = _newPos.clone();
 		delta.sub(oldPos);
-		this.#animateProp(_time, (_perc) => {
+		animateSigmoidally(_time, (_perc) => {
 			let curPos = oldPos.clone();
 			curPos.add(delta.clone().multiplyScalar(_perc));
 			this.controls.target = curPos;
@@ -101,25 +102,10 @@ export default class Camera {
 		let startTime = new Date();
 		let panDuration = 200 + 5 * Math.abs(dDist);
 		
-		this.#animateProp(panDuration, (_perc) => {
+		animateSigmoidally(panDuration, (_perc) => {
 			this.camera.position.setLength(initialDist * (1 - _perc) + _distance * _perc);	
 		});
 		return panDuration;
-	}
-
-	#animateProp(_duration, _callBack) {
-		let startTime = new Date();
-		let update = () => {
-			let curTimePerc = (new Date() - startTime) / _duration;
-			let curProgressPerc = 1 / (1 + Math.exp(-(curTimePerc - 0.5) * 10));
-			_callBack(curProgressPerc);
-			if (curTimePerc > 1) {
-				_callBack(1);
-				return;
-			}
-			requestAnimationFrame(update);
-		}
-		requestAnimationFrame(update);
 	}
 }
 
