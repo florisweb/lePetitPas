@@ -18,7 +18,9 @@ export default class Habit extends DataObject {
 	createDate = new Date();
 
 	#planetObject;
-
+	get planetObject() {
+		return this.#planetObject;
+	}
 
 	get curState() {
 		return this.getStateOnDate(new Date());

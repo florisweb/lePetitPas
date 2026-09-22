@@ -62,7 +62,6 @@ export default class HabitEditPanel extends HTMLElement {
     this.#habit.name = this.#nameInputField.value;
     await HabitManager.update(this.#habit);
     this.#editResolver(this.#habit);
-    console.log('resolve with', this.#habit);
     this.#close();
   }
 }

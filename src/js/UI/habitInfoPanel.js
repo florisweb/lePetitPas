@@ -31,12 +31,14 @@ export default class HabitInfoPanel extends HTMLElement {
 
   open(_habit, _date) {
     this.habit = _habit;
+    this.habit.planetObject?.focus();
     this.#date = _date;
     App.curOpenPanel = this;
     return new Promise((resolve) => this.#openStateResolver = resolve);
   }
   close() {
     this.openState = false;
+    this.habit.planetObject?.deFocus();
     this.#openStateResolver(false);
   }
 
@@ -53,14 +55,15 @@ export default class HabitInfoPanel extends HTMLElement {
     `;
     this.querySelector('.skipButton').addEventListener('click', () => this.habit.setSkipStateOnDate(this.#date));
     this.querySelector('.deleteButton').addEventListener('click', async () => {
-      await HabitManager.remove(this.habit.id)
+      await HabitManager.remove(this.habit.id);
+      // TODO Add habit delete animation
       this.close();
     });
     this.querySelector('.editButton').addEventListener('click', async () => {
       let habit = await App.habitEditPanel.openEdit(this.habit);
+      App.curOpenPanel = this;
       if (!habit) return;
       this.habit = habit;
-      App.curOpenPanel = this;
     });
   }
 

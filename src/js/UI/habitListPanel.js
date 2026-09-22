@@ -40,7 +40,12 @@ export default class HabitListPanel extends HTMLElement {
       this.open();
       this.#update();
     });
-    this.#curHabitList.addEventListener('onHabitCreateButtonClick', () => {console.log('onHabitCreate-bubbled', this)});
+    this.#curHabitList.addEventListener('onHabitCreateButtonClick', async () => {
+      await App.habitEditPanel.open();
+      this.open();
+      this.#update();
+      // TODO add habit create animation (creating the world object)
+    });
 
     this.#nextHabitList = new HabitList([]);
     this.#habitLists = [this.#prevHabitList, this.#curHabitList, this.#nextHabitList];

@@ -39,13 +39,18 @@ export default class PlanetObject {
 	update() {	
 	}
 
-	playStateChangeAnimation(_newState) {
+	focus() {
 		spotLight.highlight(this.position);
 		camera.putObjectInFocus(this);
-		setTimeout(() => {
-			camera.deFocus();
-			spotLight.hide();
-		}, 2500);
+	}
+	deFocus() {
+		camera.deFocus();
+		spotLight.hide();
+	}
+	
+	playStateChangeAnimation(_newState) {
+		this.focus();
+		setTimeout(() => this.deFocus(), 2500);
 	}
 }
 
