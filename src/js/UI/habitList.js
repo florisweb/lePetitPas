@@ -31,7 +31,6 @@ export default class HabitList extends HTMLElement {
       this.append(new HabitElement(habit, this.#date));
     }
     this.append(new HabitCreateButtonElement());
-
   }
 
 

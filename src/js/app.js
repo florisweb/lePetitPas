@@ -19,11 +19,23 @@ import HabitEditPanel from './UI/habitEditPanel.js';
 
 
 const App = new class {
+	#curOpenPanel;
+	get curOpenPanel() {
+		return this.#curOpenPanel;
+	}
+	set curOpenPanel(_panel) {
+		if (this.#curOpenPanel) this.#curOpenPanel.openState = false;
+		this.#curOpenPanel = _panel;
+		this.#curOpenPanel.openState = true;
+	}
+
+
 	constructor() {
 		window.App = this;
 		this.habitListPanel = new HabitListPanel();
 		this.habitInfoPanel = new HabitInfoPanel();
 		this.habitEditPanel = new HabitEditPanel();
+		this.curOpenPanel = this.habitListPanel;
 	}
 
 	async setup() {
@@ -38,7 +50,7 @@ const App = new class {
 	
 		update();
 		document.body.classList.remove('loading');
-		renderer.domElement.addEventListener('click', () => this.habitInfoPanel.openState = false);
+		renderer.domElement.addEventListener('click', () => this.habitInfoPanel.close());
 	}
 
 	resize() {

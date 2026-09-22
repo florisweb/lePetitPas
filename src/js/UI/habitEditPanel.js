@@ -21,7 +21,7 @@ export default class HabitEditPanel extends HTMLElement {
   }
 
   open() {
-    this.openState = true;
+    App.curOpenPanel = this;
     this.#habit = new Habit();
     this.#nameInputField.value = null;
     this.#nameInputField.focus();

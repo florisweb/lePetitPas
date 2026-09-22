@@ -6,6 +6,8 @@ import HabitList from './habitList.js';
 export default class HabitInfoPanel extends HTMLElement {
   static observedAttributes = ["openState"];
 
+  #openStateResolver;
+
   #habit;
   set habit(_habit) {
     this.#habit = _habit;
@@ -30,10 +32,12 @@ export default class HabitInfoPanel extends HTMLElement {
   open(_habit, _date) {
     this.habit = _habit;
     this.#date = _date;
-    this.openState = true;
+    App.curOpenPanel = this;
+    return new Promise((resolve) => this.#openStateResolver = resolve);
   }
   close() {
     this.openState = false;
+    this.#openStateResolver(false);
   }
 
 
@@ -54,9 +58,9 @@ export default class HabitInfoPanel extends HTMLElement {
     });
     this.querySelector('.editButton').addEventListener('click', async () => {
       let habit = await App.habitEditPanel.openEdit(this.habit);
-      console.log('habit', habit);
       if (!habit) return;
       this.habit = habit;
+      App.curOpenPanel = this;
     });
   }
 

@@ -18,17 +18,36 @@ export default class HabitListPanel extends HTMLElement {
   get date() {
     return this.#date;
   }
+
+  get openState() {
+    return this.getAttribute('openState') === 'true';
+  }
+  set openState(_openState) {
+    this.setAttribute('openState', _openState);
+  }
+
+  open() {
+    App.curOpenPanel = this;
+  }
+
   
   constructor() {
     super();
     this.#prevHabitList = new HabitList([]);
     this.#curHabitList = new HabitList([]);
+    this.#curHabitList.addEventListener('onBodyClick', async (_event) => { // Bubbles form habits 
+      await App.habitInfoPanel.open(_event.detail.habit);
+      this.open();
+      this.#update();
+    });
+    this.#curHabitList.addEventListener('onHabitCreateButtonClick', () => {console.log('onHabitCreate-bubbled', this)});
+
     this.#nextHabitList = new HabitList([]);
     this.#habitLists = [this.#prevHabitList, this.#curHabitList, this.#nextHabitList];
   }
 
 
-  connectedCallback() {
+  async connectedCallback() {
     this.classList.add('UIPanel');
 
     this.innerHTML = `
@@ -49,13 +68,13 @@ export default class HabitListPanel extends HTMLElement {
       this.querySelectorAll('.dayTab')[i].append(this.#habitLists[i]);
     }
     
-    this.#update();
     this.addEventListener('scroll', () => this.#onScroll());
     this.scrollLeft = 1 / 3 * this.scrollWidth;
+    await HabitManager.isSetUp;
+    this.#update();
   }
 
-  async #update() {
-    await HabitManager.isSetUp;
+  #update() {  
     for (let i = 0; i < this.#habitLists.length; i++)
     {
       let curDate = new DatePlus(this.#date.getTime() + (i - 1) * 24 * 60 * 60 * 1000);

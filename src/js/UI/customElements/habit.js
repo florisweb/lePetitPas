@@ -4,6 +4,10 @@ export default class HabitElement extends HTMLElement {
   static observedAttributes = ["curState"];
   #habit;
   #date;
+  get habit() {
+    return this.#habit;
+  }
+
   constructor(_habit, _date) {
     super();
     // this.attachShadow({ mode: 'open' });
@@ -31,10 +35,14 @@ export default class HabitElement extends HTMLElement {
     });
 
     this.addEventListener('click', (_e) => {
-      console.log(_e);
       if (_e.target.className.includes('status')) return;
-      // this.#habit.panToPlanetObject();
-      App.habitInfoPanel.open(this.#habit);
+      this.dispatchEvent(
+        new CustomEvent("onBodyClick", {
+          detail: this,
+          bubbles: true,
+          composed: true
+        })
+      );
     });
   }
   #fillData() {
