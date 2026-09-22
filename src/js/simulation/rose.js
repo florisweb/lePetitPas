@@ -3,7 +3,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 
 
 
-import { Perlin, random } from './random.js';
+import { Perlin, random } from '../random.js';
 import Planet from './planet.js';
 import { generatePatchGeometry } from './geometryGenerator.js';
 import PlanetObject from './planetObject.js'

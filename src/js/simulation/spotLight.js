@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { animateSigmoidally } from './animator.js';
+import { animateSigmoidally } from '../animator.js';
 
 export default class SpotLight {
 	#light;

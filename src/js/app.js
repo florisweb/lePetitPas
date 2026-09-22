@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
-import Star from './star.js';
-import Sun from './sun.js';
-import Planet from './planet.js';
+import Star from './simulation/star.js';
+import Sun from './simulation/sun.js';
+import Planet from './simulation/planet.js';
 import { random } from './random.js';
-import Camera from './camera.js';
-import SpotLight from './spotLight.js';
+import Camera from './simulation/camera.js';
+import SpotLight from './simulation/spotLight.js';
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
 
 import HabitList from './UI/habitList.js';
@@ -416,11 +416,8 @@ function update() {
 
 
 
-
-
 	requestAnimationFrame(update);
 }
-
 
 
 

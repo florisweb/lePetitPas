@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { animateSigmoidally } from './animator.js';
+import { animateSigmoidally } from '../animator.js';
 
 export default class Camera {
 	static defaultZoomLevel = 70;

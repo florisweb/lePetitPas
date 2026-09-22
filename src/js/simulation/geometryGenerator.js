@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Perlin, random } from './random.js';
+import { Perlin, random } from '../random.js';
 
 
 // export function generatePatchGeometry({radius, height, segDensityMultiplier}, radialFunction) {

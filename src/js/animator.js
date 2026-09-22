@@ -1,5 +1,3 @@
-import Planet from './planet.js';
-
 
 export function animateLinearily(_duration, _callBack) {
 	let startTime = new Date();

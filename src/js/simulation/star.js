@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { random } from './random.js';
+import { random } from '../random.js';
 
 export default class Star {
 	#mesh;

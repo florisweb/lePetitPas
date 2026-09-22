@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Perlin, random } from './random.js';
+import { Perlin, random } from '../random.js';
 import Planet from './planet.js';
 import { generatePatchGeometry } from './geometryGenerator.js';
 import PlanetObject from './planetObject.js'
