@@ -30,8 +30,9 @@ export default class Habit extends DataObject {
 
 	setStateWithAnimation(_newState, _date = new Date()) {
 		this.setStateOnDate(_newState, _date)
-		this.panToPlanetObject();	
+		this.#planetObject.playStateChangeAnimation(_newState);
 	}
+	
 	panToPlanetObject() {
 		camera.panToObject(this.#planetObject); // TODO proper link
 	}

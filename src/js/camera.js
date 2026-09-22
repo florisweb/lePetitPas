@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 export default class Camera {
+	static defaultZoomLevel = 70;
 	controls;
 	camera;
 	#renderer;
@@ -39,17 +40,59 @@ export default class Camera {
 		this.camera.updateProjectionMatrix();
 	}
 
-	panToObject(_obj) {
-		let dPhi = camera.controls.getPolarAngle() - _obj.absoluteAnglePos[1];
-		camera.controls.rotateUp(dPhi);
 
-		let theta = -(camera.controls.getAzimuthalAngle() - 0.5 * Math.PI); // Convert azimuth angle to our angle system
+	putObjectInFocus(_obj, _angle = 0.1 * Math.PI) { // Looks at object from this angle (0 = from the top)
+		// Update target
+		let targetPos = _obj.calcPosAtRad(planet.baseRadius); // Position we want to have in the centre of the screen
+		let animateTime = this.zoomTo(30); 
+		this.#animateTargetPos(new THREE.Vector3(...targetPos), animateTime);
+		let maxLoops = 1;
+
+		let zoomToLoop = () => {
+			let dPhi = this.controls.getPolarAngle() - _angle - _obj.absoluteAnglePos[1];
+			this.controls.rotateUp(dPhi);
+
+			let theta = -(this.controls.getAzimuthalAngle() - 0.5 * Math.PI); // Convert azimuth angle to our angle system
+			let dTheta = -(theta - _obj.absoluteAnglePos[0]);
+			if (dTheta < -Math.PI) dTheta += Math.PI * 2;
+			if (dTheta > Math.PI) dTheta -= Math.PI * 2;
+
+			this.controls.rotateLeft(dTheta);
+
+			maxLoops--;
+			if (maxLoops <= 0) return;
+			setTimeout(zoomToLoop(), 500);
+		}
+		zoomToLoop();
+	}
+	deFocus() {
+		let newPos = new THREE.Vector3(0, 0, 0);
+		let animateTime = this.zoomTo(Camera.defaultZoomLevel);
+		this.#animateTargetPos(newPos, animateTime);
+	}
+	#animateTargetPos(_newPos, _time=200) {
+		let oldPos = this.controls.target;
+		 
+		let delta = _newPos.clone();
+		delta.sub(oldPos);
+		this.#animateProp(_time, (_perc) => {
+			let curPos = oldPos.clone();
+			curPos.add(delta.clone().multiplyScalar(_perc));
+			this.controls.target = curPos;
+		}); 
+	}
+
+	panToObject(_obj, _customZoomLevel = Camera.defaultZoomLevel) {
+		let dPhi = this.controls.getPolarAngle() - _obj.absoluteAnglePos[1];
+		this.controls.rotateUp(dPhi);
+
+		let theta = -(this.controls.getAzimuthalAngle() - 0.5 * Math.PI); // Convert azimuth angle to our angle system
 		let dTheta = -(theta - _obj.absoluteAnglePos[0]);
 		if (dTheta < -Math.PI) dTheta += Math.PI * 2;
 		if (dTheta > Math.PI) dTheta -= Math.PI * 2;
 
-		camera.controls.rotateLeft(dTheta);
-		this.zoomTo(70); // 55
+		this.controls.rotateLeft(dTheta);
+		this.zoomTo(_customZoomLevel);
 	}
 
 	zoomTo(_distance) {
@@ -58,13 +101,20 @@ export default class Camera {
 		let startTime = new Date();
 		let panDuration = 200 + 5 * Math.abs(dDist);
 		
-		let update = () => {
-			let curTimePerc = (new Date() - startTime) / panDuration;
-			let curProgressPerc = 1 / (1 + Math.exp(-(curTimePerc - 0.5) * 10));
+		this.#animateProp(panDuration, (_perc) => {
+			this.camera.position.setLength(initialDist * (1 - _perc) + _distance * _perc);	
+		});
+		return panDuration;
+	}
 
-			this.camera.position.setLength(initialDist * (1 - curProgressPerc) + _distance * curProgressPerc);
+	#animateProp(_duration, _callBack) {
+		let startTime = new Date();
+		let update = () => {
+			let curTimePerc = (new Date() - startTime) / _duration;
+			let curProgressPerc = 1 / (1 + Math.exp(-(curTimePerc - 0.5) * 10));
+			_callBack(curProgressPerc);
 			if (curTimePerc > 1) {
-				this.camera.position.setLength(_distance);
+				_callBack(1);
 				return;
 			}
 			requestAnimationFrame(update);

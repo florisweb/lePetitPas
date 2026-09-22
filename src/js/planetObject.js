@@ -38,6 +38,11 @@ export default class PlanetObject {
 
 	update() {	
 	}
+
+	playStateChangeAnimation(_newState) {
+		camera.putObjectInFocus(this);
+		setTimeout(() => camera.deFocus(), 2500);
+	}
 }
 
 
