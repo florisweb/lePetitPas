@@ -29,17 +29,18 @@ export default class HabitListPanel extends HTMLElement {
 
 
   connectedCallback() {
+    this.classList.add('UIPanel');
 
     this.innerHTML = `
       <div class='tabHolder'>
         <div class='dayTab prev'>
-          <div class='dateHolder'></div>
+          <div class='dateHolder panelTitle'></div>
         </div>
         <div class='dayTab cur'>
-          <div class='dateHolder'></div>
+          <div class='dateHolder panelTitle'></div>
         </div>
         <div class='dayTab next'>
-          <div class='dateHolder'></div>
+          <div class='dateHolder panelTitle'></div>
         </div>
       </div>
     `;

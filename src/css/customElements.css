@@ -34,8 +34,11 @@ habit-create-button .statusRing {
 	border-radius: 100%;
 }
 
-habit-element[finished="true"] .statusRing {
+habit-element[curState="true"] .statusRing {
 	background: #555;
+}
+habit-element[curState="HABIT_SKIPPED"] .statusRing {
+	background: #f00;
 }
 
 habit-element .title,
@@ -54,6 +57,13 @@ habit-element .subTitle {
 	opacity: .7;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+}
+habit-element[curState="HABIT_SKIPPED"] .subTitle:before {
+	content: "SKIPPED";
+	background: rgba(255, 255, 255, 0.3);
+	border-radius: 3px;
+	padding: 3px 5px;
+	margin-right: 5px;
 }
 
 habit-create-button {
@@ -161,4 +171,22 @@ popup-element[openState="false"] .popup {
 	}
 }
 
+
+
+
+/* ---- overwrite elements ---- */
+
+
+button {
+	border-radius: 5px;
+	background: none;
+	border: none;
+	padding: 20px;
+	font-size: 14px;
+	color: var(--textColor);
+}
+button[filled] {
+	background: #daf;
+	color: #555;
+}
 

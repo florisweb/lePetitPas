@@ -1,25 +1,84 @@
-
-
-habit-list-panel {
+.UIPanel {
 	position: fixed;
 	bottom: 0;
 	z-index: 100;
-	/*background: rgba(30, 30, 30, .9);*/
-	/*backdrop-filter: blur(50px);*/
 
 	background: linear-gradient(180deg,rgba(17,17,19,.95) 10%,rgba(17,17,19,.75));
 	backdrop-filter: blur(20px);
 
 	width: 100vw;
-	padding: 30px 0;
+	padding: 30px;
 	padding-top: 25px;
 	border-radius: 20px 20px 0 0;
 	padding-bottom: var(--navBarHeight);
+	color: var(--textColor);
 
+	transition: opacity .3s, bottom -3s;
+}
+
+
+.UIPanel[openState="false"] {
+	opacity: 0;
+	bottom: -50px;
+	pointer-events: none;
+}
+
+.UIPanel .panelTitle {
+	font-size: 18px;
+	color: #ccc;
+	margin-bottom: 5px;	
+}
+
+
+/* ------ HABIT INFO PANEL ------ */
+habit-info-panel {
+	padding-bottom: 30px;
+
+
+	display: grid;
+	grid-template-areas: 
+		"icon name"
+		"skipButton skipButton";
+	grid-template-columns: 50px auto;
+
+	height: 30vh;
+}
+
+habit-info-panel .habitIconHolder {
+	grid-area: icon;
+}
+habit-info-panel .habitNameHolder {
+	grid-area: name;
+}
+habit-info-panel button.skipButton {
+	grid-area: skipButton;
+	display: inline;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ------ HABIT LIST PANEL ------ */
+habit-list-panel.UIPanel {
 	overflow: auto;
 	scroll-snap-type: x mandatory;
 	scrollbar-width: none;  /* Firefox */
+	padding: 30px 0;
+	padding-top: 25px;
 }
+
+
+
 habit-list-panel::-webkit-scrollbar {
 	display: none;
 }
@@ -38,11 +97,7 @@ habit-list-panel .dayTab {
 }
 
 
-habit-list-panel .dateHolder {
-	font-size: 18px;
-	color: #ccc;
-	margin-bottom: 5px;
-}
+
 
 habit-list-panel habit-element {
 	margin-bottom: 5px;
@@ -51,4 +106,8 @@ habit-list-panel habit-element {
 habit-list-panel habit-element {
 	margin-top: 10px;
 }
+
+
+
+
 

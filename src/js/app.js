@@ -14,13 +14,14 @@ import HabitManager from './data/habitManager.js';
 // --- Load Elements so they are registered to the DOM ---
 import Popup from './UI/customElements/popup.js';
 import HabitListPanel from './UI/habitListPanel.js';
+import HabitInfoPanel from './UI/habitInfoPanel.js';
 
 
 const App = new class {
 	constructor() {
 		window.App = this;
 		this.habitListPanel = new HabitListPanel();
-
+		this.habitInfoPanel = new HabitInfoPanel();
 	}
 
 	async setup() {
@@ -28,6 +29,7 @@ const App = new class {
 
 		for (let habit of HabitManager.data) planet.addHabitObject(habit);	
 		document.body.append(this.habitListPanel);
+		document.body.append(this.habitInfoPanel);
 
 		this.resize();
 	

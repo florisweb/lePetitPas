@@ -1,6 +1,7 @@
+import App from '../../app.js';
 // Create a class for the element
 export default class HabitElement extends HTMLElement {
-  static observedAttributes = ["finished"];
+  static observedAttributes = ["curState"];
   #habit;
   #date;
   constructor(_habit, _date) {
@@ -22,8 +23,8 @@ export default class HabitElement extends HTMLElement {
     `;
     this.#fillData();
     this.querySelector('.statusHolder').addEventListener('click', () => {
-      let oldState = this.getAttribute('finished') === 'true';
-      this.setAttribute('finished', !oldState);
+      let oldState = this.getAttribute('curState') === 'true';
+      this.setAttribute('curState', !oldState);
       this.#habit.setStateWithAnimation(!oldState, this.#date);
 
       this.#fillData();
@@ -32,13 +33,14 @@ export default class HabitElement extends HTMLElement {
     this.addEventListener('click', (_e) => {
       console.log(_e);
       if (_e.target.className.includes('status')) return;
-      this.#habit.panToPlanetObject();
+      // this.#habit.panToPlanetObject();
+      App.habitInfoPanel.open(this.#habit);
     });
   }
   #fillData() {
     this.querySelector('.title').innerHTML = this.#habit.name; // FIXME
     this.querySelector('.subTitle').innerHTML = this.#habit.getStreakLengthOnDate(this.#date) + ' day streak'; // FIXME
-    this.setAttribute('finished', this.#habit.getStateOnDate(this.#date));
+    this.setAttribute('curState', this.#habit.getStateOnDate(this.#date));
   }
 
   disconnectedCallback() {

@@ -102,6 +102,9 @@ export default class Habit extends DataObject {
 		}
 		HabitManager.update(this);
 	}
+	setSkipStateOnDate(_date) {
+		return this.setStateOnDate(Habit.HABIT_SKIPPED_VALUE, _date);
+	}
 
 
 
