@@ -5,6 +5,7 @@ import Sun from './sun.js';
 import Planet from './planet.js';
 import { random } from './random.js';
 import Camera from './camera.js';
+import SpotLight from './spotLight.js';
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
 
 import HabitList from './UI/habitList.js';
@@ -64,6 +65,7 @@ window.addEventListener('resize', () => App.resize());
 
 
 
+
 document.body.onscroll = (_e) => {
 	let scroller = document.getElementById('scroller');
 	if (!scroller) return;
@@ -89,6 +91,12 @@ for (let a = 0; a < Math.PI * 2; a += Math.PI * 2 / 3)
 	spotLight.shadow.normalBias = -2;
 	scene.add(spotLight);
 }
+
+
+const spotLight = new SpotLight();
+window.spotLight = spotLight;
+spotLight.addToScene(scene);
+
 
 
 const planet = new Planet();
