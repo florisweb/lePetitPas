@@ -22,7 +22,6 @@ export default class HabitEditPanel extends HTMLElement {
   }
 
   open() {
-    this.#inEditMode = false;
     App.curOpenPanel = this;
     this.#habit = new Habit();
     this.#nameInputField.value = null;
@@ -32,7 +31,6 @@ export default class HabitEditPanel extends HTMLElement {
 
   openEdit(_habit) {
     let promise = this.open();
-    this.#inEditMode = true;
     this.#habit = _habit;
     this.#nameInputField.value = this.#habit.name;
     return promise;

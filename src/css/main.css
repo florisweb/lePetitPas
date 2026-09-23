@@ -143,7 +143,7 @@ canvas {
 
 
 #header {
-	position: absolute;
+	position: fixed;
 	z-index: 1000;
 	height: 90px;
 	padding: 20px;

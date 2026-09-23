@@ -12,7 +12,6 @@ export default class HabitListPanel extends HTMLElement {
 
   #date = new DatePlus();
   set date(_date) {
-    console.log('set date', _date);
     this.#date = new DatePlus(_date);
     this.#update();
   }
@@ -41,7 +40,7 @@ export default class HabitListPanel extends HTMLElement {
       this.open();
       this.#update();
     });
-    
+
     this.#curHabitList.addEventListener('onHabitCreateButtonClick', async () => {
       let newHabit = await App.habitEditPanel.open();
       this.open();
@@ -107,23 +106,6 @@ export default class HabitListPanel extends HTMLElement {
       this.scrollLeft = 1 / 3 * this.scrollWidth;
       this.date = new DatePlus(this.#date.getTime() + 24 * 60 * 60 * 1000);
     }
-  }
-
- 
-  disconnectedCallback() {
-    console.log("Custom element removed from page.");
-  }
-
-  connectedMoveCallback() {
-    console.log("Custom element moved with moveBefore()");
-  }
-
-  adoptedCallback() {
-    console.log("Custom element moved to new page.");
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    console.log(`Attribute ${name} has changed.`);
   }
 }
 
