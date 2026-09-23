@@ -1,6 +1,7 @@
 import HabitManager from '../data/habitManager.js';
 import DatePlus from '../datePlus.js';
 import HabitList from './habitList.js';
+import App from '../app.js';
 // Create a class for the element
 export default class HabitListPanel extends HTMLElement {
   static observedAttributes = [];
@@ -40,11 +41,16 @@ export default class HabitListPanel extends HTMLElement {
       this.open();
       this.#update();
     });
+    
     this.#curHabitList.addEventListener('onHabitCreateButtonClick', async () => {
-      await App.habitEditPanel.open();
+      let newHabit = await App.habitEditPanel.open();
       this.open();
       this.#update();
-      // TODO add habit create animation (creating the world object)
+
+      if (!newHabit) return;
+      let habitObject = App.simulation.planet.addHabitObject(newHabit); 
+      App.simulation.camera.putObjectInFocus(habitObject);
+      setTimeout(() => App.simulation.camera.deFocus(), 3500);
     });
 
     this.#nextHabitList = new HabitList([]);

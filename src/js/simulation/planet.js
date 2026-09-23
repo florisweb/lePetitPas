@@ -66,10 +66,11 @@ export default class Planet {
 			case "activeVulcano": objectConstructor = ActiveVulcano; break;
 		}
 
-		let curObject = new objectConstructor(_habit.objectInfo, this, _habit);
+		let curObject = new objectConstructor(_habit.objectInfo, this);
 		_habit.setPlanetObject(curObject);
 		this.objects.push(curObject);
 		this.#group.add(curObject.mesh);
+		return curObject;
 	}
 
 	addToScene(scene) {

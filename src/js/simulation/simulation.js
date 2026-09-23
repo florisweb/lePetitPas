@@ -124,8 +124,6 @@ export default class Simulation {
 
 
 	#setUpScene() {
-
-
 		this.scene = new THREE.Scene();
 		this.scene.background = new THREE.Color(0x000010); // Deep dark blue
 
