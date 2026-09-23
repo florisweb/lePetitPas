@@ -7,9 +7,11 @@ export default class Camera {
 	controls;
 	camera;
 	#renderer;
-	constructor({renderer}) {
+	#simulation;
+	constructor({renderer, simulation}) {
 		window.camera = this;
 		this.#renderer = renderer;
+		this.#simulation = simulation;
 		this.camera = new THREE.PerspectiveCamera(
 			75,
 			window.innerWidth / window.innerHeight,
@@ -22,8 +24,7 @@ export default class Camera {
 		this.camera.position.z = 0;
 		this.camera.lookAt(0, 0, 0);
 
-
-		this.controls = new OrbitControls( this.camera, renderer.domElement );
+		this.controls = new OrbitControls(this.camera, renderer.domElement);
 		this.controls.enablePan = false;
 		this.controls.enableDamping = true;
 		this.controls.dampingFactor = 0.05;
@@ -44,7 +45,7 @@ export default class Camera {
 
 	putObjectInFocus(_obj, _angle = 0.1 * Math.PI) { // Looks at object from this angle (0 = from the top)
 		// Update target
-		let targetPos = _obj.calcPosAtRad(planet.baseRadius); // Position we want to have in the centre of the screen
+		let targetPos = _obj.calcPosAtRad(this.#simulation.planet.baseRadius); // Position we want to have in the centre of the screen
 		let animateTime = this.zoomTo(35); 
 		this.#animateTargetPos(new THREE.Vector3(...targetPos), animateTime);
 		let maxLoops = 1;

@@ -46,7 +46,7 @@ const App = new class {
 		this.simulation.setup();
 		await HabitManager.isSetUp;
 
-		for (let habit of HabitManager.data) planet.addHabitObject(habit);	
+		for (let habit of HabitManager.data) this.simulation.planet.addHabitObject(habit);	
 		document.body.append(this.habitListPanel);
 		document.body.append(this.habitInfoPanel);
 		document.body.append(this.habitEditPanel);
