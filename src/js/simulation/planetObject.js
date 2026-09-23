@@ -1,5 +1,5 @@
 import Planet from './planet.js';
-
+import App from '../app.js';
 
 export default class PlanetObject {
 	get relPosition() {
@@ -9,7 +9,7 @@ export default class PlanetObject {
 		let planRot = [0, 0, 0];
 		if (this._planet.group)
 		{
-			planRot =[this._planet.group.rotation.y, this._planet.group.rotation.x, this._planet.group.rotation.z];
+			planRot = [this._planet.group.rotation.y, this._planet.group.rotation.x, this._planet.group.rotation.z];
 		}
 
 		return [
@@ -40,12 +40,12 @@ export default class PlanetObject {
 	}
 
 	focus() {
-		spotLight.highlight(this.position);
-		camera.putObjectInFocus(this);
+		App.simulation.spotLight.highlight(this.position);
+		App.simulation.camera.putObjectInFocus(this);
 	}
 	deFocus() {
-		camera.deFocus();
-		spotLight.hide();
+		App.simulation.camera.deFocus();
+		App.simulation.spotLight.hide();
 	}
 	
 	playStateChangeAnimation(_newState) {
