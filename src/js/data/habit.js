@@ -7,7 +7,7 @@ export default class Habit extends DataObject {
 
 	id = Math.round(Math.random() * 100000000);
 	name = '' + Math.random();
-	type = 'vulcano';  // vulcano, rose...
+	type = 'activeVulcano';  // activeVulcano, inactiveVulcano, rose...
 	objectInfo = { // Specifies the information for rendering the planet object
 		position: [0, 0],
 	}

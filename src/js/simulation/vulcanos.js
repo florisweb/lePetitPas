@@ -4,26 +4,23 @@ import Planet from './planet.js';
 import { generatePatchGeometry } from './geometryGenerator.js';
 import PlanetObject from './planetObject.js'
 
-export default class Vulcano extends PlanetObject {
-	#mesh;
-	#lavaMesh;
-	#vulcMesh;
-	get mesh() {return this.#mesh};
+
+export default class BaseVulcano extends PlanetObject {
+	_mesh;
+	_vulcMesh;
+	get mesh() {return this._mesh};
 	
-	#height;
-	#radius;
+	_height;
+	_radius;
 	#creationTime = Date.now() + Math.random() * 1000;
 
 	constructor({position, radius, height}, _planet) {
 		super(position, _planet)
-		this.#height = height;
-		this.#radius = radius;
-
-
-		this.#generateMesh({radius, height});
+		this._height = height;
+		this._radius = radius;
 	}
 
-	#animateCreation() {
+	_animateCreation() {
 		let dt = new Date() - this.#creationTime;
 		const perc = Math.min(dt / 5000, 1);
 		
@@ -32,16 +29,16 @@ export default class Vulcano extends PlanetObject {
 		const emissivePercShare = 0.5;
 
 		let popupPerc = 1 / (1 + Math.exp(-(perc / popupPercShare - 0.5) * 10))
-		this.#mesh.scale.x = popupPerc;
-		this.#mesh.scale.y = popupPerc;
-		this.#mesh.scale.z = popupPerc;
+		this._mesh.scale.x = popupPerc;
+		this._mesh.scale.y = popupPerc;
+		this._mesh.scale.z = popupPerc;
 
 		let emissivePerc = 1 / (1 + Math.exp(((perc - (1 - emissivePercShare)) / emissivePercShare) * 10))
-		this.#vulcMesh.material.emissiveIntensity = 3 * emissivePerc;
+		this._vulcMesh.material.emissiveIntensity = 3 * emissivePerc;
 	}
 
-	#vulcRadialFunction(theta, phi) {
-		const patchSize = this.#radius * 2;
+	_vulcRadialFunction(theta, phi) {
+		const patchSize = this._radius * 2;
 		const xArcLength = patchSize / this._planet.baseRadius;
 
 		let radius = this._planet.radialFunction(theta, phi);
@@ -49,7 +46,7 @@ export default class Vulcano extends PlanetObject {
 		const rTheta = theta - this.position[0]; // Relative theta
 		const rPhi = phi - this.position[1]; // Relative phi
 
-		const patchRadius = this.#radius / (this._planet.baseRadius); // Convert to units of angles
+		const patchRadius = this._radius / (this._planet.baseRadius); // Convert to units of angles
 		const vulcanoRadius = patchRadius;
 
 		let distFromCenter = Math.abs(
@@ -63,17 +60,13 @@ export default class Vulcano extends PlanetObject {
 		const topWidth = 0.2 * vulcanoRadius;
 		let curEdgeFrac = (distFromCenter - (vulcanoRadius - baseWidth)) / baseWidth;
 		if (curEdgeFrac < 0) curEdgeFrac = -10 * curEdgeFrac; // Make the hole in the vulcano steeper
-		radius += this.#height * Math.min((topWidth + 1) * (1 - Math.min(curEdgeFrac, 1)), 1);	
+		radius += this._height * Math.min((topWidth + 1) * (1 - Math.min(curEdgeFrac, 1)), 1);	
 
 		return radius;
 	}
 
-	#lavaRadialFunction(theta, phi) {
-		let radius = this._planet.radialFunction(theta, phi) + 0.5 * this.#height;
-		return radius;
-	}
 
-	#generateGeometry({radius, segDensityMultiplier}, radialFunction) {
+	_generateGeometry({radius, segDensityMultiplier}, radialFunction) {
 		const patchSize = radius * 2;
 		const segDensity = Planet.segCount / (Math.PI * this._planet.baseRadius) * segDensityMultiplier;
 		return generatePatchGeometry((theta, phi) => radialFunction(theta, phi), [patchSize, patchSize], this.position, segDensity, this._planet.baseRadius);
@@ -106,54 +99,96 @@ export default class Vulcano extends PlanetObject {
 		return texture;
 	}
 
-
-	#generateMesh({radius, height}) {
+	_generateVulcMesh({radius}) {
 		const vulcTexture = this.#createTexture();
-		let vulcGeo = this.#generateGeometry({radius, segDensityMultiplier: 4}, (theta, phi) => this.#vulcRadialFunction(theta, phi));
-		// let vulcMaterial = new THREE.MeshLambertMaterial({
-		// 	emissive: 0xff5000,
-		// 	color: 0xffffff
-		// });
+		let vulcGeo = this._generateGeometry({radius, segDensityMultiplier: 4}, (theta, phi) => this._vulcRadialFunction(theta, phi));
 		let vulcMaterial = new THREE.MeshLambertMaterial({
 			map: vulcTexture,
 		});
 
-
 		vulcMaterial.side = THREE.DoubleSide; // Fix cliping issues
-		this.#vulcMesh = new THREE.Mesh(vulcGeo, vulcMaterial);
+		this._vulcMesh = new THREE.Mesh(vulcGeo, vulcMaterial);
 
-		this.#vulcMesh.castShadow = true;
-		this.#vulcMesh.receiveShadow = true;
+		this._vulcMesh.castShadow = true;
+		this._vulcMesh.receiveShadow = true;
+		return this._vulcMesh;
+	}
+
+	_generateMesh({radius, height}) {}
+
+	update() {
+		this._animateCreation();
+	}
+}
 
 
-		let lavaGeo = this.#generateGeometry({radius: radius * 0.3, segDensityMultiplier: 10}, (theta, phi) => this.#lavaRadialFunction(theta, phi));
+
+
+
+export class ActiveVulcano extends BaseVulcano {
+	#lavaMesh;
+	constructor({position, radius, height}, _planet) {
+		super(...arguments);
+		this._generateMesh({radius, height});
+	}
+
+	update() {
+		super.update();
+		this.#lavaMesh.material.emissiveIntensity = 1.85 + (1 + Math.sin(Date.now() / 1000 * 3)) / 2 * 0.01 + (1 + Math.sin(Date.now() / 1000)) / 2 * 0.01;
+	}
+
+	_generateMesh({radius, height}) {
+		this._vulcMesh = this._generateVulcMesh({radius});
+		this.#lavaMesh = this.#generateLavaMesh({radius});
+
+		this._mesh = new THREE.Group();
+		this._mesh.add(this._vulcMesh);
+		this._mesh.add(this.#lavaMesh);
+		this._mesh.position.x = 0;
+		this._mesh.position.z = 0;
+		this._mesh.position.y = 0;
+	}
+
+	#generateLavaMesh({radius}) {
+		let lavaGeo = this._generateGeometry({radius: radius * 0.3, segDensityMultiplier: 10}, (theta, phi) => this.#lavaRadialFunction(theta, phi));
 		let lavaMaterial = new THREE.MeshLambertMaterial({
 			emissive: 0xff5000, 
 			emissiveIntensity: 1.9,
 			color: 0xff5000, 
 			toneMapped: false
 		});
-		lavaMaterial.side = THREE.DoubleSide; // Fix cliping issues
+		lavaMaterial.side = THREE.DoubleSide;
 		this.#lavaMesh = new THREE.Mesh(lavaGeo, lavaMaterial);
-		window.lavaMesh = this.#lavaMesh;
-
-		this.#vulcMesh.castShadow = true;
-		this.#vulcMesh.receiveShadow = true;
-		
-
-		this.#mesh = new THREE.Group();
-		this.#mesh.add(this.#vulcMesh);
-		this.#mesh.add(this.#lavaMesh);
-		this.#mesh.position.x = 0;
-		this.#mesh.position.z = 0;
-		this.#mesh.position.y = 0;
+		return this.#lavaMesh;
 	}
 
-	update() {
-		this.#lavaMesh.material.emissiveIntensity = 1.85 + (1 + Math.sin(Date.now() / 1000 * 3)) / 2 * 0.01 + (1 + Math.sin(Date.now() / 1000)) / 2 * 0.01;
-		this.#animateCreation();
+	#lavaRadialFunction(theta, phi) {
+		let radius = this._planet.radialFunction(theta, phi) + 0.5 * this._height;
+		return radius;
 	}
 }
+
+export class InActiveVulcano extends BaseVulcano {
+	constructor({position, radius, height}, _planet) {
+		super(...arguments);
+		this._generateMesh({radius, height});
+	}
+
+
+	_generateMesh({radius, height}) {
+		this._vulcMesh = this._generateVulcMesh({radius});
+
+	
+		this._mesh = new THREE.Group();
+		this._mesh.add(this._vulcMesh);
+		this._mesh.position.x = 0;
+		this._mesh.position.z = 0;
+		this._mesh.position.y = 0;
+	}
+}
+
+
+
 
 
 

@@ -70,7 +70,15 @@ export default class HabitInfoPanel extends HTMLElement {
 
   async #update() {
     this.querySelector('.habitNameHolder').innerHTML = this.habit.name;
-    this.querySelector('.habitIconHolder').setAttribute('src', this.habit.type === 'vulcano' ? './images/vulcanoIcon.png' : './images/roseIcon.png');
+
+    let src = '';
+    switch (this.habit.type) {
+      case "inactiveVulcano": src = './images/inactiveVulcanoIcon.png'; break;
+      case "rose": src = './images/roseIcon.png'; break;
+      default:
+      case "activeVulcano": src = './images/activeVulcanoIcon.png'; break;
+    }
+    this.querySelector('.habitIconHolder').setAttribute('src', src);
   }
 
 

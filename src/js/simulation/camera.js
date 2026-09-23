@@ -64,7 +64,7 @@ export default class Camera {
 		 
 		let delta = _newPos.clone();
 		delta.sub(oldPos);
-		animateSigmoidally(_time, (_perc) => {
+		animateLinearily(_time, (_perc) => {
 			let curPos = oldPos.clone();
 			curPos.add(delta.clone().multiplyScalar(_perc));
 			this.controls.target = curPos;

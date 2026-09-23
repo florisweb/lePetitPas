@@ -16,6 +16,7 @@ export default class Rose extends PlanetObject {
 
 
 	get mesh() {return this.#mesh};
+	habit;
 
 	
 	#hillHeight = 0.7;
@@ -27,8 +28,9 @@ export default class Rose extends PlanetObject {
 	#flowerRad = 1.2;
 	#creationTime = Date.now() + Math.random() * 1000;
 
-	constructor({position}, _planet) {
-		super(position, _planet)
+	constructor({position}, _planet, _habit) {
+		super(position, _planet);
+		this.habit = _habit;
 
 		this.#generateMesh();
 	}

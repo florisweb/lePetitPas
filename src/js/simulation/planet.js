@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Perlin, random } from '../random.js';
-import Vulcano from './vulcano.js';
+import { ActiveVulcano, InActiveVulcano } from './vulcanos.js';
 import Rose from './rose.js';
 
 import { generatePlanetGeometry } from './geometryGenerator.js';
@@ -52,15 +52,21 @@ export default class Planet {
 
 
 	update() {
-		// this.#group.rotateY(-0.001);
-		// this.#group.rotateY(-0.0003);
 		this.#animateCreation();
-		for (let vulc of this.objects) vulc.update();
+		for (let obj of this.objects) obj.update();
 	}
 
 	addHabitObject(_habit) {
-		let objectConstructor = _habit.type === "vulcano" ? Vulcano : Rose;
-		let curObject = new objectConstructor(_habit.objectInfo, this);
+		let objectConstructor;
+		switch (_habit.type)
+		{
+			case "inactiveVulcano": objectConstructor = InActiveVulcano; break;
+			case "rose": objectConstructor = Rose; break;
+			default:
+			case "activeVulcano": objectConstructor = ActiveVulcano; break;
+		}
+
+		let curObject = new objectConstructor(_habit.objectInfo, this, _habit);
 		_habit.setPlanetObject(curObject);
 		this.objects.push(curObject);
 		this.#group.add(curObject.mesh);
