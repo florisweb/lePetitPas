@@ -30,6 +30,7 @@ const App = new class {
 		if (this.#curOpenPanel) this.#curOpenPanel.openState = false;
 		this.#curOpenPanel = _panel;
 		this.#curOpenPanel.openState = true;
+		this.simulation?.resize();
 	}
 
 

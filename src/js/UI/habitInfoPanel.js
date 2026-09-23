@@ -37,8 +37,9 @@ export default class HabitInfoPanel extends HTMLElement {
     return new Promise((resolve) => this.#openStateResolver = resolve);
   }
   close() {
+    if (!this.openState) return;
     this.openState = false;
-    this.habit.planetObject?.deFocus();
+    this.habit?.planetObject.deFocus();
     this.#openStateResolver(false);
   }
 

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { animateSigmoidally } from '../animator.js';
+import { animateSigmoidally, animateLinearily } from '../animator.js';
 
 export default class Camera {
 	static defaultZoomLevel = 70;
@@ -46,27 +46,14 @@ export default class Camera {
 	putObjectInFocus(_obj, _angle = 0.1 * Math.PI) { // Looks at object from this angle (0 = from the top)
 		// Update target
 		let targetPos = _obj.calcPosAtRad(this.#simulation.planet.baseRadius); // Position we want to have in the centre of the screen
-		let animateTime = this.zoomTo(35); 
+		let animateTime = this.panToPosition([
+			_obj.absoluteAnglePos[0],
+			_angle + _obj.absoluteAnglePos[1]
+		], 35);
+
 		this.#animateTargetPos(new THREE.Vector3(...targetPos), animateTime);
-		let maxLoops = 1;
-
-		let zoomToLoop = () => {
-			let dPhi = this.controls.getPolarAngle() - _angle - _obj.absoluteAnglePos[1];
-			this.controls.rotateUp(dPhi);
-
-			let theta = -(this.controls.getAzimuthalAngle() - 0.5 * Math.PI); // Convert azimuth angle to our angle system
-			let dTheta = -(theta - _obj.absoluteAnglePos[0]);
-			if (dTheta < -Math.PI) dTheta += Math.PI * 2;
-			if (dTheta > Math.PI) dTheta -= Math.PI * 2;
-
-			this.controls.rotateLeft(dTheta);
-
-			maxLoops--;
-			if (maxLoops <= 0) return;
-			setTimeout(zoomToLoop(), 500);
-		}
-		zoomToLoop();
 	}
+
 	deFocus() {
 		let newPos = new THREE.Vector3(0, 0, 0);
 		let animateTime = this.zoomTo(Camera.defaultZoomLevel);
@@ -84,24 +71,32 @@ export default class Camera {
 		}); 
 	}
 
-	panToObject(_obj, _customZoomLevel = Camera.defaultZoomLevel) {
-		let dPhi = this.controls.getPolarAngle() - _obj.absoluteAnglePos[1];
-		this.controls.rotateUp(dPhi);
+	panToPosition(_pos, _customZoomLevel = Camera.defaultZoomLevel) {
+		let duration = this.zoomTo(_customZoomLevel);
+		let dPhi = this.controls.getPolarAngle() - _pos[1];
 
 		let theta = -(this.controls.getAzimuthalAngle() - 0.5 * Math.PI); // Convert azimuth angle to our angle system
-		let dTheta = -(theta - _obj.absoluteAnglePos[0]);
+		let dTheta = -(theta - _pos[0]);
 		if (dTheta < -Math.PI) dTheta += Math.PI * 2;
 		if (dTheta > Math.PI) dTheta -= Math.PI * 2;
 
-		this.controls.rotateLeft(dTheta);
-		this.zoomTo(_customZoomLevel);
+		animateSigmoidally(duration, (_perc, _dPerc) => {
+			this.controls.rotateLeft(dTheta * _dPerc);
+			this.controls.rotateUp(dPhi * _dPerc);
+		});
+		return duration;
+	}
+
+
+	panToObject(_obj, _customZoomLevel = Camera.defaultZoomLevel) {
+		return this.panToPosition(_obj.absoluteAnglePos, _customZoomLevel)
 	}
 
 	zoomTo(_distance) {
 		let initialDist = this.camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
 		const dDist = _distance - initialDist;
 		let startTime = new Date();
-		let panDuration = 200 + 5 * Math.abs(dDist);
+		let panDuration = (200 + 5 * Math.abs(dDist)) * 1;
 		
 		animateSigmoidally(panDuration, (_perc) => {
 			this.camera.position.setLength(initialDist * (1 - _perc) + _distance * _perc);	

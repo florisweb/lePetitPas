@@ -59,8 +59,8 @@ export default class Simulation {
 	}
 
 	resize() {
-		let panel = document.querySelector('habit-list-panel');
-		if (panel) document.documentElement.style.setProperty('--panelHeight', panel.offsetHeight + 'px');
+		let panel = document.querySelector('.UIPanel[openState="true"]');
+		if (panel) document.documentElement.style.setProperty('--panelHeight', (panel.offsetHeight - 40) + 'px');
 
 		renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight, false); // FIXME
 		this.camera.onResize();
