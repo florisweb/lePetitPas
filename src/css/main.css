@@ -11,6 +11,7 @@
 	--UIBorderRad: 10px;
 	--textColor: #ccc;
 	/*--navBarHeight: 80px;*/
+	--navBarHeight: 0px;
 }
 
 body {

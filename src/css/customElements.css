@@ -178,14 +178,39 @@ popup-element[openState="false"] .popup {
 
 habit-type-selector label {
 	margin-bottom: 10px;
-	pointer: cursor;
+	cursor: pointer;
 }
 habit-type-selector input {
-	width: 20px;
-	aspect-ratio: 1;
+	opacity: 1;
+	cursor: pointer;
+	padding: 20px;
+	margin-right: 10px;
+}
+
+habit-type-selector input:after {
+	position: relative;
+	top: -4.5px;
+	left: -3px;
+	
+	content: '';
+	color: transparent;
+	font-size: 0px;
+
+	transform: translate(-50%, -50%);
+	
+	padding: 7.5px 8px;
+	border-radius: 100%;
+
 	border: 1px solid #aaa;
-	background: none;
-	pointer: cursor;
+	background: rgb(15, 15, 17);
+	pointer-events: none;
+
+	transition: background .3s;
+}
+
+habit-type-selector input:checked:after {
+	background: #aaa;
+
 }
 habit-type-selector input[checked="true"] {
 	background: #aaa;
@@ -201,7 +226,18 @@ habit-type-selector label img {
 	margin-right: 5px;
 } 
 
-
+habit-type-selector label {
+	font-size: 15px;
+}
+habit-type-selector label .typeName {
+	/*font-weight: bold;*/
+}
+habit-type-selector label .typeDescription {
+	color: #666;
+}
+habit-type-selector hr {
+	border: none;
+}
 
 
 

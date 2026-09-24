@@ -10,10 +10,10 @@
 	padding: 30px;
 	padding-top: 25px;
 	border-radius: 20px 20px 0 0;
-	padding-bottom: var(--navBarHeight);
+	padding-bottom: calc(var(--navBarHeight) + 20px);
 	color: var(--textColor);
 
-	transition: opacity .3s, bottom -3s;
+	transition: opacity .3s, bottom .3s;
 }
 
 
@@ -78,7 +78,8 @@ habit-list-panel.UIPanel {
 	overflow: auto;
 	scroll-snap-type: x mandatory;
 	scrollbar-width: none;  /* Firefox */
-	padding: 30px 0;
+	padding-left: 0;
+	padding-right: 0;
 	padding-top: 25px;
 }
 
@@ -115,17 +116,20 @@ habit-list-panel habit-element {
 
 
 /* ------ HABIT EDIT PANEL ------ */
-habit-edit-panel {
+habit-edit-panel.UIPanel {
 	display: grid;
 	grid-template-areas: 
 		"nameInput nameInput"
 		"typeInput typeInput"
-		"editButton skipButton";
-	grid-template-columns: 40px auto;
-	grid-template-rows: 30px auto;
-	grid-row-gap: 20px;
+		"cancelButton saveButton";
+	grid-template-columns: 50% 50%;
+	grid-template-rows: 30px auto 40px;
+	grid-row-gap: 20px;;
 
+	padding-bottom: calc(var(--navBarHeight) + 40px);
 }
+
+
 habit-edit-panel .habitNameEditField {
 	grid-area: nameInput;
 	background: none;
@@ -138,6 +142,12 @@ habit-edit-panel habit-type-selector {
 	grid-area: typeInput;
 }
 
+habit-edit-panel button.saveButton {
+	grid-area: saveButton;
+}
+habit-edit-panel button.cancelButton {
+	grid-area: cancelButton;
+}
 
 
 
