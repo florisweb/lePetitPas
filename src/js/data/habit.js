@@ -104,16 +104,6 @@ export default class Habit extends DataObject {
 		}
 		HabitManager.update(this);
 	}
-	getCompletionPercOnDate(_date = new Date()) {
-		let perc = 0;
-		let state = this.getStateOnDate(_date);
-		switch (this.valueType)
-		{
-			default:
-			case "check": perc = state ? 1 : 0; break
-		}
-		return perc;
-	}
 
 	setSkipStateOnDate(_date) {
 		console.log('set skip', _date);

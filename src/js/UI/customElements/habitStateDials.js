@@ -15,23 +15,40 @@ export class HabitStateDial extends HTMLElement {
   connectedCallback() {
     this.classList.add('habitStateDial')
     this.innerHTML = `
-      <div class='progressRing backgroundTrack'></div>
+      <div class='progressRing backgroundTrack'>
+        <div class='valueHolder'></div>
+        <div class='valueSubTextHolder'></div>
+      </div>
       <div class='progressRing percVisualizer'></div>
     `; 
 
     this.#updateClipPath(this.#curPerc);
   }
+  
   updateState(_habit, _date) {
     let state = _habit.getStateOnDate(_date);
     let perc = 0;
+    let stateText = '';
+    let stateSubText = '';
     this.classList.toggle('habitSkipped', state == Habit.HABIT_SKIPPED_VALUE);
-    if (state == Habit.HABIT_SKIPPED_VALUE)
+    if (state === Habit.HABIT_SKIPPED_VALUE)
     {
       perc = 1;
+      stateText = 'X';
+      stateSubText = 'SKIPPED';
     } else {
-      perc = _habit.getCompletionPercOnDate(_date);
+      switch (_habit.valueType)
+      {
+        case "check": 
+          perc = state ? 1 : 0; 
+          stateText = (state ? 1 : 0) + '/1';
+          stateSubText = state ? 'COMPLETED' : '';
+        break
+      }
     }
 
+    this.querySelector('.valueHolder').innerHTML = stateText;
+    this.querySelector('.valueSubTextHolder').innerHTML = stateSubText;
     this.animateToPerc(perc);
   }
 

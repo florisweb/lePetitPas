@@ -253,6 +253,7 @@ habit-type-selector hr {
 	aspect-ratio: 1;
 	border-radius: 100%;
 }
+
 .habitStateDial .progressRing.backgroundTrack {
 	border: calc(var(--dialThickness) + 2 * var(--dialBackgroundPadding)) solid #333;
 }
@@ -269,6 +270,22 @@ habit-type-selector hr {
 }
 
 
+.habitStateDial .progressRing.backgroundTrack {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+.habitStateDial .progressRing.backgroundTrack > * {
+	text-align: center;
+}
+.habitStateDial .progressRing.backgroundTrack .valueHolder {
+	font-size: 25px;
+	margin-bottom: 5px;
+}
+.habitStateDial .progressRing.backgroundTrack .valueSubTextHolder {
+	font-size: 14px;
+	color: #555;
+}
 
 
 

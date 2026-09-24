@@ -44,7 +44,7 @@ habit-info-panel {
 		"skipButton skipButton";
 	grid-template-columns: 30px auto;
 	grid-template-rows: 30px auto;
-	grid-row-gap: 10px;
+	grid-row-gap: 15px;
 	grid-column-gap: 5px;
 }
 
@@ -65,6 +65,7 @@ habit-info-panel button.skipButton {
 
 habit-info-panel .habitStateDial {
 	grid-area: stateDial;
+	margin-bottom: 10px;
 }
 
 
