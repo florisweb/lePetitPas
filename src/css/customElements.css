@@ -261,6 +261,11 @@ habit-type-selector hr {
 	width: calc(2 * (var(--ringRad) - var(--dialBackgroundPadding)));
 	margin-top: calc(-2 * var(--ringRad) + var(--dialBackgroundPadding));
 	border: calc(var(--dialThickness)) solid rgb(255, 200, 50);
+	transition: border-color 0.3s;
+}
+
+.habitStateDial.habitSkipped .progressRing.percVisualizer {
+	border-color: rgb(255, 100, 0);
 }
 
 

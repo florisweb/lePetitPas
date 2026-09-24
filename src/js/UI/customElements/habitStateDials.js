@@ -24,6 +24,7 @@ export class HabitStateDial extends HTMLElement {
   updateState(_habit, _date) {
     let state = _habit.getStateOnDate(_date);
     let perc = 0;
+    this.classList.toggle('habitSkipped', state == Habit.HABIT_SKIPPED_VALUE);
     if (state == Habit.HABIT_SKIPPED_VALUE)
     {
       perc = 1;

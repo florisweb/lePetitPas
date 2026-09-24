@@ -32,10 +32,8 @@ export default class HabitInfoPanel extends HTMLElement {
 
   open(_habit, _date) {
     this.habit = _habit;
-    this.habit.planetObject?.focus();
     this.#date = _date;
-
-    this.stateDial.updateState(_habit, _date);
+    this.#update();
 
     App.curOpenPanel = this;
     return new Promise((resolve) => this.#openStateResolver = resolve);
@@ -61,7 +59,10 @@ export default class HabitInfoPanel extends HTMLElement {
       <button class='skipButton' filled>Skip</button>
     `;
     this.stateDial = this.querySelector('habit-state-dial');
-    this.querySelector('.skipButton').addEventListener('click', () => this.habit.setSkipStateOnDate(this.#date));
+    this.querySelector('.skipButton').addEventListener('click', async () => {
+      await this.habit.setSkipStateOnDate(this.#date);
+      this.#update();
+    });
     this.querySelector('.deleteButton').addEventListener('click', async () => {
       await HabitManager.remove(this.habit.id);
       // TODO Add habit delete animation
@@ -75,7 +76,10 @@ export default class HabitInfoPanel extends HTMLElement {
     });
   }
 
-  async #update() {
+  #update() {
+    this.habit.planetObject?.focus();
+    this.stateDial.updateState(this.#habit, this.#date);
+
     this.querySelector('.habitNameHolder').innerHTML = this.habit.name;
 
     let src = '';
