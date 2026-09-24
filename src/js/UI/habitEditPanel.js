@@ -28,7 +28,6 @@ export default class HabitEditPanel extends HTMLElement {
     App.curOpenPanel = this;
     this.#habit = new Habit();
     this.#nameInputField.value = null;
-    this.#nameInputField.focus();
     this.#typeSelector.value = 'activeVulcano';
     return new Promise((resolve) => this.#editResolver = resolve);
   }

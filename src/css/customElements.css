@@ -213,13 +213,17 @@ habit-type-selector input:checked + label:before {
 }
 
 
+
 habit-type-selector label img {
-	height: 15px;
+	margin-top: -2.5px;
+	height: 20px;
 	width: auto;
 	margin-right: 5px;
 } 
 
-habit-type-selector label {
+habit-type-selector label a {
+	position: relative;
+	top: -2.5px;
 	font-size: 15px;
 }
 
