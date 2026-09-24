@@ -40,13 +40,12 @@ habit-info-panel {
 	display: grid;
 	grid-template-areas: 
 		"icon name"
+		"stateDial stateDial"
 		"skipButton skipButton";
 	grid-template-columns: 30px auto;
 	grid-template-rows: 30px auto;
 	grid-row-gap: 10px;
 	grid-column-gap: 5px;
-
-	height: 30vh;
 }
 
 habit-info-panel .habitIconHolder {
@@ -64,6 +63,9 @@ habit-info-panel button.skipButton {
 	display: inline;
 }
 
+habit-info-panel .habitStateDial {
+	grid-area: stateDial;
+}
 
 
 

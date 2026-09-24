@@ -237,6 +237,37 @@ habit-type-selector hr {
 
 
 
+.habitStateDial {
+	position: relative;
+	width: 100%;
+	height: auto;
+}
+
+.habitStateDial .progressRing {
+	position: relative;
+	--ringRad: 30%;
+	--dialThickness: 10px;
+	--dialBackgroundPadding: 2px;
+	margin: auto;
+	width: calc(2 * var(--ringRad));
+	aspect-ratio: 1;
+	border-radius: 100%;
+}
+.habitStateDial .progressRing.backgroundTrack {
+	border: calc(var(--dialThickness) + 2 * var(--dialBackgroundPadding)) solid #333;
+}
+
+.habitStateDial .progressRing.percVisualizer {
+	width: calc(2 * (var(--ringRad) - var(--dialBackgroundPadding)));
+	margin-top: calc(-2 * var(--ringRad) + var(--dialBackgroundPadding));
+	border: calc(var(--dialThickness)) solid rgb(255, 200, 50);
+}
+
+
+
+
+
+
 
 
 

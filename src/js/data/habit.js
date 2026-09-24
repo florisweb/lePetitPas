@@ -50,12 +50,12 @@ export default class Habit extends DataObject {
 	getStreakLengthOnDate(_date) {
 		let curPointerDate = new Date(_date.getTime() - 24 * 60 * 60 * 1000);
 		let streakLength = 0;
-		let curStateItem = this.#foundLatestStateItemOnDate(curPointerDate);
+		let curStateItem = this.#findLatestStateItemOnDate(curPointerDate);
 		while (curStateItem?.value)
 		{
 			if (curStateItem.value !== Habit.HABIT_SKIPPED_VALUE) streakLength++;
 			curPointerDate = new Date(curPointerDate.getTime() - 24 * 60 * 60 * 1000);
-			curStateItem = this.#foundLatestStateItemOnDate(curPointerDate);
+			curStateItem = this.#findLatestStateItemOnDate(curPointerDate);
 		}
 
 		let curState = this.getStateOnDate(_date);
@@ -63,7 +63,7 @@ export default class Habit extends DataObject {
 		return streakLength;
 	}
 
-	#foundLatestStateItemOnDate(_date) {
+	#findLatestStateItemOnDate(_date) {
 		let hist = this.#stateHistory.sort((a, b) => a.date < b.date);
 
 		_date.setHours(0);
@@ -80,7 +80,7 @@ export default class Habit extends DataObject {
 	}
 
 	getStateOnDate(_date) {
-		let foundHistItem = this.#foundLatestStateItemOnDate(_date);
+		let foundHistItem = this.#findLatestStateItemOnDate(_date);
 		if (!foundHistItem)
 		{
 			switch (this.valueType)
@@ -92,7 +92,7 @@ export default class Habit extends DataObject {
 		}
 	}
 	setStateOnDate(_newState, _date = new Date()) {
-		let foundHistItem = this.#foundLatestStateItemOnDate(_date);
+		let foundHistItem = this.#findLatestStateItemOnDate(_date);
 		if (foundHistItem) // Update today's stateitem if it exists
 		{
 			foundHistItem.value = _newState;
@@ -104,6 +104,17 @@ export default class Habit extends DataObject {
 		}
 		HabitManager.update(this);
 	}
+	getCompletionPercOnDate(_date = new Date()) {
+		let perc = 0;
+		let state = this.getStateOnDate(_date);
+		switch (this.valueType)
+		{
+			default:
+			case "check": perc = state ? 1 : 0; break
+		}
+		return perc;
+	}
+
 	setSkipStateOnDate(_date) {
 		console.log('set skip', _date);
 		return this.setStateOnDate(Habit.HABIT_SKIPPED_VALUE, _date);
