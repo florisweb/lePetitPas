@@ -1,14 +1,17 @@
 
 import HabitManager from '../data/habitManager.js';
 import Habit from '../data/habit.js';
-// Create a class for the element
+import HabitTypeSelector from './customElements/habitTypeSelector.js';
+
+
 export default class HabitEditPanel extends HTMLElement {
   static observedAttributes = ["openState"];
 
   #habit;
   #editResolver;
   #nameInputField;
-  #inEditMode = false;
+  #typeSelect;
+  #typeSelector;
 
   get openState() {
     return this.getAttribute('openState') === 'true';
@@ -26,6 +29,7 @@ export default class HabitEditPanel extends HTMLElement {
     this.#habit = new Habit();
     this.#nameInputField.value = null;
     this.#nameInputField.focus();
+    this.#typeSelector.value = 'activeVulcano';
     return new Promise((resolve) => this.#editResolver = resolve);
   }
 
@@ -33,6 +37,9 @@ export default class HabitEditPanel extends HTMLElement {
     let promise = this.open();
     this.#habit = _habit;
     this.#nameInputField.value = this.#habit.name;
+    this.#typeSelector.value = _habit.type;
+
+
     return promise;
   }
 
@@ -41,11 +48,13 @@ export default class HabitEditPanel extends HTMLElement {
     this.classList.add('UIPanel');
     this.openState = false;
     this.innerHTML = `
-      <input class='habitNameEditField panelTitle'></input>
+      <input class='habitNameEditField panelTitle' placeholder='Habit name...'></input>
+      <habit-type-selector></habit-type-selector>
       <button class='saveButton' filled>Save</button>
       <button class='cancelButton'>cancel</button>
     `;
     this.#nameInputField = this.querySelector('.habitNameEditField');
+    this.#typeSelector = this.querySelector('habit-type-selector');
     this.querySelector('.saveButton').addEventListener('click', () => this.#save());
     this.querySelector('.cancelButton').addEventListener('click', () => this.#close());
   }
@@ -61,6 +70,7 @@ export default class HabitEditPanel extends HTMLElement {
   
   async #save() {
     this.#habit.name = this.#nameInputField.value;
+    this.#habit.type = this.#typeSelector.value;
     await HabitManager.update(this.#habit);
     this.#editResolver(this.#habit);
     this.#close();

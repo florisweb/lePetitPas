@@ -114,5 +114,30 @@ habit-list-panel habit-element {
 
 
 
+/* ------ HABIT EDIT PANEL ------ */
+habit-edit-panel {
+	display: grid;
+	grid-template-areas: 
+		"nameInput nameInput"
+		"typeInput typeInput"
+		"editButton skipButton";
+	grid-template-columns: 40px auto;
+	grid-template-rows: 30px auto;
+	grid-row-gap: 20px;
+
+}
+habit-edit-panel .habitNameEditField {
+	grid-area: nameInput;
+	background: none;
+	border: none;
+	border-radius: 0;
+	width: 100%;
+}
+
+habit-edit-panel habit-type-selector {
+	grid-area: typeInput;
+}
+
+
 
 
