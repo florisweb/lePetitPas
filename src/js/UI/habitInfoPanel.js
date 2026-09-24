@@ -10,13 +10,6 @@ export default class HabitInfoPanel extends HTMLElement {
   #openStateResolver;
 
   #habit;
-  set habit(_habit) {
-    this.#habit = _habit;
-    this.#update();
-  }
-  get habit() {
-    return this.#habit;
-  }
   #date = new Date();
 
   get openState() {
@@ -31,7 +24,7 @@ export default class HabitInfoPanel extends HTMLElement {
   }
 
   open(_habit, _date) {
-    this.habit = _habit;
+    this.#habit = _habit;
     this.#date = _date;
     this.#update();
 
@@ -41,7 +34,7 @@ export default class HabitInfoPanel extends HTMLElement {
   close() {
     if (!this.openState) return;
     this.openState = false;
-    this.habit?.planetObject.deFocus();
+    this.#habit?.planetObject.deFocus();
     this.#openStateResolver(false);
     this.stateDial.reset();
   }
@@ -72,18 +65,19 @@ export default class HabitInfoPanel extends HTMLElement {
       let habit = await App.habitEditPanel.openEdit(this.habit);
       App.curOpenPanel = this;
       if (!habit) return;
-      this.habit = habit;
+      this.#habit = habit;
+      this.#update();
     });
   }
 
   #update() {
-    this.habit.planetObject?.focus();
+    this.#habit.planetObject?.focus();
     this.stateDial.updateState(this.#habit, this.#date);
 
-    this.querySelector('.habitNameHolder').innerHTML = this.habit.name;
+    this.querySelector('.habitNameHolder').innerHTML = this.#habit.name;
 
     let src = '';
-    switch (this.habit.type) {
+    switch (this.#habit.type) {
       case "inactiveVulcano": src = './images/inactiveVulcanoIcon.png'; break;
       case "rose": src = './images/roseIcon.png'; break;
       default:

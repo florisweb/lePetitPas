@@ -106,7 +106,6 @@ export default class Habit extends DataObject {
 	}
 
 	setSkipStateOnDate(_date) {
-		console.log('set skip', _date);
 		return this.setStateOnDate(Habit.HABIT_SKIPPED_VALUE, _date);
 	}
 
