@@ -46,6 +46,11 @@ export default class Habit extends DataObject {
 	get curStreakLength() {
 		return this.getStreakLengthOnDate(new Date());
 	}
+	get daysSinceLastCompletion() {
+		let hist = this.#stateHistory.sort((a, b) => a.date < b.date);
+		if (!hist[0]) return Infinity;
+		return (new Date() - hist[0].date) / 1000 / 60 / 60 / 24;
+	}
 
 	getStreakLengthOnDate(_date) {
 		let curPointerDate = new Date(_date.getTime() - 24 * 60 * 60 * 1000);
@@ -136,6 +141,14 @@ export default class Habit extends DataObject {
 
 	setPlanetObject(_planetObject) {
 		this.#planetObject = _planetObject;
+		let perc = 0;
+		if (this.curState) 
+		{
+			perc = 1;
+		} else {
+			perc = Math.max((7 - this.daysSinceLastCompletion) / 7 * 0.5, 0);
+		}
+		this.#planetObject.animateMeshToCompletionState(perc);
 	}
 
 	todoOnDate(_date) {

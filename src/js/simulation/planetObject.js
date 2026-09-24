@@ -47,10 +47,13 @@ export default class PlanetObject {
 		App.simulation.camera.deFocus();
 		App.simulation.spotLight.hide();
 	}
+
+	animateMeshToCompletionState(_perc) {}
 	
 	playStateChangeAnimation(_newState) {
 		this.focus();
-		setTimeout(() => this.deFocus(), 2500);
+		setTimeout(() => this.animateMeshToCompletionState(_newState ? 1 : 0), 500);
+		setTimeout(() => this.deFocus(), 3000);
 	}
 }
 

@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
-
-
 import { Perlin, random } from '../random.js';
 import Planet from './planet.js';
 import { generatePatchGeometry } from './geometryGenerator.js';
 import PlanetObject from './planetObject.js'
+import { animateSigmoidally } from '../animator.js';
 
 export default class Rose extends PlanetObject {
 	#mesh;
@@ -264,8 +263,6 @@ export default class Rose extends PlanetObject {
 
 	#createFlowerMesh() {
 		const topStemOffset = this.#stemOffsetFunc(1);
-		const topStemOffsetDy = this.#stemOffsetFunc(1 + 0.01);
-		let stemNormal = new THREE.Vector3(topStemOffsetDy[0] - topStemOffset[0], 0.01 * this.#flowerHeight, topStemOffsetDy[1] - topStemOffset[1]).normalize();
 
 		const innerPetalCount = 3;
 		const layerCount = 3;
@@ -304,20 +301,30 @@ export default class Rose extends PlanetObject {
 		mesh.position.y = pos[1];
 		mesh.position.z = pos[2];
 
-		const normal = new THREE.Vector3(
+		
+		mesh.castShadow = true;
+		mesh.receiveShadow = true;
+		return mesh;
+	}
+	#setFlowerAngles(_angles) { // []
+		// const topStemOffset = this.#stemOffsetFunc(1);
+		// const topStemOffsetDy = this.#stemOffsetFunc(1 + 0.01);
+		// let stemNormal = new THREE.Vector3(
+		// 	topStemOffsetDy[0] - topStemOffset[0], 
+		// 	0.01 * this.#flowerHeight, 
+		// 	topStemOffsetDy[1] - topStemOffset[1]
+		// ).normalize();
+
+		const planetNormal = new THREE.Vector3(
 			Math.sin(this.position[1]) * Math.cos(this.position[0]), 
 			Math.cos(this.position[1]), 
 			Math.sin(this.position[1]) * Math.sin(this.position[0])
 		);
 
-		const quaternion = new THREE.Quaternion();
-		quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal.addScaledVector(stemNormal, 1));
-		mesh.quaternion.copy(quaternion);
-		mesh.castShadow = true;
-		mesh.receiveShadow = true;
-		return mesh;
+    	let quaternion = orientFlowerHead(planetNormal, ..._angles)
+		this.#flowerMesh.quaternion.copy(quaternion);
 	}
-
+	setFlowerAngles(_angles) {return this.#setFlowerAngles(_angles)}
 
 
 	#generateMesh() {
@@ -333,12 +340,76 @@ export default class Rose extends PlanetObject {
 		this.#mesh.position.x = 0;
 		this.#mesh.position.z = 0;
 		this.#mesh.position.y = 0;
+
+		this.#setFlowerAngles([Math.PI * 0.5, Math.PI * 0.5]);
 	}
 
 	update() {
-		
+
+	}
+
+	#curFlowerHeadAngle = 0.5 * Math.PI;
+
+	#animateFlowerHeadToAngle(_angle) {
+		// Angle = 0.5 pi : straight out from the planet
+		// 0: 90 degree perp to planet -> upwards
+		// pi: 90 degree perp to planet -> downwards
+		let prevAngle = this.#curFlowerHeadAngle;
+		this.#curFlowerHeadAngle = _angle;
+
+		// let baseAngle = Math.PI  * 0.5
+		animateSigmoidally(1000, (_perc) => this.#setFlowerAngles([Math.PI * 0.5, prevAngle + (_angle - prevAngle) * _perc]));
+	}
+
+	animateMeshToCompletionState(_perc) {
+		let targetAngle = Math.PI * 0.5 + Math.PI * 0.5 * (1 - _perc);
+		this.#animateFlowerHeadToAngle(targetAngle);
 	}
 }
 
 
 
+
+
+
+function orientFlowerHead(planetNormal, theta, phi) {
+	const n = planetNormal.clone().normalize();
+
+	// Choose a fixed reference direction.
+	// This defines where theta = 0 is.
+	const reference = Math.abs(n.y) < 0.999
+		? new THREE.Vector3(0, 1, 0)
+		: new THREE.Vector3(1, 0, 0);
+
+	// Two axes tangent to the planet at this point
+	const tangentX = new THREE.Vector3()
+		.crossVectors(reference, n)
+		.normalize();
+
+	const tangentY = new THREE.Vector3()
+		.crossVectors(n, tangentX)
+		.normalize();
+
+	// Direction around the planet's local tangent plane
+	const tangentDirection = tangentX.clone()
+		.multiplyScalar(Math.cos(theta))
+		.add(
+		  tangentY.clone().multiplyScalar(Math.sin(theta))
+		);
+
+	// Combine horizontal tilt and outward/upward direction
+	const flowerDirection = tangentDirection
+		.multiplyScalar(Math.cos(phi))
+		.add(
+		  n.clone().multiplyScalar(Math.sin(phi))
+		)
+		.normalize();
+
+	const rotation = new THREE.Quaternion()
+		.setFromUnitVectors(
+		  new THREE.Vector3(0, 1, 0),
+		  flowerDirection
+		);
+
+	return rotation;
+}
