@@ -179,26 +179,26 @@ popup-element[openState="false"] .popup {
 habit-type-selector label {
 	margin-bottom: 10px;
 	cursor: pointer;
+	-webkit-user-select: none; /* Safari */
+	-ms-user-select: none; /* IE 10 and IE 11 */
+	user-select: none; /* Standard syntax */
 }
 habit-type-selector input {
-	opacity: 1;
+	opacity: 0;
 	cursor: pointer;
-	padding: 20px;
 	margin-right: 10px;
 }
 
-habit-type-selector input:after {
-	position: relative;
-	top: -4.5px;
-	left: -3px;
-	
-	content: '';
-	color: transparent;
-	font-size: 0px;
+habit-type-selector label:before {
+	position: absolute;
+	left: var(--horizontalPanelPadding);
+	margin-top: 1px;
 
-	transform: translate(-50%, -50%);
+	content: '';
+
+	width: 14px;
+	aspect-ratio: 1;
 	
-	padding: 7.5px 8px;
 	border-radius: 100%;
 
 	border: 1px solid #aaa;
@@ -208,20 +208,13 @@ habit-type-selector input:after {
 	transition: background .3s;
 }
 
-habit-type-selector input:checked:after {
-	background: #aaa;
-
-}
-habit-type-selector input[checked="true"] {
+habit-type-selector input:checked + label:before {
 	background: #aaa;
 }
 
-habit-type-selector label {
-	margin-bottom: 10px;
-}
 
 habit-type-selector label img {
-	height: 20px;
+	height: 15px;
 	width: auto;
 	margin-right: 5px;
 } 
@@ -229,9 +222,7 @@ habit-type-selector label img {
 habit-type-selector label {
 	font-size: 15px;
 }
-habit-type-selector label .typeName {
-	/*font-weight: bold;*/
-}
+
 habit-type-selector label .typeDescription {
 	color: #666;
 }
