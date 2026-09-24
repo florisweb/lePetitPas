@@ -47,22 +47,30 @@ export default class HabitInfoPanel extends HTMLElement {
       <img class='habitIconHolder'>
       <div class='habitNameHolder panelTitle'></div>
       <habit-state-dial></habit-state-dial>
-      <button class='editButton' filled>edit</button>
-      <button class='deleteButton' filled>delete</button>
-      <button class='skipButton' filled>Skip</button>
+      <img src='./images/editIcon.png' class='headerButton editButton'>
+      <img src='./images/removeIcon.png' class='headerButton deleteButton'>
+      <div class='buttonHolder'>
+        <button class='skipButton'>Skip</button>
+        <button class='completeButton' filled>Complete</button>
+      </div>
     `;
     this.stateDial = this.querySelector('habit-state-dial');
     this.querySelector('.skipButton').addEventListener('click', async () => {
-      await this.habit.setSkipStateOnDate(this.#date);
+      await this.#habit.setSkipStateOnDate(this.#date);
       this.#update();
     });
+    this.querySelector('.completeButton').addEventListener('click', async () => {
+      await this.#habit.setStateWithAnimation(true, this.#date); // TEMP
+      this.#update();
+    });
+
     this.querySelector('.deleteButton').addEventListener('click', async () => {
-      await HabitManager.remove(this.habit.id);
+      await HabitManager.remove(this.#habit.id);
       // TODO Add habit delete animation
       this.close();
     });
     this.querySelector('.editButton').addEventListener('click', async () => {
-      let habit = await App.habitEditPanel.openEdit(this.habit);
+      let habit = await App.habitEditPanel.openEdit(this.#habit);
       App.curOpenPanel = this;
       if (!habit) return;
       this.#habit = habit;

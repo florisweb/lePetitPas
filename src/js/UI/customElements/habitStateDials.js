@@ -56,7 +56,6 @@ export class HabitStateDial extends HTMLElement {
 
   animateToPerc(_perc) {
     let oldPerc = this.#curPerc;
-    console.log('animate', oldPerc, _perc)
     this.#curPerc = _perc;
     let newPerc = _perc;
     animateSigmoidally(500, (_perc) => this.#updateClipPath(oldPerc + _perc * (newPerc - oldPerc)));

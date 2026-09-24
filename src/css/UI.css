@@ -39,10 +39,10 @@ habit-info-panel {
 
 	display: grid;
 	grid-template-areas: 
-		"icon name"
-		"stateDial stateDial"
-		"skipButton skipButton";
-	grid-template-columns: 30px auto;
+		"icon name editButton deleteButton"
+		"stateDial stateDial stateDial stateDial"
+		"buttonHolder buttonHolder buttonHolder buttonHolder";
+	grid-template-columns: 30px auto 30px 30px;
 	grid-template-rows: 30px auto;
 	grid-row-gap: 15px;
 	grid-column-gap: 5px;
@@ -58,8 +58,38 @@ habit-info-panel .habitNameHolder {
 	grid-area: name;
 	line-height: 30px;
 }
+
+habit-info-panel .headerButton.editButton {
+	grid-area: editButton;
+	padding: 4px;
+}
+
+habit-info-panel .headerButton.deleteButton {
+	grid-area: deleteButton;
+}
+
+habit-info-panel .headerButton {
+	height: 100%;
+	width: auto;
+	padding: 3px;
+	opacity: 0.7;
+	margin-left: 10px;
+	cursor: pointer;
+}
+
+
+
+
+habit-info-panel .buttonHolder {
+	grid-area: buttonHolder;
+	display: flex;
+	justify-content: right;
+}
 habit-info-panel button.skipButton {
-	grid-area: skipButton;
+	display: inline;
+	min-width: 100px;
+}
+habit-info-panel button.completeButton {
 	display: inline;
 }
 
