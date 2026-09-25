@@ -31,6 +31,7 @@ export default class HabitEditPanel extends HTMLElement {
     this.#nameInputField.value = null;
     this.#descriptionInputField.value = null;
     this.#typeSelector.value = 'activeVulcano';
+    this.#valueTypeSelector.reset();
     return new Promise((resolve) => this.#editResolver = resolve);
   }
 
@@ -40,6 +41,7 @@ export default class HabitEditPanel extends HTMLElement {
     this.#nameInputField.value = this.#habit.name;
     this.#descriptionInputField.value = this.#habit.description;
     this.#typeSelector.value = _habit.type;
+    this.#valueTypeSelector.set(this.#habit.valueType, this.#habit.valueTypeConfig);
 
     return promise;
   }
@@ -74,6 +76,8 @@ export default class HabitEditPanel extends HTMLElement {
     this.#habit.name = this.#nameInputField.value;
     this.#habit.description = this.#descriptionInputField.value;
     this.#habit.type = this.#typeSelector.value;
+    this.#habit.valueType = this.#valueTypeSelector.valueType;
+    this.#habit.valueTypeConfig = this.#valueTypeSelector.config;
     await HabitManager.update(this.#habit);
     this.#editResolver(this.#habit);
     this.#close();

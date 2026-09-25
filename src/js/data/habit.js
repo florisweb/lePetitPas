@@ -15,6 +15,7 @@ export default class Habit extends DataObject {
 	}
 
 	valueType = 'check'; // check: 0, 1. count: 0 ... n, 
+	valueTypeConfig = {};
 
 	#stateHistory = []; // Format: {date, value}
 	createDate = new Date();
@@ -118,13 +119,14 @@ export default class Habit extends DataObject {
 
 
 
-	constructor({id, name, description, type, valueType, createDate, stateHistory, objectInfo} = {}) {
+	constructor({id, name, description, type, valueType, valueTypeConfig, createDate, stateHistory, objectInfo} = {}) {
 		super();
 		this.id = id ?? this.id;
 		this.name = name ?? this.name;
 		this.description = description ?? this.description;
 		this.type = type ?? this.type;
 		this.valueType = valueType ?? this.valueType;
+		this.valueTypeConfig = valueTypeConfig ?? this.valueTypeConfig;
 		this.createDate = new Date(createDate) ?? this.createDate;
 		this.#stateHistory = stateHistory || [];
 
@@ -165,6 +167,7 @@ export default class Habit extends DataObject {
 			description: this.description,
 			type: this.type,
 			valueType: this.valueType,
+			valueTypeConfig: this.valueTypeConfig,
 			createDate: this.createDate.getTime(),
 			stateHistory: this.#stateHistory,
 			objectInfo: this.objectInfo

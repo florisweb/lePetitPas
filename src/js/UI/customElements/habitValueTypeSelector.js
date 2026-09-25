@@ -13,7 +13,30 @@ export default class HabitValueTypeSelector extends HTMLElement {
     this.querySelector('select').value = _newValue;
   }
   get config() {
+    switch (this.valueType)
+    {
+      case "check": return {};
+      case "count": return {
+        maxCount: parseInt(this.querySelector('.configPage.count input').value)
+      }
+    }
+  }
+  set config(_config) {
+    switch (this.valueType)
+    {
+      case "check": break;
+      case "count":
+        this.querySelector('.configPage.count input').value = _config.maxCount || 1;
+      break;
+    }
+  }
 
+  reset() {
+    this.set('check', {});
+  }
+  set(_valueType, _config) {
+    this.valueType = _valueType;
+    this.config = _config;
   }
   
   constructor() {
@@ -29,7 +52,8 @@ export default class HabitValueTypeSelector extends HTMLElement {
       </select>
       <div class='configSelector'>
         <div class='configPage count hide'>
-          <input type='number' min='1'>
+          <label for='habitValueTypeSelector.count'>Maximum count</label>
+          <input type='number' min='1' id='habitValueTypeSelector.count'>
         </div>
       </div>
     `;
