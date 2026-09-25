@@ -32,8 +32,7 @@ habit-create-button .statusHolder {
 }
 
 	
-habit-element progress-dial,
-habit-create-button progress-dial {
+habit-element progress-dial {
 	--progressColor: #777;
 	--progressBackColor: #333;
 }
@@ -93,13 +92,19 @@ habit-create-button .title {
 	line-height: 35px;
 }
 habit-create-button .statusRing {
+	position: relative;
+	top: 50%;
+	left: 0px;
+	transform: translateY(-50%);
+	height: 22px;
+	aspect-ratio: 1;
+	border-radius: 100%;
 	border: 1.5px dashed #777;
 	line-height: 18px;
 	text-align: center;
 	color: #888;
 	font-size: 14px;
 }
-
 
 
 
