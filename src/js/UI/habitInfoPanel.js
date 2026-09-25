@@ -2,7 +2,7 @@
 import HabitManager from '../data/habitManager.js';
 import DatePlus from '../datePlus.js';
 import HabitList from './habitList.js';
-import { HabitStateDial } from './customElements/habitStateDials.js';
+import { HabitStateDialConstructors } from './customElements/habitStateDials.js';
 // Create a class for the element
 export default class HabitInfoPanel extends HTMLElement {
   static observedAttributes = ["openState"];
@@ -26,6 +26,8 @@ export default class HabitInfoPanel extends HTMLElement {
   open(_habit, _date) {
     this.#habit = _habit;
     this.#date = _date;
+    this.stateDial = new HabitStateDialConstructors[_habit.valueType];
+    this.append(this.stateDial);
     this.#update();
 
     App.curOpenPanel = this;
@@ -36,9 +38,8 @@ export default class HabitInfoPanel extends HTMLElement {
     this.openState = false;
     this.#habit?.planetObject.deFocus();
     this.#openStateResolver(false);
-    this.stateDial.reset();
+    this.stateDial.remove();
   }
-
 
   connectedCallback() {
     this.classList.add('UIPanel');
@@ -47,7 +48,6 @@ export default class HabitInfoPanel extends HTMLElement {
       <img class='habitIconHolder'>
       <div class='habitNameHolder panelTitle'></div>
       <div class='habitDescriptionHolder'></div>
-      <habit-state-dial></habit-state-dial>
       <img src='./images/editIcon.png' class='headerButton editButton'>
       <img src='./images/removeIcon.png' class='headerButton deleteButton'>
       <div class='buttonHolder'>
@@ -55,6 +55,7 @@ export default class HabitInfoPanel extends HTMLElement {
         <button class='completeButton' filled>Complete</button>
       </div>
     `;
+
     this.stateDial = this.querySelector('habit-state-dial');
     this.querySelector('.skipButton').addEventListener('click', async () => {
       await this.#habit.setSkipStateOnDate(this.#date);

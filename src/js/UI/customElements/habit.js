@@ -27,9 +27,23 @@ export default class HabitElement extends HTMLElement {
     `;
     this.#fillData();
     this.querySelector('.statusHolder').addEventListener('click', () => {
-      let oldState = this.getAttribute('curState') === 'true';
-      this.setAttribute('curState', !oldState);
-      this.#habit.setStateWithAnimation(!oldState, this.#date);
+      let oldState = this.getAttribute('curState');
+      let newState;
+      
+      switch (this.habit.valueType)
+      {
+        case "check":
+          newState = oldState === 'true' ? false : true;
+          break;
+        case "count":
+          let curState = parseInt(oldState) ?? 0;
+          newState = curState + 1;
+          if (newState > this.habit.valueTypeConfig.maxCount) newState = 0;
+          break;
+      }
+
+      this.setAttribute('curState', newState);
+      this.#habit.setStateWithAnimation(newState, this.#date);
 
       this.#fillData();
     });

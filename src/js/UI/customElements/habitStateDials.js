@@ -25,33 +25,6 @@ export class HabitStateDial extends HTMLElement {
 
     this.#updateClipPath(this.#curPerc);
   }
-  
-  updateState(_habit, _date) {
-    let state = _habit.getStateOnDate(_date);
-    let perc = 0;
-    let stateText = '';
-    let stateSubText = '';
-    this.classList.toggle('habitSkipped', state == Habit.HABIT_SKIPPED_VALUE);
-    if (state === Habit.HABIT_SKIPPED_VALUE)
-    {
-      perc = 1;
-      stateText = 'X';
-      stateSubText = 'SKIPPED';
-    } else {
-      switch (_habit.valueType)
-      {
-        case "check": 
-          perc = state ? 1 : 0; 
-          stateText = (state ? 1 : 0) + '/1';
-          stateSubText = state ? 'COMPLETED' : '';
-        break
-      }
-    }
-
-    this.querySelector('.valueHolder').innerHTML = stateText;
-    this.querySelector('.valueSubTextHolder').innerHTML = stateSubText;
-    this.animateToPerc(perc);
-  }
 
 
   animateToPerc(_perc) {
@@ -78,6 +51,67 @@ export class HabitStateDial extends HTMLElement {
     }
     this.querySelector('.progressRing.percVisualizer').style.clipPath = clipPath + ', 50% 50%)';
   }
+
+
+  updateState(_habit, _date) {
+    let state = _habit.getStateOnDate(_date);
+    let perc = 0;
+    let stateText = '';
+    let stateSubText = '';
+
+    this.classList.toggle('habitSkipped', state == Habit.HABIT_SKIPPED_VALUE);
+    if (state === Habit.HABIT_SKIPPED_VALUE)
+    {
+      perc = 1;
+      stateText = 'X';
+      stateSubText = 'SKIPPED';
+    }
+    this.querySelector('.valueHolder').innerHTML = stateText;
+    this.querySelector('.valueSubTextHolder').innerHTML = stateSubText;
+    this.animateToPerc(perc);
+  }
 }
 
-customElements.define("habit-state-dial", HabitStateDial);
+export class HabitStateDial_check extends HabitStateDial {
+  constructor() {
+    super();
+  }
+  
+  
+  updateState(_habit, _date) {
+    super.updateState(_habit, _date);
+    let state = _habit.getStateOnDate(_date) ?? 0;
+    if (state === Habit.HABIT_SKIPPED_VALUE) return;
+    
+    this.querySelector('.valueHolder').innerHTML = (state ? 1 : 0) + '/1';;
+    this.querySelector('.valueSubTextHolder').innerHTML = state ? 'COMPLETED' : '';;
+    this.animateToPerc(state ? 1 : 0);
+  }
+}
+
+customElements.define("habit-state-dial-check", HabitStateDial_check);
+
+
+export class HabitStateDial_count extends HabitStateDial {
+  constructor() {
+    super();
+  }
+  
+  updateState(_habit, _date) {
+    super.updateState(_habit, _date);
+    let state = _habit.getStateOnDate(_date) ?? 0;
+    if (state === Habit.HABIT_SKIPPED_VALUE) return;
+    
+    this.querySelector('.valueHolder').innerHTML = state + '/' + _habit.valueTypeConfig.maxCount;
+    this.querySelector('.valueSubTextHolder').innerHTML = state === _habit.valueTypeConfig.maxCount ? 'COMPLETED' : '';
+    this.animateToPerc(state / _habit.valueTypeConfig.maxCount);
+  }
+}
+
+customElements.define("habit-state-dial-count", HabitStateDial_count);
+
+
+export const HabitStateDialConstructors = {
+  "check": HabitStateDial_check,
+  "count": HabitStateDial_count,
+}
