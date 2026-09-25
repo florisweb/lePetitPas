@@ -14,7 +14,7 @@ export default class Habit extends DataObject {
 		position: [0, 0],
 	}
 
-	valueType = 'check'; // check: 0, 1. Count: 0 ... n, 
+	valueType = 'check'; // check: 0, 1. count: 0 ... n, 
 
 	#stateHistory = []; // Format: {date, value}
 	createDate = new Date();

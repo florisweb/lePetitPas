@@ -236,6 +236,35 @@ habit-type-selector hr {
 
 
 
+habit-value-type-selector {
+	border: 1px solid blue;
+}
+
+habit-value-type-selector select {
+	width: 100%;
+	background: none;
+	color: var(--textColor);
+}
+
+habit-value-type-selector .configSelector {
+	width: 100%;
+	border: 1px solid red;
+}
+
+
+habit-value-type-selector .configSelector .configPage {
+	border: 1px solid green;
+	transition: opacity .3s, margin-top .3s;
+}
+
+habit-value-type-selector .configSelector .configPage.hide {
+	margin-top: -10px;
+	pointer-events: none;
+	opacity: 0;
+}
+
+
+
 
 .habitStateDial {
 	position: relative;

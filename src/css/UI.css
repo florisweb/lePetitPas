@@ -168,6 +168,7 @@ habit-edit-panel.UIPanel {
 		"nameInput nameInput"
 		"descriptionInput descriptionInput"
 		"typeInput typeInput"
+		"valueTypeInput valueTypeInput"
 		"cancelButton saveButton";
 	grid-template-columns: 50% 50%;
 	grid-template-rows: 30px 30px auto 40px;
@@ -191,6 +192,12 @@ habit-edit-panel .descriptionField {
 
 habit-edit-panel habit-type-selector {
 	grid-area: typeInput;
+	margin-top: 10px;
+}
+
+
+habit-edit-panel habit-value-type-selector {
+	grid-area: valueTypeInput;
 	margin-top: 10px;
 }
 

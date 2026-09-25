@@ -2,7 +2,7 @@
 import HabitManager from '../data/habitManager.js';
 import Habit from '../data/habit.js';
 import HabitTypeSelector from './customElements/habitTypeSelector.js';
-
+import HabitValueTypeSelector from './customElements/HabitValueTypeSelector.js';
 
 export default class HabitEditPanel extends HTMLElement {
   static observedAttributes = ["openState"];
@@ -11,8 +11,8 @@ export default class HabitEditPanel extends HTMLElement {
   #editResolver;
   #nameInputField;
   #descriptionInputField;
-  #typeSelect;
   #typeSelector;
+  #valueTypeSelector;
 
   get openState() {
     return this.getAttribute('openState') === 'true';
@@ -52,12 +52,14 @@ export default class HabitEditPanel extends HTMLElement {
       <input class='nameField panelTitle inputField' placeholder='Habit name...'></input>
       <input class='descriptionField inputField' placeholder='Description...'></input>
       <habit-type-selector></habit-type-selector>
+      <habit-value-type-selector></habit-value-type-selector>
       <button class='saveButton' filled>Save</button>
       <button class='cancelButton'>cancel</button>
     `;
     this.#nameInputField = this.querySelector('.nameField');
     this.#descriptionInputField = this.querySelector('.descriptionField');
     this.#typeSelector = this.querySelector('habit-type-selector');
+    this.#valueTypeSelector = this.querySelector('habit-value-type-selector');
     this.querySelector('.saveButton').addEventListener('click', () => this.#save());
     this.querySelector('.cancelButton').addEventListener('click', () => this.#close());
   }
