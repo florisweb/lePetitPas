@@ -46,6 +46,7 @@ export default class HabitInfoPanel extends HTMLElement {
     this.innerHTML = `
       <img class='habitIconHolder'>
       <div class='habitNameHolder panelTitle'></div>
+      <div class='habitDescriptionHolder'></div>
       <habit-state-dial></habit-state-dial>
       <img src='./images/editIcon.png' class='headerButton editButton'>
       <img src='./images/removeIcon.png' class='headerButton deleteButton'>
@@ -83,6 +84,7 @@ export default class HabitInfoPanel extends HTMLElement {
     this.stateDial.updateState(this.#habit, this.#date);
 
     this.querySelector('.habitNameHolder').innerHTML = this.#habit.name;
+    this.querySelector('.habitDescriptionHolder').innerHTML = this.#habit.description;
 
     let src = '';
     switch (this.#habit.type) {

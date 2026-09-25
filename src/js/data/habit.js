@@ -6,7 +6,9 @@ export default class Habit extends DataObject {
 	static HABIT_SKIPPED_VALUE = "HABIT_SKIPPED";
 
 	id = Math.round(Math.random() * 100000000);
-	name = '' + Math.random();
+	name = '';
+	description = '';
+
 	type = 'activeVulcano';  // activeVulcano, inactiveVulcano, rose...
 	objectInfo = { // Specifies the information for rendering the planet object
 		position: [0, 0],
@@ -116,10 +118,11 @@ export default class Habit extends DataObject {
 
 
 
-	constructor({id, name, type, valueType, createDate, stateHistory, objectInfo} = {}) {
+	constructor({id, name, description, type, valueType, createDate, stateHistory, objectInfo} = {}) {
 		super();
 		this.id = id ?? this.id;
 		this.name = name ?? this.name;
+		this.description = description ?? this.description;
 		this.type = type ?? this.type;
 		this.valueType = valueType ?? this.valueType;
 		this.createDate = new Date(createDate) ?? this.createDate;
@@ -159,6 +162,7 @@ export default class Habit extends DataObject {
 		return {
 			id: this.id,
 			name: this.name,
+			description: this.description,
 			type: this.type,
 			valueType: this.valueType,
 			createDate: this.createDate.getTime(),

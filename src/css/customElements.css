@@ -228,7 +228,7 @@ habit-type-selector label a {
 }
 
 habit-type-selector label .typeDescription {
-	color: #666;
+	color: var(--secondaryTextColor);
 }
 habit-type-selector hr {
 	border: none;

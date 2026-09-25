@@ -40,10 +40,11 @@ habit-info-panel {
 	display: grid;
 	grid-template-areas: 
 		"icon name editButton deleteButton"
+		"description description description description"
 		"stateDial stateDial stateDial stateDial"
 		"buttonHolder buttonHolder buttonHolder buttonHolder";
 	grid-template-columns: 30px auto 30px 30px;
-	grid-template-rows: 30px auto;
+	grid-template-rows: 30px auto auto 50px;
 	grid-row-gap: 15px;
 	grid-column-gap: 5px;
 }
@@ -57,6 +58,16 @@ habit-info-panel .habitIconHolder {
 habit-info-panel .habitNameHolder {
 	grid-area: name;
 	line-height: 30px;
+}
+habit-info-panel .habitDescriptionHolder {
+	grid-area: description;
+	margin-top: -5px;
+	line-height: 20px;
+	font-size: 15px;
+	max-height: 40px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	color: var(--secondaryTextColor);
 }
 
 habit-info-panel .headerButton.editButton {
@@ -76,7 +87,6 @@ habit-info-panel .headerButton {
 	margin-left: 10px;
 	cursor: pointer;
 }
-
 
 
 
@@ -156,34 +166,41 @@ habit-edit-panel.UIPanel {
 	display: grid;
 	grid-template-areas: 
 		"nameInput nameInput"
+		"descriptionInput descriptionInput"
 		"typeInput typeInput"
 		"cancelButton saveButton";
 	grid-template-columns: 50% 50%;
-	grid-template-rows: 30px auto 40px;
-	grid-row-gap: 15px;
+	grid-template-rows: 30px 30px auto 40px;
 
 	padding-bottom: calc(var(--navBarHeight) + 40px);
 }
 
 
-habit-edit-panel .habitNameEditField {
+habit-edit-panel .nameField {
 	grid-area: nameInput;
-	background: none;
-	border: none;
-	border-radius: 0;
 	width: 100%;
-	padding-left: 0;
+}
+
+habit-edit-panel .descriptionField {
+	grid-area: descriptionInput;
+	font-size: 15px;
+	height: 30px;
+	margin-top: -5px;
+	color: var(--secondaryTextColor);
 }
 
 habit-edit-panel habit-type-selector {
 	grid-area: typeInput;
+	margin-top: 10px;
 }
 
 habit-edit-panel button.saveButton {
 	grid-area: saveButton;
+	margin-top: 15px;
 }
 habit-edit-panel button.cancelButton {
 	grid-area: cancelButton;
+	margin-top: 15px;
 }
 
 

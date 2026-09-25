@@ -10,6 +10,7 @@ export default class HabitEditPanel extends HTMLElement {
   #habit;
   #editResolver;
   #nameInputField;
+  #descriptionInputField;
   #typeSelect;
   #typeSelector;
 
@@ -28,6 +29,7 @@ export default class HabitEditPanel extends HTMLElement {
     App.curOpenPanel = this;
     this.#habit = new Habit();
     this.#nameInputField.value = null;
+    this.#descriptionInputField.value = null;
     this.#typeSelector.value = 'activeVulcano';
     return new Promise((resolve) => this.#editResolver = resolve);
   }
@@ -36,8 +38,8 @@ export default class HabitEditPanel extends HTMLElement {
     let promise = this.open();
     this.#habit = _habit;
     this.#nameInputField.value = this.#habit.name;
+    this.#descriptionInputField.value = this.#habit.description;
     this.#typeSelector.value = _habit.type;
-
 
     return promise;
   }
@@ -47,20 +49,19 @@ export default class HabitEditPanel extends HTMLElement {
     this.classList.add('UIPanel');
     this.openState = false;
     this.innerHTML = `
-      <input class='habitNameEditField panelTitle' placeholder='Habit name...'></input>
+      <input class='nameField panelTitle inputField' placeholder='Habit name...'></input>
+      <input class='descriptionField inputField' placeholder='Description...'></input>
       <habit-type-selector></habit-type-selector>
       <button class='saveButton' filled>Save</button>
       <button class='cancelButton'>cancel</button>
     `;
-    this.#nameInputField = this.querySelector('.habitNameEditField');
+    this.#nameInputField = this.querySelector('.nameField');
+    this.#descriptionInputField = this.querySelector('.descriptionField');
     this.#typeSelector = this.querySelector('habit-type-selector');
     this.querySelector('.saveButton').addEventListener('click', () => this.#save());
     this.querySelector('.cancelButton').addEventListener('click', () => this.#close());
   }
 
-  async #update() {
-    
-  }
 
   #close() {
     this.#editResolver(false);
@@ -69,6 +70,7 @@ export default class HabitEditPanel extends HTMLElement {
   
   async #save() {
     this.#habit.name = this.#nameInputField.value;
+    this.#habit.description = this.#descriptionInputField.value;
     this.#habit.type = this.#typeSelector.value;
     await HabitManager.update(this.#habit);
     this.#editResolver(this.#habit);
