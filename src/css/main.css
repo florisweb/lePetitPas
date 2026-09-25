@@ -9,12 +9,15 @@
 
 	--panelHeight: 330px;
 	--UIBorderRad: 10px;
-	--textColor: #ccc;
+	
 	/*--navBarHeight: 80px;*/
 	--navBarHeight: 0px;
 
-
+	--textColor: #ccc;
 	--secondaryTextColor: #666;
+
+	--habitCompletedColor: rgb(255, 200, 50);
+	--habitSkippedColor: rgb(255, 100, 0);
 }
 
 body {

@@ -1,9 +1,11 @@
 import App from '../../app.js';
+import ProgressDial from './progressDial.js';
 // Create a class for the element
 export default class HabitElement extends HTMLElement {
   static observedAttributes = ["curState"];
   #habit;
   #date;
+  #progressDial;
   get habit() {
     return this.#habit;
   }
@@ -16,16 +18,18 @@ export default class HabitElement extends HTMLElement {
     this.#habit = _habit;
   }
 
-
+  // <div class="statusRing"></div>
   connectedCallback() {
     this.innerHTML = `
       <div class="statusHolder">
-        <div class="statusRing"></div>
+        <progress-dial></progress-dial>
       </div>
       <div class="title">Piano spelen</div>
       <div class="subTitle">15:00 - 5 day streak</div>
     `;
+    this.#progressDial = this.querySelector('progress-dial');
     this.#fillData();
+    
     this.querySelector('.statusHolder').addEventListener('click', () => {
       let oldState = this.getAttribute('curState');
       let newState;
@@ -43,13 +47,14 @@ export default class HabitElement extends HTMLElement {
       }
 
       this.setAttribute('curState', newState);
+
       this.#habit.setStateWithAnimation(newState, this.#date);
 
       this.#fillData();
     });
 
     this.addEventListener('click', (_e) => {
-      if (_e.target.className.includes('status')) return;
+      if (_e.target.tagName === 'circle' || _e.target.tagName === 'svg' || _e.target.className?.includes('status')) return;
       this.dispatchEvent(
         new CustomEvent("onBodyClick", {
           detail: this,
@@ -59,10 +64,13 @@ export default class HabitElement extends HTMLElement {
       );
     });
   }
+
   #fillData() {
     this.querySelector('.title').innerHTML = this.#habit.name; // FIXME
     this.querySelector('.subTitle').innerHTML = this.#habit.getStreakLengthOnDate(this.#date) + ' day streak'; // FIXME
     this.setAttribute('curState', this.#habit.getStateOnDate(this.#date));
+    this.#progressDial.animateToPerc(this.#habit.getStatePercOnDate(this.#date));
+    this.setAttribute('fullyCompleted', this.#habit.wasFullyCompletedOnDate(this.#date));
   }
 
   disconnectedCallback() {

@@ -55,20 +55,19 @@ export class HabitStateDial extends HTMLElement {
 
   updateState(_habit, _date) {
     let state = _habit.getStateOnDate(_date);
-    let perc = 0;
     let stateText = '';
     let stateSubText = '';
 
     this.classList.toggle('habitSkipped', state == Habit.HABIT_SKIPPED_VALUE);
     if (state === Habit.HABIT_SKIPPED_VALUE)
     {
-      perc = 1;
       stateText = 'X';
       stateSubText = 'SKIPPED';
     }
     this.querySelector('.valueHolder').innerHTML = stateText;
     this.querySelector('.valueSubTextHolder').innerHTML = stateSubText;
-    this.animateToPerc(perc);
+
+    this.animateToPerc(_habit.getStatePercOnDate(_date));
   }
 }
 
@@ -83,9 +82,8 @@ export class HabitStateDial_check extends HabitStateDial {
     let state = _habit.getStateOnDate(_date) ?? 0;
     if (state === Habit.HABIT_SKIPPED_VALUE) return;
     
-    this.querySelector('.valueHolder').innerHTML = (state ? 1 : 0) + '/1';;
-    this.querySelector('.valueSubTextHolder').innerHTML = state ? 'COMPLETED' : '';;
-    this.animateToPerc(state ? 1 : 0);
+    this.querySelector('.valueHolder').innerHTML = (state ? 1 : 0) + '/1';
+    this.querySelector('.valueSubTextHolder').innerHTML = state ? 'COMPLETED' : '';
   }
 }
 
@@ -104,7 +102,6 @@ export class HabitStateDial_count extends HabitStateDial {
     
     this.querySelector('.valueHolder').innerHTML = state + '/' + _habit.valueTypeConfig.maxCount;
     this.querySelector('.valueSubTextHolder').innerHTML = state === _habit.valueTypeConfig.maxCount ? 'COMPLETED' : '';
-    this.animateToPerc(state / _habit.valueTypeConfig.maxCount);
   }
 }
 

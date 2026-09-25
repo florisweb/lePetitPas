@@ -71,6 +71,30 @@ export default class Habit extends DataObject {
 		return streakLength;
 	}
 
+	wasFullyCompletedOnDate(_date) {
+		let state = this.getStateOnDate(_date);
+    	if (state === Habit.HABIT_SKIPPED_VALUE) return 1;
+    	switch (this.valueType)
+    	{
+    		case "check": return state;
+    		case "count": return state === this.valueTypeConfig.maxCount;
+    	}
+    	return false;
+	}
+
+	getStatePercOnDate(_date) {
+		let state = this.getStateOnDate(_date);
+    	if (state === Habit.HABIT_SKIPPED_VALUE) return 1;
+    	switch (this.valueType)
+    	{
+    		case "check": return state === true ? 1 : 0;
+    		case "count": return (state ?? 0) / this.valueTypeConfig.maxCount;
+    	}
+    	return 0;
+	}
+
+
+
 	#findLatestStateItemOnDate(_date) {
 		let hist = this.#stateHistory.sort((a, b) => a.date < b.date);
 

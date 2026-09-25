@@ -19,27 +19,32 @@ habit-create-button {
 
 habit-element .statusHolder,
 habit-create-button .statusHolder {
+	position: relative;
 	grid-area: status;
 	cursor: pointer;
-}
-habit-element .statusRing,
-habit-create-button .statusRing {
-	position: relative;
+
 	top: 50%;
 	left: 0px;
 	transform: translateY(-50%);
-	border: 1.5px solid #777;
-	height: 22px;
+
+	width: 22px;
 	aspect-ratio: 1;
-	border-radius: 100%;
 }
 
-habit-element[curState="true"] .statusRing {
-	background: #555;
+	
+habit-element progress-dial,
+habit-create-button progress-dial {
+	--progressColor: #777;
+	--progressBackColor: #333;
 }
-habit-element[curState="HABIT_SKIPPED"] .statusRing {
-	background: #f00;
+
+habit-element[fullyCompleted="true"] progress-dial {
+	--progressColor: var(--habitCompletedColor) !important;
 }
+habit-element[curState="HABIT_SKIPPED"] progress-dial {
+	--progressColor: var(--habitSkippedColor);
+}
+
 
 habit-element .title,
 habit-create-button .title, {
@@ -290,12 +295,12 @@ habit-value-type-selector .configSelector .configPage.hide {
 .habitStateDial .progressRing.percVisualizer {
 	width: calc(2 * (var(--ringRad) - var(--dialBackgroundPadding)));
 	margin-top: calc(-2 * var(--ringRad) + var(--dialBackgroundPadding));
-	border: calc(var(--dialThickness)) solid rgb(255, 200, 50);
+	border: calc(var(--dialThickness)) solid var(--habitCompletedColor);
 	transition: border-color 0.3s;
 }
 
 .habitStateDial.habitSkipped .progressRing.percVisualizer {
-	border-color: rgb(255, 100, 0);
+	border-color: var(--habitSkippedColor);
 }
 
 
@@ -319,6 +324,53 @@ habit-value-type-selector .configSelector .configPage.hide {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+progress-dial {
+	--progressColor: #777;
+	--progressBackColor: #333;
+}
+
+progress-dial svg {
+	width: 100%;
+	height: 100%;
+	transform: rotate(-90deg);
+}
+
+progress-dial .progressBackground,
+progress-dial .progressBar {
+  	fill: none;
+  	stroke-width: 12;
+}
+
+progress-dial .progressBackground {
+  	stroke: var(--progressBackColor);
+}
+
+progress-dial .progressBar {
+	transition: stroke .3s;
+  	stroke: var(--progressColor);
+  	stroke-dasharray: 0 100;
+  	transition: stroke-dasharray 1s ease;
+}
 
 
 
