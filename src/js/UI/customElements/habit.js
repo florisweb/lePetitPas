@@ -40,7 +40,7 @@ export default class HabitElement extends HTMLElement {
           newState = oldState === 'true' ? false : true;
           break;
         case "count":
-          let curState = parseInt(oldState) ?? 0;
+          let curState = parseInt(oldState) || 0;
           newState = curState + 1;
           if (newState > this.habit.valueTypeConfig.maxCount) newState = 0;
           break;
