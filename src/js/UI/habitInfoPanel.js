@@ -67,8 +67,7 @@ export default class HabitInfoPanel extends HTMLElement {
     });
 
     this.querySelector('.deleteButton').addEventListener('click', async () => {
-      await HabitManager.remove(this.#habit.id);
-      // TODO Add habit delete animation
+      await this.#habit.delete();
       this.close();
     });
     this.querySelector('.editButton').addEventListener('click', async () => {

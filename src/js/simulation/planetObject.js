@@ -1,5 +1,7 @@
 import Planet from './planet.js';
 import App from '../app.js';
+import { animateLinearily } from '../animator.js';
+import { wait } from '../polyfill.js';
 
 export default class PlanetObject {
 	get relPosition() {
@@ -54,6 +56,21 @@ export default class PlanetObject {
 		this.focus();
 		setTimeout(() => this.animateMeshToCompletionState(_newState ? 1 : 0), 500);
 		setTimeout(() => this.deFocus(), 3000);
+	}
+
+	async delete() {
+		await this.animateDeletion();
+		this.mesh.parent.remove(this.mesh);
+	}
+
+	async animateDeletion() {
+		let duration = 500;
+		animateLinearily(duration, (_perc) => {
+			this.mesh.scale.x = (1 - _perc);
+			this.mesh.scale.y = (1 - _perc);
+			this.mesh.scale.z = (1 - _perc);
+		});
+		return wait(duration);
 	}
 }
 

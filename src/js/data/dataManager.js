@@ -20,7 +20,7 @@ export default class DataManager {
 		return this.writeData();
 	}
 	
-	remove(_id) {
+	delete(_id) {
 		this._data = this._data.filter((_item) => _item.id !== _id);
 		return this.writeData();
 	}

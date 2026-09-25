@@ -43,12 +43,10 @@ export default class Habit extends DataObject {
 	}
 	resetStateHistory() {
 		this.#stateHistory = [];
-		HabitManager.update(this);
+		return this.update();
 	}
 
-	get curStreakLength() {
-		return this.getStreakLengthOnDate(new Date());
-	}
+	
 	get daysSinceLastCompletion() {
 		let hist = this.#stateHistory.sort((a, b) => a.date < b.date);
 		if (!hist[0]) return Infinity;
@@ -134,7 +132,7 @@ export default class Habit extends DataObject {
 				value: _newState
 			});
 		}
-		HabitManager.update(this);
+		return this.update();
 	}
 
 	setSkipStateOnDate(_date) {
@@ -166,6 +164,14 @@ export default class Habit extends DataObject {
 			this.objectInfo.radius = 4;
 			this.objectInfo.height = 5;
 		}
+	}
+
+	async update() {
+	    await HabitManager.update(this);
+	}
+	async delete() {
+		if (this.#planetObject) await this.#planetObject.delete();
+		return await HabitManager.delete(this.id);
 	}
 
 	setPlanetObject(_planetObject) {

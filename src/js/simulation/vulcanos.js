@@ -4,7 +4,6 @@ import Planet from './planet.js';
 import { generatePatchGeometry } from './geometryGenerator.js';
 import PlanetObject from './planetObject.js'
 
-
 export default class BaseVulcano extends PlanetObject {
 	_mesh;
 	_vulcMesh;
@@ -13,6 +12,7 @@ export default class BaseVulcano extends PlanetObject {
 	_height;
 	_radius;
 	#creationTime = Date.now() + Math.random() * 1000;
+	#removalTime;
 
 	constructor({position, radius, height}, _planet) {
 		super(position, _planet)

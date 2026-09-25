@@ -78,7 +78,7 @@ export default class HabitEditPanel extends HTMLElement {
     this.#habit.type = this.#typeSelector.value;
     this.#habit.valueType = this.#valueTypeSelector.valueType;
     this.#habit.valueTypeConfig = this.#valueTypeSelector.config;
-    await HabitManager.update(this.#habit);
+    await this.#habit.update();
     this.#editResolver(this.#habit);
     this.#close();
   }
