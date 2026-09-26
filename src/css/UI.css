@@ -50,17 +50,16 @@ habit-info-panel {
 	grid-column-gap: 5px;
 }
 
-habit-info-panel calendar-month {
-	grid-area: calendarMonth;
-}
 
-habit-info-panel .habitIconHolder {
+habit-info-panel .habitIconHolder,
+habit-overview-panel .habitIconHolder {
 	grid-area: icon;
 	height: 100%;
 	width: auto;
 	padding: 3px;
 }
-habit-info-panel .habitNameHolder {
+habit-info-panel .habitNameHolder,
+habit-overview-panel .habitNameHolder {
 	grid-area: name;
 	line-height: 30px;
 }
@@ -218,3 +217,19 @@ habit-edit-panel button.cancelButton {
 
 
 
+
+/* ------ HABIT OVERVIEW PANEL ------ */
+habit-overview-panel {
+	display: grid;
+	grid-template-areas: 
+		"icon name"
+		"calendarMonth calendarMonth ";
+	grid-template-columns: 30px auto;
+	grid-template-rows: 30px auto;
+	grid-row-gap: 15px;
+	grid-column-gap: 5px;
+}
+
+habit-overview-panel calendar-month {
+	grid-area: calendarMonth;
+}

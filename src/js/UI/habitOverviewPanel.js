@@ -27,7 +27,7 @@ export default class HabitOverviewPanel extends HTMLElement {
 
   open(_habit, _date) {
     this.#habit = _habit;
-    this.#date = _date;
+    this.#date = new DatePlus(_date);
     this.#update();
 
     App.curOpenPanel = this;
@@ -64,7 +64,18 @@ export default class HabitOverviewPanel extends HTMLElement {
   }
 
   #update() {
-   this.#calendarMonth.update(this.#date);
+    this.#calendarMonth.update(this.#date);
+
+    this.querySelector('.habitNameHolder').innerHTML = this.#habit.name + ' - ' + this.#date.getMonthName();
+
+    let src = '';
+    switch (this.#habit.type) {
+      case "inactiveVulcano": src = './images/inactiveVulcanoIcon.png'; break;
+      case "rose": src = './images/roseIcon.png'; break;
+      default:
+      case "activeVulcano": src = './images/activeVulcanoIcon.png'; break;
+    }
+    this.querySelector('.habitIconHolder').setAttribute('src', src);
   }
 }
 
