@@ -92,7 +92,7 @@ export default class HabitOverviewPanel extends HTMLElement {
   }
 
   #update() {
-    this.pageHolder.update();
+    this.pageHolder.resetRelOffset();
     this.#updatePageTitle(this.#date);
 
     let src = '';
