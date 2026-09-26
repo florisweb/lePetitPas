@@ -1,7 +1,7 @@
 
 
 export default class DatePlus extends Date {
-    static monthNames = ["January", "February", "March", "April", "June", "July", "August", "September", "October", "November", "December"];
+    static monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     static dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     get isLeapYear() {
         let year = this.getFullYear();
