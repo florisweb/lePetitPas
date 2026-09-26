@@ -1,7 +1,8 @@
 // Create a class for the element
 export default class Popup extends HTMLElement {
   static observedAttributes = ["openState"];
-  constructor(_habit) {
+  _resolveOnOpenPromise;
+  constructor() {
     super();
     // this.attachShadow({ mode: 'open' });
     // this.shadowRoot.innerHTML = ``;
@@ -13,14 +14,24 @@ export default class Popup extends HTMLElement {
   }
   set openState(_newState) {
     this.setAttribute('openState', _newState);
+    if (!_newState && this._resolveOnOpenPromise) this._resolveOnOpenPromise(false);
   }
 
+  close() {
+    this.openState = false;
+  }
+
+  open() {
+    this.openState = true;
+    return new Promise((resolve) => this._resolveOnOpenPromise = resolve);
+  }
+
+
   connectedCallback() {
+    this.classList.add('UIPopup');
     this.innerHTML = `
       <div class='popupOverlay'>
-        <div class='popup'>
-          Hey
-        </div>
+        <div class='popup'></div>
       </div>
     `;
     this.openState = false;

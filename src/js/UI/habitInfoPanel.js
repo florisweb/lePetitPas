@@ -4,12 +4,14 @@ import DatePlus from '../datePlus.js';
 import HabitList from './habitList.js';
 import { HabitStateDialConstructors } from './customElements/habitStateDials.js';
 import App from '../app.js';
+import QuestionPopup from './customElements/questionPopup.js';
 
 
 export default class HabitInfoPanel extends HTMLElement {
   static observedAttributes = ["openState"];
 
   #openStateResolver;
+  #youSureDeletePopup;
 
   #habit;
   #date = new Date();
@@ -23,6 +25,9 @@ export default class HabitInfoPanel extends HTMLElement {
   
   constructor() {
     super();
+
+    this.#youSureDeletePopup = new QuestionPopup();
+    this.#youSureDeletePopup.positiveButtonText = 'Delete';
   }
 
   open(_habit, _date) {
@@ -60,9 +65,9 @@ export default class HabitInfoPanel extends HTMLElement {
     `;
 
 
+    document.body.append(this.#youSureDeletePopup);
 
     this.stateDial = this.querySelector('habit-state-dial');
-    
 
     this.querySelector('.infoButton').addEventListener('click', async () => {
       await App.habitOverviewPanel.open(this.#habit, this.#date);
@@ -79,6 +84,10 @@ export default class HabitInfoPanel extends HTMLElement {
     });
 
     this.querySelector('.deleteButton').addEventListener('click', async () => {
+      this.#youSureDeletePopup.title = 'Are you sure?';
+      this.#youSureDeletePopup.text = `Are you sure you want to delete ${this.#habit.name}? This action is irreversible.`;
+      let answer = await this.#youSureDeletePopup.open();
+      if (!answer) return;
       await this.#habit.delete();
       this.close();
     });

@@ -111,7 +111,7 @@ habit-list {
 
 
 
-popup-element .popupOverlay {
+.UIPopup .popupOverlay {
 	position: fixed;
 	left: 0;
 	top: 0;
@@ -123,12 +123,12 @@ popup-element .popupOverlay {
 	transition: opacity 0.3s;
 }
 
-popup-element[openState="false"] .popupOverlay {
+.UIPopup[openState="false"] .popupOverlay {
 	opacity: 0;
 	pointer-events: none;
 }
 
-popup-element .popup {
+.UIPopup .popup {
 	position: relative;
 	top: 50vh;
 	margin: auto;
@@ -144,10 +144,57 @@ popup-element .popup {
 	box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
 	transition: opacity 0.3s, transform 0.3s;
 }
-popup-element[openState="false"] .popup {
+.UIPopup[openState="false"] .popup {
 	opacity: 0;
 	transform: translateY(-50%) scale(0.8);
 }
+
+.UIPopup .popup .titleHolder {
+	font-size: 18px;
+	color: #333;
+}
+
+
+
+
+
+
+question-popup-element.UIPopup .popup {
+	display: grid;
+	grid-template-areas: 
+		'title title title'
+		'text text text'
+		'. cancelButton positiveButton';
+
+	grid-template-rows: 20px auto 40px;
+	grid-template-columns: auto auto auto;
+	grid-row-gap: 10px;
+	padding: 20px 30px;
+}
+
+question-popup-element .popup .titleHolder {
+	grid-area: title;
+}
+
+question-popup-element .popup .textHolder {
+	grid-area: text;
+	font-size: 15px;
+	margin-bottom: 5px;
+}
+
+
+question-popup-element .popup button.cancelButton {
+	grid-area: cancelButton;
+}
+
+
+question-popup-element .popup button.positiveButton {
+	grid-area: positiveButton;
+}
+
+
+
+
 
 
 
