@@ -416,7 +416,7 @@ calendar-month .day.header {
 
 
 calendar-month .day.otherMonth {
-	opacity: 0.3;
+	opacity: 0.2;
 }
 
 calendar-month .day .progessHolder {
@@ -432,6 +432,10 @@ calendar-month .day .progessHolder .dateHolder {
 	height: 0;
 	margin-top: 50%;
 	transform: translateY(-3px);
+}
+calendar-month .day.today .progessHolder .dateHolder {
+	font-weight: bolder;
+	color: #fff;
 }
 
 calendar-month .day .progessHolder habit-progress-dial {

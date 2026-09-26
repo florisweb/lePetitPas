@@ -60,7 +60,8 @@ export default class HabitListPanel extends HTMLElement {
     this.append(this.pageHolder);
     
     this.pageHolder.mainPage[1].addEventListener('onBodyClick', async (_event) => { // Bubbles form habits 
-      await App.habitInfoPanel.open(_event.detail.habit, this.date);
+      let curDate = new DatePlus(this.#date.getTime() + this.pageHolder.curOffset * 24 * 60 * 60 * 1000);
+      await App.habitInfoPanel.open(_event.detail.habit, curDate);
       this.open();
       this.#update();
     });

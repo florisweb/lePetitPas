@@ -55,9 +55,10 @@ export default class CalendarMonthElement extends HTMLElement {
     let dayElements = this.querySelectorAll('.day:not(.header)');
     for (let i = 0; i < dayElements.length; i++)
     {
-      let curDate = new Date(this.#date.getTime() + 1000 * 60 * 60 * 24 * (i - monthOffset));
+      let curDate = new DatePlus(this.#date.getTime() + 1000 * 60 * 60 * 24 * (i - monthOffset));
       let inCurMonth = !(i < monthOffset || i >= monthOffset + daysInMonth);
       dayElements[i].classList.toggle('otherMonth', !inCurMonth);
+      dayElements[i].classList.toggle('today', curDate.equalsDate(new Date()));
       dayElements[i].innerHTML = ``;
       dayElements[i].append(this.#dayContentsBuilder(curDate, inCurMonth))
     }

@@ -11,7 +11,7 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
     return this.#pages[Math.round((HorizontalInfiniteScroller.pageCount - 1) / 2)];
   }
 
-  get relOffset() {
+  get curOffset() {
     return this.#relOffset;
   }
   resetRelOffset() {

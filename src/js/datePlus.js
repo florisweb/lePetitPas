@@ -24,6 +24,10 @@ export default class DatePlus extends Date {
         let name = DatePlus.dayNames[this.getDay()];
         return _short ? name.substr(0, 3) : name;
     }
+
+    equalsDate(_date) {
+        return this.getDate() === _date.getDate() && this.getMonth() === _date.getMonth() && this.getFullYear() === _date.getFullYear();
+    }
 }
 window.DatePlus = DatePlus;
 
