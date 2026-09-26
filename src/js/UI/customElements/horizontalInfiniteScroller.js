@@ -6,6 +6,7 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
   #pages = [];
   #relOffset = 0; // Offset with respect to initial placement
 
+  #onOffsetChange;
   get mainPage() {
     return this.#pages[Math.round((HorizontalInfiniteScroller.pageCount - 1) / 2)];
   }
@@ -19,7 +20,7 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
   }
 
   
-  constructor({createPage}) {
+  constructor({createPage, onOffsetChange}) {
     super();
 
     for (let i = 0; i < HorizontalInfiniteScroller.pageCount; i++)
@@ -27,6 +28,7 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
       let page = createPage();
       this.#pages.push(page);
     }
+    this.#onOffsetChange = onOffsetChange;
   }
 
   async connectedCallback() {
@@ -64,11 +66,13 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
       this.parentNode.scrollLeft = 1 / HorizontalInfiniteScroller.pageCount * this.parentNode.scrollWidth;
       this.#relOffset -= 1;
       this.update();
+      if (this.#onOffsetChange) this.#onOffsetChange(this.#relOffset);
     } else if (perc > (1 - 1/HorizontalInfiniteScroller.pageCount) - margin)
     {
       this.parentNode.scrollLeft = 1 / HorizontalInfiniteScroller.pageCount * this.parentNode.scrollWidth;
       this.#relOffset += 1;
       this.update();
+      if (this.#onOffsetChange) this.#onOffsetChange(this.#relOffset);
     }
   }
 }

@@ -71,22 +71,6 @@ export default class HabitElement extends HTMLElement {
     this.#progressDial.animateToPerc(this.#habit.getStatePercOnDate(this.#date));
     this.#progressDial.update(this.#habit, this.#date);
   }
-
-  disconnectedCallback() {
-    console.log("Custom element removed from page.");
-  }
-
-  connectedMoveCallback() {
-    console.log("Custom element moved with moveBefore()");
-  }
-
-  adoptedCallback() {
-    console.log("Custom element moved to new page.");
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    console.log(`Attribute ${name} has changed.`);
-  }
 }
 
 customElements.define("habit-element", HabitElement);

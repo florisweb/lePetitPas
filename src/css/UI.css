@@ -211,17 +211,29 @@ habit-edit-panel button.cancelButton {
 
 
 /* ------ HABIT OVERVIEW PANEL ------ */
-habit-overview-panel {
+habit-overview-panel.UIPanel {
 	display: grid;
 	grid-template-areas: 
-		"icon name"
-		"calendarMonth calendarMonth ";
-	grid-template-columns: 30px auto;
+		". icon name ."
+		"calendarScroller calendarScroller calendarScroller calendarScroller";
+	grid-template-columns: var(--horizontalPanelPadding) 30px auto var(--horizontalPanelPadding);
 	grid-template-rows: 30px auto;
 	grid-row-gap: 15px;
 	grid-column-gap: 5px;
+	padding-left: 0;
+	padding-right: 0;
 }
 
-habit-overview-panel calendar-month {
-	grid-area: calendarMonth;
+habit-overview-panel .calendarHolder {
+	grid-area: calendarScroller;
+	width: 100%;
+	overflow: auto;
+	scroll-snap-type: x mandatory;
+	scrollbar-width: none;  /* Firefox */
 }
+
+
+
+
+
+

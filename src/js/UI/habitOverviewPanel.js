@@ -3,6 +3,7 @@ import DatePlus from '../datePlus.js';
 
 import CalendarMonthElement from './customElements/calendarMonth.js';
 import HabitProgressDial from './customElements/habitProgressDial.js';
+import HorizontalInfiniteScroller from './customElements/horizontalInfiniteScroller.js';
 
 // Create a class for the element
 export default class HabitOverviewPanel extends HTMLElement {
@@ -45,28 +46,54 @@ export default class HabitOverviewPanel extends HTMLElement {
     this.innerHTML = `
       <img class='habitIconHolder'>
       <div class='habitNameHolder panelTitle'></div>
+      <div class='calendarHolder'></div>
     `;
 
-    this.#calendarMonth = new CalendarMonthElement({dayContentsBuilder: (_date, _inCurMonth) => {
-      let element = document.createElement('div');
-      element.classList.add('progessHolder')
-      let dateHolder = document.createElement('div');
-      dateHolder.classList.add('dateHolder');
-      dateHolder.innerHTML = _date.getDate();
-      element.append(dateHolder);
-      let dial = new HabitProgressDial();
-      element.append(dial);
-      if (!this.#habit) return element;
-      dial.update(this.#habit, _date);
-      return element;
-    }});
-    this.append(this.#calendarMonth);
+
+    this.pageHolder = new HorizontalInfiniteScroller({
+      createPage: (_relPageIndex) => {
+        let calendarMonth = new CalendarMonthElement({dayContentsBuilder: (_date, _inCurMonth) => {
+          let element = document.createElement('div');
+          element.classList.add('progessHolder')
+          let dateHolder = document.createElement('div');
+          dateHolder.classList.add('dateHolder');
+          dateHolder.innerHTML = _date.getDate();
+          element.append(dateHolder);
+          let dial = new HabitProgressDial();
+          element.append(dial);
+          if (!this.#habit) return element;
+          dial.update(this.#habit, _date);
+          return element;
+        }});
+
+        calendarMonth.infScroll_updateContents = (_relPos) => {
+          let curDate = new DatePlus(this.#date);
+          curDate.setMonth(curDate.getMonth() + _relPos);
+          calendarMonth.update(curDate);
+        }
+
+        return calendarMonth;
+      },
+      onOffsetChange: (_newOffset) => {
+        let curDate = new DatePlus(this.#date);
+        curDate.setMonth(curDate.getMonth() + _newOffset);
+        this.#updatePageTitle(curDate);
+      }
+    });
+
+    this.querySelector('.calendarHolder').append(this.pageHolder);
+  }
+
+  #updatePageTitle(_date = this.#date) {
+    this.querySelector('.habitNameHolder').innerHTML = 
+      this.#habit.name + ' - ' + 
+      _date.getMonthName() + ' ' + 
+      (_date.getFullYear() !== this.#date.getFullYear() ? _date.getFullYear() : '');
   }
 
   #update() {
-    this.#calendarMonth.update(this.#date);
-
-    this.querySelector('.habitNameHolder').innerHTML = this.#habit.name + ' - ' + this.#date.getMonthName();
+    this.pageHolder.update();
+    this.#updatePageTitle(this.#date);
 
     let src = '';
     switch (this.#habit.type) {
