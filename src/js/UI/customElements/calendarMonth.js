@@ -27,6 +27,14 @@ export default class CalendarMonthElement extends HTMLElement {
 
  
   connectedCallback() {
+    for (let d = 0; d < 7; d++)
+    {
+      let element = document.createElement('div');
+      element.className = 'day header';
+      element.innerHTML = DatePlus.dayNames[(d + 1) % 7].substr(0, 2);
+      this.appendChild(element);
+    } 
+
     for (let w = 0; w < 5; w++)
     {
       for (let d = 0; d < 7; d++)
@@ -44,7 +52,7 @@ export default class CalendarMonthElement extends HTMLElement {
     if (monthOffset < 0) monthOffset += 7;
     const daysInMonth = this.#date.daysInMonth;
 
-    let dayElements = this.querySelectorAll('.day');
+    let dayElements = this.querySelectorAll('.day:not(.header)');
     for (let i = 0; i < dayElements.length; i++)
     {
       let curDate = new Date(this.#date.getTime() + 1000 * 60 * 60 * 24 * (i - monthOffset));

@@ -396,15 +396,25 @@ habit-progress-dial[curState="HABIT_SKIPPED"] {
 
 calendar-month {
 	display: grid;
-	grid-template-columns: repeat(7, auto);
+	grid-template-columns: repeat(7, calc(100% / 7));
 	grid-template-rows: repeat(5, auto);
 }
 calendar-month .day {
 	aspect-ratio: 1;
 	text-align: center;
-	border-bottom: 1px solid #333;
-	border-right: 1px solid #333;
 }
+calendar-month .day.header {
+	height: 30px;
+	aspect-ratio: revert;
+
+	line-height: 25px;
+	color: var(--secondaryTextColor);
+	font-size: 15px;
+	border-bottom: 1px solid #333;
+	margin: 0 2px;
+}	
+
+
 calendar-month .day.otherMonth {
 	opacity: 0.3;
 }
