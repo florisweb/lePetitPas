@@ -75,11 +75,10 @@ export default class HabitListPanel extends HTMLElement {
       App.simulation.camera.putObjectInFocus(habitObject);
       setTimeout(() => App.simulation.camera.deFocus(), 3500);
     });
-    
   }
 
   #update() {
-    // TODO
+    this.pageHolder.update();
   }
 }
 

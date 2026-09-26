@@ -15,7 +15,7 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
   }
   resetRelOffset() {
     this.#relOffset = 0;
-    this.#update();
+    this.update();
   }
 
   
@@ -45,10 +45,10 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
     
     this.parentNode.addEventListener('scroll', () => this.#onScroll());
     this.parentNode.scrollLeft = 1 / this.constructor.pageCount * this.scrollWidth;
-    this.#update();
+    this.update();
   }
 
-  #update() {  
+  update() {  
     for (let i = 0; i < this.#pages.length; i++)
     {
       let curVal = this.#relOffset + i - Math.round((HorizontalInfiniteScroller.pageCount - 1) / 2);
@@ -63,12 +63,12 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
     {
       this.parentNode.scrollLeft = 1 / HorizontalInfiniteScroller.pageCount * this.parentNode.scrollWidth;
       this.#relOffset -= 1;
-      this.#update();
+      this.update();
     } else if (perc > (1 - 1/HorizontalInfiniteScroller.pageCount) - margin)
     {
       this.parentNode.scrollLeft = 1 / HorizontalInfiniteScroller.pageCount * this.parentNode.scrollWidth;
       this.#relOffset += 1;
-      this.#update();
+      this.update();
     }
   }
 }
