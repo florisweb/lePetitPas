@@ -41,7 +41,6 @@ const App = new class {
 		this.habitInfoPanel = new HabitInfoPanel();
 		this.habitEditPanel = new HabitEditPanel();
 		this.habitOverviewPanel = new HabitOverviewPanel();
-		this.curOpenPanel = this.habitListPanel;
 		this.simulation = new Simulation(this);
 	}
 
@@ -60,6 +59,7 @@ const App = new class {
 			if (this.habitInfoPanel.openState) this.habitInfoPanel.close();
 			if (this.habitOverviewPanel.openState) this.habitOverviewPanel.close();
 		});
+		this.curOpenPanel = this.habitListPanel;
 	}
 }
 

@@ -1,4 +1,4 @@
-
+import { wait } from '../../polyfill.js';
 
 export default class HorizontalInfiniteScroller extends HTMLElement {
   static observedAttributes = [];
@@ -8,7 +8,10 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
 
   #onOffsetChange;
   get mainPage() {
-    return this.#pages[Math.round((HorizontalInfiniteScroller.pageCount - 1) / 2)];
+    return this.#pages[this.mainPageIndex];
+  }
+  get mainPageIndex() {
+    return Math.round((HorizontalInfiniteScroller.pageCount - 1) / 2)
   }
 
   get curOffset() {
@@ -53,27 +56,30 @@ export default class HorizontalInfiniteScroller extends HTMLElement {
   update() {  
     for (let i = 0; i < this.#pages.length; i++)
     {
-      let curVal = this.#relOffset + i - Math.round((HorizontalInfiniteScroller.pageCount - 1) / 2);
+      let curVal = this.#relOffset + i - this.mainPageIndex;
       this.#pages[i].infScroll_updateContents(curVal);
     }
   }
 
-  #onScroll() {
+  async #onScroll() {
     let perc = this.parentNode.scrollLeft / this.parentNode.scrollWidth;
     const margin = 0.001;
+
     if (perc < margin)
     {
-      this.parentNode.scrollLeft = 1 / HorizontalInfiniteScroller.pageCount * this.parentNode.scrollWidth;
-      this.#relOffset -= 1;
-      this.update();
-      if (this.#onOffsetChange) this.#onOffsetChange(this.#relOffset);
+      this.#shiftPages(-1);
     } else if (perc > (1 - 1/HorizontalInfiniteScroller.pageCount) - margin)
     {
-      this.parentNode.scrollLeft = 1 / HorizontalInfiniteScroller.pageCount * this.parentNode.scrollWidth;
-      this.#relOffset += 1;
-      this.update();
-      if (this.#onOffsetChange) this.#onOffsetChange(this.#relOffset);
+      this.#shiftPages(1);
     }
+  }
+
+ 
+  async #shiftPages(_dx) {
+    this.parentNode.scrollLeft = 1 / HorizontalInfiniteScroller.pageCount * this.parentNode.scrollWidth;
+    this.#relOffset += _dx;
+    this.update();
+    if (this.#onOffsetChange) this.#onOffsetChange(this.#relOffset);
   }
 }
 
