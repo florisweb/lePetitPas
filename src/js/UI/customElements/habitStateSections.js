@@ -2,11 +2,12 @@ import App from '../../app.js';
 import { animateSigmoidally } from '../../animator.js';
 import Habit from '../../data/habit.js';
 
-export class HabitStateDial extends HTMLElement {
+export class HabitStateSection extends HTMLElement {
   constructor() {
     super();
   }
   #curPerc = 0;
+  _curState;
 
   reset() {
     this.#curPerc = 0;
@@ -14,15 +15,18 @@ export class HabitStateDial extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add('habitStateDial')
+    this.classList.add('habitStateSection')
     this.innerHTML = `
-      <div class='progressRing backgroundTrack'>
-        <div class='valueHolder'></div>
-        <div class='valueSubTextHolder'></div>
+      <div class='leftPanel'></div>
+      <div class='progressRingHolder'>
+        <div class='progressRing backgroundTrack'>
+          <div class='valueHolder'></div>
+          <div class='valueSubTextHolder'></div>
+        </div>
+        <div class='progressRing percVisualizer'></div>
       </div>
-      <div class='progressRing percVisualizer'></div>
+      <div class='rightPanel'></div>
     `; 
-
     this.#updateClipPath(this.#curPerc);
   }
 
@@ -55,6 +59,7 @@ export class HabitStateDial extends HTMLElement {
 
   updateState(_habit, _date) {
     let state = _habit.getStateOnDate(_date);
+    this._curState = state;
     let stateText = '';
     let stateSubText = '';
 
@@ -71,11 +76,14 @@ export class HabitStateDial extends HTMLElement {
   }
 }
 
-export class HabitStateDial_check extends HabitStateDial {
+export class HabitStateSection_check extends HabitStateSection {
   constructor() {
     super();
   }
   
+  connectedCallback() {
+    super.connectedCallback();
+  }
   
   updateState(_habit, _date) {
     super.updateState(_habit, _date);
@@ -87,17 +95,45 @@ export class HabitStateDial_check extends HabitStateDial {
   }
 }
 
-customElements.define("habit-state-dial-check", HabitStateDial_check);
+customElements.define("habit-state-section-check", HabitStateSection_check);
 
 
-export class HabitStateDial_count extends HabitStateDial {
+export class HabitStateSection_count extends HabitStateSection {
   constructor() {
     super();
   }
+  connectedCallback() {
+    super.connectedCallback();
+    let leftPanel = this.querySelector('.leftPanel');
+    leftPanel.innerHTML = `
+      <div class='textButton'>-</div>
+    `;
+    leftPanel.addEventListener('click', () => {
+      this.dispatchEvent(
+        new CustomEvent("stateChange", {detail: (this._curState ?? 0) - 1})
+      );
+    });
+
+    let rightPanel = this.querySelector('.rightPanel');
+    rightPanel.innerHTML = `
+      <div class='textButton'>+</div>
+    `;
+    rightPanel.addEventListener('click', () => {
+      this.dispatchEvent(
+        new CustomEvent("stateChange", {detail: (this._curState ?? 0) + 1})
+      );
+    });
+  }
+
+
   
   updateState(_habit, _date) {
     super.updateState(_habit, _date);
     let state = _habit.getStateOnDate(_date) ?? 0;
+    
+    this.querySelector('.leftPanel').classList.toggle('disabled', state <= 0 || state === Habit.HABIT_SKIPPED_VALUE);
+    this.querySelector('.rightPanel').classList.toggle('disabled', state >= _habit.valueTypeConfig.maxCount || state === Habit.HABIT_SKIPPED_VALUE);
+
     if (state === Habit.HABIT_SKIPPED_VALUE) return;
     
     this.querySelector('.valueHolder').innerHTML = state + '/' + _habit.valueTypeConfig.maxCount;
@@ -105,10 +141,10 @@ export class HabitStateDial_count extends HabitStateDial {
   }
 }
 
-customElements.define("habit-state-dial-count", HabitStateDial_count);
+customElements.define("habit-state-section-count", HabitStateSection_count);
 
 
-export const HabitStateDialConstructors = {
-  "check": HabitStateDial_check,
-  "count": HabitStateDial_count,
+export const HabitStateSectionConstructors = {
+  "check": HabitStateSection_check,
+  "count": HabitStateSection_count,
 }

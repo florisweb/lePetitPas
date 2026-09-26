@@ -2,7 +2,7 @@
 import HabitManager from '../data/habitManager.js';
 import DatePlus from '../datePlus.js';
 import HabitList from './habitList.js';
-import { HabitStateDialConstructors } from './customElements/habitStateDials.js';
+import { HabitStateSectionConstructors } from './customElements/habitStateSections.js';
 import App from '../app.js';
 import QuestionPopup from './customElements/questionPopup.js';
 
@@ -33,8 +33,12 @@ export default class HabitInfoPanel extends HTMLElement {
   open(_habit, _date) {
     this.#habit = _habit;
     this.#date = _date;
-    this.stateDial = new HabitStateDialConstructors[_habit.valueType];
-    this.append(this.stateDial);
+    this.stateSection = new HabitStateSectionConstructors[_habit.valueType];
+    this.stateSection.addEventListener('stateChange', async (_e) => {
+      await this.#habit.setStateWithAnimation(_e.detail);
+      this.#update();
+    });
+    this.append(this.stateSection);
     this.#update();
 
     App.curOpenPanel = this;
@@ -45,7 +49,7 @@ export default class HabitInfoPanel extends HTMLElement {
     this.openState = false;
     this.#habit?.planetObject.deFocus();
     this.#openStateResolver(false);
-    this.stateDial.remove();
+    this.stateSection.remove();
   }
 
   connectedCallback() {
@@ -60,14 +64,11 @@ export default class HabitInfoPanel extends HTMLElement {
       <div class='buttonHolder'>
         <button class='infoButton'>Info</button>
         <button class='skipButton'>Skip</button>
-        <button class='completeButton' filled>Complete</button>
       </div>
     `;
 
 
     document.body.append(this.#youSureDeletePopup);
-
-    this.stateDial = this.querySelector('habit-state-dial');
 
     this.querySelector('.infoButton').addEventListener('click', async () => {
       await App.habitOverviewPanel.open(this.#habit, this.#date);
@@ -76,10 +77,6 @@ export default class HabitInfoPanel extends HTMLElement {
 
     this.querySelector('.skipButton').addEventListener('click', async () => {
       await this.#habit.setSkipStateOnDate(this.#date);
-      this.#update();
-    });
-    this.querySelector('.completeButton').addEventListener('click', async () => {
-      await this.#habit.setStateWithAnimation(true, this.#date); // TEMP
       this.#update();
     });
 
@@ -102,7 +99,7 @@ export default class HabitInfoPanel extends HTMLElement {
 
   #update() {
     this.#habit.planetObject?.focus();
-    this.stateDial.updateState(this.#habit, this.#date);
+    this.stateSection.updateState(this.#habit, this.#date);
 
     this.querySelector('.habitNameHolder').innerHTML = this.#habit.name;
     this.querySelector('.habitDescriptionHolder').innerHTML = this.#habit.description;

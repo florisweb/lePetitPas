@@ -310,15 +310,22 @@ habit-value-type-selector .configSelector .configPage.hide {
 
 
 
-.habitStateDial {
+.habitStateSection {
 	position: relative;
-	width: 100%;
+	width: calc(100vw - 2 * var(--horizontalPanelPadding));
 	height: auto;
+
+	display: grid;
+	grid-template-areas: "leftPanel ring rightPanel";
+	grid-template-columns: auto 60% auto;
 }
 
-.habitStateDial .progressRing {
+.habitStateSection .progressRingHolder {
+	grid-area: ring;
+}
+.habitStateSection .progressRingHolder .progressRing {
 	position: relative;
-	--ringRad: 30%;
+	--ringRad: 50%;
 	--dialThickness: 10px;
 	--dialBackgroundPadding: 2px;
 	margin: auto;
@@ -327,48 +334,77 @@ habit-value-type-selector .configSelector .configPage.hide {
 	border-radius: 100%;
 }
 
-.habitStateDial .progressRing.backgroundTrack {
+.habitStateSection .progressRing.backgroundTrack {
 	border: calc(var(--dialThickness) + 2 * var(--dialBackgroundPadding)) solid #333;
 }
 
-.habitStateDial .progressRing.percVisualizer {
+.habitStateSection .progressRing.percVisualizer {
 	width: calc(2 * (var(--ringRad) - var(--dialBackgroundPadding)));
 	margin-top: calc(-2 * var(--ringRad) + var(--dialBackgroundPadding));
 	border: calc(var(--dialThickness)) solid var(--habitCompletedColor);
 	transition: border-color 0.3s;
 }
 
-.habitStateDial.habitSkipped .progressRing.percVisualizer {
+.habitStateSection.habitSkipped .progressRing.percVisualizer {
 	border-color: var(--habitSkippedColor);
 }
 
 
-.habitStateDial .progressRing.backgroundTrack {
+.habitStateSection .progressRing.backgroundTrack {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 }
-.habitStateDial .progressRing.backgroundTrack > * {
+.habitStateSection .progressRing.backgroundTrack > * {
 	text-align: center;
 }
-.habitStateDial .progressRing.backgroundTrack .valueHolder {
+.habitStateSection .progressRing.backgroundTrack .valueHolder {
 	font-size: 25px;
 	margin-bottom: 5px;
 }
-.habitStateDial .progressRing.backgroundTrack .valueSubTextHolder {
+.habitStateSection .progressRing.backgroundTrack .valueSubTextHolder {
 	font-size: 14px;
 	color: #555;
 }
 
 
+.habitStateSection .leftPanel {
+	grid-area: leftPanel;
+}
+.habitStateSection .rightPanel {
+	grid-area: rightPanel;
+}
+.habitStateSection .leftPanel, 
+.habitStateSection .rightPanel {
+	cursor: pointer;
+	transform: opacity .3s;
+
+	-webkit-user-select: none; /* Safari */
+	-ms-user-select: none; /* IE 10 and IE 11 */
+	user-select: none; /* Standard syntax */
+}
 
 
+habit-state-section-count .leftPanel.disabled,
+habit-state-section-count .rightPanel.disabled {
+	pointer-events: none;
+	opacity: 0.3;
+}
 
+habit-state-section-count .textButton {
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+	padding: 20px 0;
+	aspect-ratio: 1;
 
+	text-align: center;
+	font-size: 25px;
+}
 
-
-
-
+habit-state-section-count .leftPanel .textButton {
+	font-size: 32px;
+}
 
 
 

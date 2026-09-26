@@ -103,9 +103,7 @@ habit-info-panel button.skipButton {
 	display: inline;
 	min-width: 100px;
 }
-habit-info-panel button.completeButton {
-	display: inline;
-}
+
 
 habit-info-panel .habitStateDial {
 	grid-area: stateDial;
