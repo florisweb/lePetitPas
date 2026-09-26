@@ -141,16 +141,8 @@ habit-list-panel::-webkit-scrollbar {
 }
 
 
-habit-list-panel .tabHolder {
-	position: relative;
-	display: flex;
-	width: 300%;
+habit-list-panel horizontal-infinite-scroller {
 	margin-bottom: 30px;
-}
-habit-list-panel .dayTab {
-	padding: 0 30px;
-	scroll-snap-align: center;
-	width: 100vw;
 }
 
 

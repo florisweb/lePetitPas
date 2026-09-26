@@ -2,17 +2,16 @@ import HabitManager from '../data/habitManager.js';
 import DatePlus from '../datePlus.js';
 import HabitList from './habitList.js';
 import App from '../app.js';
-// Create a class for the element
+import HorizontalInfiniteScroller from './customElements/horizontalInfiniteScroller.js';
+
+
 export default class HabitListPanel extends HTMLElement {
   static observedAttributes = [];
-  #prevHabitList;
-  #curHabitList;
-  #nextHabitList;
-  #habitLists = [];
 
   #date = new DatePlus();
   set date(_date) {
     this.#date = new DatePlus(_date);
+    this.pageHolder.resetRelOffset();
     this.#update();
   }
   get date() {
@@ -33,15 +32,40 @@ export default class HabitListPanel extends HTMLElement {
   
   constructor() {
     super();
-    this.#prevHabitList = new HabitList([]);
-    this.#curHabitList = new HabitList([]);
-    this.#curHabitList.addEventListener('onBodyClick', async (_event) => { // Bubbles form habits 
+
+    this.pageHolder = new HorizontalInfiniteScroller({createPage: (_relPageIndex) => {
+      let dateHolder = document.createElement('div');
+      dateHolder.className = 'dateHolder panelTitle';
+      let habitList = new HabitList([]);
+      let pageContents = [
+        dateHolder,
+        habitList
+      ];
+
+      pageContents.infScroll_updateContents = (_relPos) => {
+        let curDate = new DatePlus(this.#date.getTime() + _relPos * 24 * 60 * 60 * 1000);
+        habitList.date = curDate;
+        habitList.habits = HabitManager.getHabitsOnDate(curDate);
+        dateHolder.innerHTML = curDate.getDayName() + ' ' + curDate.getDate() + ' ' + curDate.getMonthName();
+      }
+
+      return pageContents;
+    }});
+  }
+
+
+  async connectedCallback() {
+    this.classList.add('UIPanel');
+
+    this.append(this.pageHolder);
+    
+    this.pageHolder.mainPage[1].addEventListener('onBodyClick', async (_event) => { // Bubbles form habits 
       await App.habitInfoPanel.open(_event.detail.habit, this.date);
       this.open();
       this.#update();
     });
 
-    this.#curHabitList.addEventListener('onHabitCreateButtonClick', async () => {
+    this.pageHolder.mainPage[1].addEventListener('onHabitCreateButtonClick', async () => {
       let newHabit = await App.habitEditPanel.open();
       this.open();
       this.#update();
@@ -51,61 +75,11 @@ export default class HabitListPanel extends HTMLElement {
       App.simulation.camera.putObjectInFocus(habitObject);
       setTimeout(() => App.simulation.camera.deFocus(), 3500);
     });
-
-    this.#nextHabitList = new HabitList([]);
-    this.#habitLists = [this.#prevHabitList, this.#curHabitList, this.#nextHabitList];
-  }
-
-
-  async connectedCallback() {
-    this.classList.add('UIPanel');
-
-    this.innerHTML = `
-      <div class='tabHolder'>
-        <div class='dayTab prev'>
-          <div class='dateHolder panelTitle'></div>
-        </div>
-        <div class='dayTab cur'>
-          <div class='dateHolder panelTitle'></div>
-        </div>
-        <div class='dayTab next'>
-          <div class='dateHolder panelTitle'></div>
-        </div>
-      </div>
-    `;
-    for (let i = 0; i < this.#habitLists.length; i++)
-    {
-      this.querySelectorAll('.dayTab')[i].append(this.#habitLists[i]);
-    }
     
-    this.addEventListener('scroll', () => this.#onScroll());
-    this.scrollLeft = 1 / 3 * this.scrollWidth;
-    await HabitManager.isSetUp;
-    this.#update();
   }
 
-  #update() {  
-    for (let i = 0; i < this.#habitLists.length; i++)
-    {
-      let curDate = new DatePlus(this.#date.getTime() + (i - 1) * 24 * 60 * 60 * 1000);
-      this.#habitLists[i].date = curDate;
-      this.#habitLists[i].habits = HabitManager.getHabitsOnDate(curDate);
-      this.querySelectorAll('.dayTab .dateHolder')[i].innerHTML = curDate.getDayName() + ' ' + curDate.getDate() + ' ' + curDate.getMonthName();
-    }
-  }
-
-  #onScroll() {
-    let perc = this.scrollLeft / this.scrollWidth;
-    const margin = 0.001;
-    if (perc < margin)
-    {
-      this.scrollLeft = 1 / 3 * this.scrollWidth;
-      this.date = new DatePlus(this.#date.getTime() - 24 * 60 * 60 * 1000);
-    } else if (perc > 2 / 3 - margin)
-    {
-      this.scrollLeft = 1 / 3 * this.scrollWidth;
-      this.date = new DatePlus(this.#date.getTime() + 24 * 60 * 60 * 1000);
-    }
+  #update() {
+    // TODO
   }
 }
 

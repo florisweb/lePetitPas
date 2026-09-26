@@ -441,6 +441,36 @@ calendar-month .day .progessHolder habit-progress-dial {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+horizontal-infinite-scroller {
+	position: relative;
+	display: flex;
+	width: 300%;
+}
+
+horizontal-infinite-scroller .page {
+	padding: 0 30px;
+	scroll-snap-align: center;
+	width: 100vw;
+}
+
+
+
+
+
+
+
 /* ---- overwrite elements ---- */
 
 
