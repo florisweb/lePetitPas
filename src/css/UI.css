@@ -42,11 +42,16 @@ habit-info-panel {
 		"icon name editButton deleteButton"
 		"description description description description"
 		"stateDial stateDial stateDial stateDial"
-		"buttonHolder buttonHolder buttonHolder buttonHolder";
+		"buttonHolder buttonHolder buttonHolder buttonHolder"
+		"calendarMonth calendarMonth calendarMonth calendarMonth"; /*TEMP FIXME*/
 	grid-template-columns: 30px auto 30px 30px;
 	grid-template-rows: 30px auto auto 50px;
 	grid-row-gap: 15px;
 	grid-column-gap: 5px;
+}
+
+habit-info-panel calendar-month {
+	grid-area: calendarMonth;
 }
 
 habit-info-panel .habitIconHolder {
@@ -107,6 +112,7 @@ habit-info-panel .habitStateDial {
 	grid-area: stateDial;
 	margin-bottom: 10px;
 }
+
 
 
 

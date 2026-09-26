@@ -1,5 +1,6 @@
 export default class ProgressDial extends HTMLElement {
   #progressBar;
+  #curPerc = 0;
 
   connectedCallback() {
     this.classList.add('habitStateDial')
@@ -23,10 +24,13 @@ export default class ProgressDial extends HTMLElement {
       </svg>
     `; 
     this.#progressBar = this.querySelector('.progressBar');
+    this.animateToPerc(this.#curPerc);
   }
 
 
   animateToPerc(_perc, _duration = 300) {
+    this.#curPerc = _perc;
+    if (!this.#progressBar) return;
     this.#progressBar.style.transition = `stroke-dasharray ${_duration}ms ease`;
     this.#progressBar.style.strokeDasharray = `${Math.round(_perc * 100)} 100`;
   }

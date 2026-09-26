@@ -1,5 +1,5 @@
 import App from '../../app.js';
-import ProgressDial from './progressDial.js';
+import HabitProgressDial from './habitProgressDial.js';
 // Create a class for the element
 export default class HabitElement extends HTMLElement {
   static observedAttributes = ["curState"];
@@ -22,12 +22,12 @@ export default class HabitElement extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <div class="statusHolder">
-        <progress-dial></progress-dial>
+        <habit-progress-dial></habit-progress-dial>
       </div>
       <div class="title">Piano spelen</div>
       <div class="subTitle">15:00 - 5 day streak</div>
     `;
-    this.#progressDial = this.querySelector('progress-dial');
+    this.#progressDial = this.querySelector('habit-progress-dial');
     this.#fillData();
     
     this.querySelector('.statusHolder').addEventListener('click', () => {
@@ -68,9 +68,8 @@ export default class HabitElement extends HTMLElement {
   #fillData() {
     this.querySelector('.title').innerHTML = this.#habit.name; // FIXME
     this.querySelector('.subTitle').innerHTML = this.#habit.getStreakLengthOnDate(this.#date) + ' day streak'; // FIXME
-    this.setAttribute('curState', this.#habit.getStateOnDate(this.#date));
     this.#progressDial.animateToPerc(this.#habit.getStatePercOnDate(this.#date));
-    this.setAttribute('fullyCompleted', this.#habit.wasFullyCompletedOnDate(this.#date));
+    this.#progressDial.update(this.#habit, this.#date);
   }
 
   disconnectedCallback() {

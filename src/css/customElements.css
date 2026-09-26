@@ -31,19 +31,6 @@ habit-create-button .statusHolder {
 	aspect-ratio: 1;
 }
 
-	
-habit-element progress-dial {
-	--progressColor: #777;
-	--progressBackColor: #333;
-}
-
-habit-element[fullyCompleted="true"] progress-dial {
-	--progressColor: var(--habitCompletedColor) !important;
-}
-habit-element[curState="HABIT_SKIPPED"] progress-dial {
-	--progressColor: var(--habitSkippedColor);
-}
-
 
 habit-element .title,
 habit-create-button .title, {
@@ -349,28 +336,33 @@ habit-value-type-selector .configSelector .configPage.hide {
 
 
 
-progress-dial {
+progress-dial, habit-progress-dial {
 	--progressColor: #777;
 	--progressBackColor: #333;
 }
 
-progress-dial svg {
+progress-dial svg,
+habit-progress-dial svg {
 	width: 100%;
 	height: 100%;
 	transform: rotate(-90deg);
 }
 
 progress-dial .progressBackground,
-progress-dial .progressBar {
+progress-dial .progressBar,
+habit-progress-dial .progressBackground,
+habit-progress-dial .progressBar {
   	fill: none;
   	stroke-width: 12;
 }
 
-progress-dial .progressBackground {
+progress-dial .progressBackground,
+habit-progress-dial .progressBackground {
   	stroke: var(--progressBackColor);
 }
 
-progress-dial .progressBar {
+progress-dial .progressBar,
+habit-progress-dial .progressBar {
 	transition: stroke .3s;
   	stroke: var(--progressColor);
   	stroke-dasharray: 0 100;
@@ -379,6 +371,64 @@ progress-dial .progressBar {
 
 
 
+
+
+habit-progress-dial {
+	--progressColor: #777;
+	--progressBackColor: #333;
+}
+
+habit-progress-dial[fullyCompleted="true"] {
+	--progressColor: var(--habitCompletedColor) !important;
+}
+habit-progress-dial[curState="HABIT_SKIPPED"] {
+	--progressColor: var(--habitSkippedColor);
+}
+
+
+
+
+
+
+
+
+
+
+calendar-month {
+	display: grid;
+	grid-template-columns: repeat(7, auto);
+	grid-template-rows: repeat(5, auto);
+}
+calendar-month .day {
+	aspect-ratio: 1;
+	text-align: center;
+	border-bottom: 1px solid #333;
+	border-right: 1px solid #333;
+}
+calendar-month .day.otherMonth {
+	opacity: 0.3;
+}
+
+calendar-month .day .progessHolder {
+	margin: auto;
+	width: 80%;
+	margin-top: 10%;
+}
+calendar-month .day .progessHolder .dateHolder {
+	position: relative;
+	color: var(--textColor);
+	font-size: 12px;
+	width: 100%;
+	height: 0;
+	margin-top: 50%;
+	transform: translateY(-3px);
+}
+
+calendar-month .day .progessHolder habit-progress-dial {
+	margin-top: calc((-80% + 1px) / 2); /*80 perc from progessholder and 1px from border*/
+	float: left;
+	margin-bottom: 0;
+}
 
 
 /* ---- overwrite elements ---- */

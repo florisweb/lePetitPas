@@ -3,7 +3,13 @@ import HabitManager from '../data/habitManager.js';
 import DatePlus from '../datePlus.js';
 import HabitList from './habitList.js';
 import { HabitStateDialConstructors } from './customElements/habitStateDials.js';
-// Create a class for the element
+
+
+import CalendarMonthElement from './customElements/calendarMonth.js';
+import HabitProgressDial from './customElements/habitProgressDial.js';
+
+
+
 export default class HabitInfoPanel extends HTMLElement {
   static observedAttributes = ["openState"];
 
@@ -56,6 +62,8 @@ export default class HabitInfoPanel extends HTMLElement {
       </div>
     `;
 
+
+
     this.stateDial = this.querySelector('habit-state-dial');
     this.querySelector('.skipButton').addEventListener('click', async () => {
       await this.#habit.setSkipStateOnDate(this.#date);
@@ -77,9 +85,27 @@ export default class HabitInfoPanel extends HTMLElement {
       this.#habit = habit;
       this.#update();
     });
+
+
+    this.calendarMonth = new CalendarMonthElement({dayContentsBuilder: (_date, _inCurMonth) => {
+      let element = document.createElement('div');
+      element.classList.add('progessHolder')
+      let dateHolder = document.createElement('div');
+      dateHolder.classList.add('dateHolder');
+      dateHolder.innerHTML = _date.getDate();
+      element.append(dateHolder);
+      let dial = new HabitProgressDial();
+      element.append(dial);
+      if (!this.#habit) return element;
+      dial.update(this.#habit, _date);
+      return element;
+    }});
+    this.append(this.calendarMonth);
   }
 
   #update() {
+    this.calendarMonth.update();
+
     this.#habit.planetObject?.focus();
     this.stateDial.updateState(this.#habit, this.#date);
 
