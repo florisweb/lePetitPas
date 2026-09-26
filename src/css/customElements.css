@@ -377,7 +377,7 @@ habit-value-type-selector .configSelector .configPage.hide {
 .habitStateSection .leftPanel, 
 .habitStateSection .rightPanel {
 	cursor: pointer;
-	transform: opacity .3s;
+	transition: opacity .3s;
 
 	-webkit-user-select: none; /* Safari */
 	-ms-user-select: none; /* IE 10 and IE 11 */
@@ -385,8 +385,8 @@ habit-value-type-selector .configSelector .configPage.hide {
 }
 
 
-habit-state-section-count .leftPanel.disabled,
-habit-state-section-count .rightPanel.disabled {
+.habitStateSection .leftPanel.disabled,
+.habitStateSection .rightPanel.disabled {
 	pointer-events: none;
 	opacity: 0.3;
 }
@@ -399,15 +399,29 @@ habit-state-section-count .textButton {
 	aspect-ratio: 1;
 
 	text-align: center;
-	font-size: 25px;
+	font-size: 30px;
 }
 
 habit-state-section-count .leftPanel .textButton {
-	font-size: 32px;
+	font-size: 40px;
 }
 
+habit-state-section-check .iconButton {
+	position: relative;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 35px;
+	aspect-ratio: 1;
+	opacity: 0.8;
+}
 
-
+habit-state-section-check .leftPanel .iconButton {
+	left: calc(50% - 0.3 * var(--horizontalPanelPadding));
+}
+habit-state-section-check .rightPanel .iconButton {
+	left: calc(50% + 0.3 * var(--horizontalPanelPadding));
+}
 
 
 

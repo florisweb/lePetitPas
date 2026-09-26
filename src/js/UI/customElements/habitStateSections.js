@@ -83,11 +83,29 @@ export class HabitStateSection_check extends HabitStateSection {
   
   connectedCallback() {
     super.connectedCallback();
+    let leftPanel = this.querySelector('.leftPanel');
+    let rightPanel = this.querySelector('.rightPanel');
+    leftPanel.innerHTML = `<img class='iconButton' src='images/resetIcon.png'>`;
+    rightPanel.innerHTML = `<img class='iconButton' src='images/checkIcon.png'>`;
+    
+    leftPanel.addEventListener('click', () => {
+      this.dispatchEvent(
+        new CustomEvent("stateChange", {detail: false})
+      );
+    });
+    rightPanel.addEventListener('click', () => {
+      this.dispatchEvent(
+        new CustomEvent("stateChange", {detail: true})
+      );
+    });
   }
   
   updateState(_habit, _date) {
     super.updateState(_habit, _date);
-    let state = _habit.getStateOnDate(_date) ?? 0;
+    
+    let state = _habit.getStateOnDate(_date) ?? false;
+    this.querySelector('.leftPanel').classList.toggle('disabled', state === false);
+    this.querySelector('.rightPanel').classList.toggle('disabled', state !== false);
     if (state === Habit.HABIT_SKIPPED_VALUE) return;
     
     this.querySelector('.valueHolder').innerHTML = (state ? 1 : 0) + '/1';
@@ -105,19 +123,15 @@ export class HabitStateSection_count extends HabitStateSection {
   connectedCallback() {
     super.connectedCallback();
     let leftPanel = this.querySelector('.leftPanel');
-    leftPanel.innerHTML = `
-      <div class='textButton'>-</div>
-    `;
+    let rightPanel = this.querySelector('.rightPanel');
+    leftPanel.innerHTML = `<div class='textButton'>-</div>`;
+    rightPanel.innerHTML = `<div class='textButton'>+</div>`;
+
     leftPanel.addEventListener('click', () => {
       this.dispatchEvent(
         new CustomEvent("stateChange", {detail: (this._curState ?? 0) - 1})
       );
     });
-
-    let rightPanel = this.querySelector('.rightPanel');
-    rightPanel.innerHTML = `
-      <div class='textButton'>+</div>
-    `;
     rightPanel.addEventListener('click', () => {
       this.dispatchEvent(
         new CustomEvent("stateChange", {detail: (this._curState ?? 0) + 1})
