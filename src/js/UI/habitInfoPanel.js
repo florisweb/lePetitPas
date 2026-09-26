@@ -3,11 +3,7 @@ import HabitManager from '../data/habitManager.js';
 import DatePlus from '../datePlus.js';
 import HabitList from './habitList.js';
 import { HabitStateDialConstructors } from './customElements/habitStateDials.js';
-
-
-import CalendarMonthElement from './customElements/calendarMonth.js';
-import HabitProgressDial from './customElements/habitProgressDial.js';
-
+import App from '../app.js';
 
 
 export default class HabitInfoPanel extends HTMLElement {
@@ -57,6 +53,7 @@ export default class HabitInfoPanel extends HTMLElement {
       <img src='./images/editIcon.png' class='headerButton editButton'>
       <img src='./images/removeIcon.png' class='headerButton deleteButton'>
       <div class='buttonHolder'>
+        <button class='infoButton'>Info</button>
         <button class='skipButton'>Skip</button>
         <button class='completeButton' filled>Complete</button>
       </div>
@@ -65,6 +62,13 @@ export default class HabitInfoPanel extends HTMLElement {
 
 
     this.stateDial = this.querySelector('habit-state-dial');
+    
+
+    this.querySelector('.infoButton').addEventListener('click', async () => {
+      await App.habitOverviewPanel.open(this.#habit, this.#date);
+      App.curOpenPanel = this;
+    });
+
     this.querySelector('.skipButton').addEventListener('click', async () => {
       await this.#habit.setSkipStateOnDate(this.#date);
       this.#update();
@@ -85,27 +89,9 @@ export default class HabitInfoPanel extends HTMLElement {
       this.#habit = habit;
       this.#update();
     });
-
-
-    this.calendarMonth = new CalendarMonthElement({dayContentsBuilder: (_date, _inCurMonth) => {
-      let element = document.createElement('div');
-      element.classList.add('progessHolder')
-      let dateHolder = document.createElement('div');
-      dateHolder.classList.add('dateHolder');
-      dateHolder.innerHTML = _date.getDate();
-      element.append(dateHolder);
-      let dial = new HabitProgressDial();
-      element.append(dial);
-      if (!this.#habit) return element;
-      dial.update(this.#habit, _date);
-      return element;
-    }});
-    this.append(this.calendarMonth);
   }
 
   #update() {
-    this.calendarMonth.update();
-
     this.#habit.planetObject?.focus();
     this.stateDial.updateState(this.#habit, this.#date);
 

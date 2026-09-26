@@ -56,8 +56,8 @@ export default class CalendarMonthElement extends HTMLElement {
   }
 
 
-  update() {
-    this.#updateDayElements();
+  update(_date) {
+    this.date = _date;
   }
 }
 

@@ -18,6 +18,7 @@ import Popup from './UI/customElements/popup.js';
 import HabitListPanel from './UI/habitListPanel.js';
 import HabitInfoPanel from './UI/habitInfoPanel.js';
 import HabitEditPanel from './UI/habitEditPanel.js';
+import HabitOverviewPanel from './UI/HabitOverviewPanel.js';
 
 
 const App = new class {
@@ -39,6 +40,7 @@ const App = new class {
 		this.habitListPanel = new HabitListPanel();
 		this.habitInfoPanel = new HabitInfoPanel();
 		this.habitEditPanel = new HabitEditPanel();
+		this.habitOverviewPanel = new HabitOverviewPanel();
 		this.curOpenPanel = this.habitListPanel;
 		this.simulation = new Simulation(this);
 	}
@@ -51,9 +53,13 @@ const App = new class {
 		document.body.append(this.habitListPanel);
 		document.body.append(this.habitInfoPanel);
 		document.body.append(this.habitEditPanel);
+		document.body.append(this.habitOverviewPanel);
 	
 		document.body.classList.remove('loading');
-		renderer.domElement.addEventListener('click', () => this.habitInfoPanel.close());
+		renderer.domElement.addEventListener('click', () => {
+			if (this.habitInfoPanel.openState) this.habitInfoPanel.close();
+			if (this.habitOverviewPanel.openState) this.habitOverviewPanel.close();
+		});
 	}
 }
 
