@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Perlin, random } from '../random.js';
+import { Perlin, random, noise3D } from '../random.js';
 import { ActiveVolcano, InActiveVolcano } from './vulcanos.js';
 import Rose from './rose.js';
 
@@ -26,8 +26,6 @@ function calcPlanetPerlin(theta, phi, targetWavelength) {
 
 	return Perlin.get(theta / Math.PI / 2 * fittedFreq, phi / Math.PI * fittedFreq);
 }
-
-
 
 export default class Planet {
 	static segCount = 100;
@@ -107,10 +105,10 @@ export default class Planet {
 
 	radialFunction(theta, phi)  {
 		let baseRad = this.baseRadius * (
-					1 
-					+ 0.1 * calcPlanetPerlin(theta, phi, 0.05)
-					+ 0.03 * calcPlanetPerlin(theta, phi, 0.01)
-					+ 0.01 * calcPlanetPerlin(theta, phi, 0.001)
+				1 
+				+ 0.1 * calcPlanetPerlin(theta, phi, 0.05)
+				+ 0.03 * calcPlanetPerlin(theta, phi, 0.01)
+				+ 0.01 * calcPlanetPerlin(theta, phi, 0.001)
 		);
 
 		for (let c = 0; c < craters.length; c++)
@@ -140,6 +138,54 @@ export default class Planet {
 		return baseRad;
 	}
 
+	#getRadAtVertIndex(_vertIndex) {
+		let vertX = this.#mesh.geometry.attributes.position.getComponent(_vertIndex, 0);
+		let vertY = this.#mesh.geometry.attributes.position.getComponent(_vertIndex, 1);
+		let vertZ = this.#mesh.geometry.attributes.position.getComponent(_vertIndex, 2);
+		return Math.sqrt(vertX**2 + vertY**2 + vertZ**2);
+	}
+
+	_interpolatedRadialFunction(_theta, _phi, _segCount = Planet.segCount) {
+		// IMPORTANT: CAN ONLY BE USED AFTER PLANET GENERATION
+		// Calculates the radius of the planet at a specific theta and phi by interpolating between points that fall on the _segCount-defined grid
+
+		const widthSegments = _segCount * 2;
+		const heightSegments = _segCount;
+		
+		const dTheta = 2 * Math.PI / (widthSegments + 1);
+		const dPhi = Math.PI / heightSegments;
+		const minTheta = Math.floor(_theta / dTheta) * dTheta;
+		const minPhi = Math.floor(_phi / dPhi) * dPhi;
+
+		let vertexIndex = Math.floor(_theta / dTheta) + (widthSegments + 1) * Math.floor(_phi / dPhi);
+			
+		let points = [
+			this.#getRadAtVertIndex(vertexIndex),
+			this.#getRadAtVertIndex(vertexIndex + 1),
+			this.#getRadAtVertIndex(vertexIndex + 1 + (widthSegments + 1)),
+			this.#getRadAtVertIndex(vertexIndex + (widthSegments + 1))
+		]
+
+		// From top left point
+		let relThetaFrac = (_theta - minTheta) / dTheta;
+		let relPhiFrac = (_phi - minPhi) / dPhi;
+
+		// Because they lie on a grid of rectangles, we can decompose along theta and phi:
+		let outVal = 0;
+		if (relThetaFrac + relPhiFrac <= 1) { // Top left triangle
+			let dRdTheta = (points[1] - points[0]);
+			let dRdPhi = (points[3] - points[0]);
+			outVal = points[0] + dRdPhi * relPhiFrac + dRdTheta * relThetaFrac;
+		} else { // Bottom right triangle
+			let dRdTheta = (points[2] - points[3]);
+			let dRdPhi = (points[2] - points[1]);
+			outVal = points[2] + dRdPhi * (1 - relPhiFrac) + dRdTheta * (1 - relThetaFrac);
+		}
+
+		return outVal;
+	}
+
+	
 	get coreMesh() {
 		return this.#coreMesh;
 	}
