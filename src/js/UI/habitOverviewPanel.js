@@ -97,10 +97,10 @@ export default class HabitOverviewPanel extends HTMLElement {
 
     let src = '';
     switch (this.#habit.type) {
-      case "inactiveVulcano": src = './images/inactiveVulcanoIcon.png'; break;
+      case "inactiveVolcano": src = './images/inactiveVolcanoIcon.png'; break;
       case "rose": src = './images/roseIcon.png'; break;
       default:
-      case "activeVulcano": src = './images/activeVulcanoIcon.png'; break;
+      case "activeVolcano": src = './images/activeVolcanoIcon.png'; break;
     }
     this.querySelector('.habitIconHolder').setAttribute('src', src);
   }

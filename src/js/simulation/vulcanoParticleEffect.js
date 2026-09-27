@@ -7,7 +7,7 @@ class ParticleEffect {
 
 }
 
-export default class VulcanoParticleEffect extends ParticleEffect {
+export default class VolcanoParticleEffect extends ParticleEffect {
 	#particles;
 	#time = 0;
 	_gpuCompute;

@@ -15,7 +15,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 
-import VulcanoParticleEffect from './vulcanoParticleEffect.js';
+import VolcanoParticleEffect from './vulcanoParticleEffect.js';
 
 export default class Simulation {
 	#App;
@@ -40,7 +40,7 @@ export default class Simulation {
 		this.#setUpScene();
 		this.spotLight.addToScene(this.scene);
 
-		this.#vulcanoParticleEffect = new VulcanoParticleEffect({renderer});
+		this.#vulcanoParticleEffect = new VolcanoParticleEffect({renderer});
 		this.#vulcanoParticleEffect.addToScene(this.scene);
 
 

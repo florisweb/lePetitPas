@@ -4,7 +4,7 @@ import Planet from './planet.js';
 import { generatePatchGeometry } from './geometryGenerator.js';
 import PlanetObject from './planetObject.js'
 
-export default class BaseVulcano extends PlanetObject {
+export default class BaseVolcano extends PlanetObject {
 	_mesh;
 	_vulcMesh;
 	get mesh() {return this._mesh};
@@ -125,7 +125,7 @@ export default class BaseVulcano extends PlanetObject {
 
 
 
-export class ActiveVulcano extends BaseVulcano {
+export class ActiveVolcano extends BaseVolcano {
 	#lavaMesh;
 	constructor({position, radius, height}, _planet) {
 		super(...arguments);
@@ -168,7 +168,7 @@ export class ActiveVulcano extends BaseVulcano {
 	}
 }
 
-export class InActiveVulcano extends BaseVulcano {
+export class InActiveVolcano extends BaseVolcano {
 	constructor({position, radius, height}, _planet) {
 		super(...arguments);
 		this._generateMesh({radius, height});

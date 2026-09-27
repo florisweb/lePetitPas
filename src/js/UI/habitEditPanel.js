@@ -30,7 +30,7 @@ export default class HabitEditPanel extends HTMLElement {
     this.#habit = new Habit();
     this.#nameInputField.value = null;
     this.#descriptionInputField.value = null;
-    this.#typeSelector.value = 'activeVulcano';
+    this.#typeSelector.value = 'activeVolcano';
     this.#valueTypeSelector.reset();
     return new Promise((resolve) => this.#editResolver = resolve);
   }

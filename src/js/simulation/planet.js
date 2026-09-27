@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Perlin, random } from '../random.js';
-import { ActiveVulcano, InActiveVulcano } from './vulcanos.js';
+import { ActiveVolcano, InActiveVolcano } from './vulcanos.js';
 import Rose from './rose.js';
 
 import { generatePlanetGeometry } from './geometryGenerator.js';
@@ -60,10 +60,10 @@ export default class Planet {
 		let objectConstructor;
 		switch (_habit.type)
 		{
-			case "inactiveVulcano": objectConstructor = InActiveVulcano; break;
+			case "inactiveVolcano": objectConstructor = InActiveVolcano; break;
 			case "rose": objectConstructor = Rose; break;
 			default:
-			case "activeVulcano": objectConstructor = ActiveVulcano; break;
+			case "activeVolcano": objectConstructor = ActiveVolcano; break;
 		}
 
 		let curObject = new objectConstructor(_habit.objectInfo, this);

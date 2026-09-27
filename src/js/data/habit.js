@@ -9,7 +9,7 @@ export default class Habit extends DataObject {
 	name = '';
 	description = '';
 
-	type = 'activeVulcano';  // activeVulcano, inactiveVulcano, rose...
+	type = 'activeVolcano';  // activeVolcano, inactiveVolcano, rose...
 	objectInfo = { // Specifies the information for rendering the planet object
 		position: [0, 0],
 	}
@@ -160,7 +160,7 @@ export default class Habit extends DataObject {
 			// let position = [random() * Math.PI * 2, (random() * 0.5 + 0.25) * Math.PI];
 			this.objectInfo.position = [Math.random() * Math.PI * 2, (Math.random() * 0.3 + 0.1) * Math.PI];
 
-			// --- Vulcano ---
+			// --- Volcano ---
 			this.objectInfo.radius = 4;
 			this.objectInfo.height = 5;
 		}

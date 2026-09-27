@@ -26,7 +26,7 @@ export default class Sun {
 		this.#light.shadow.camera.fov = 5;
 
 
-		// Vulcano has shadow
+		// Volcano has shadow
 		this.#light.shadow.bias = -0.00001; 
 		this.#light.shadow.normalBias = -2;
 
