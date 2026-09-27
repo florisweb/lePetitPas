@@ -15,7 +15,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 
-import VolcanoParticleEffect from './vulcanoParticleEffect.js';
+import VolcanoParticleEffect from './volcanoParticleEffect.js';
 
 export default class Simulation {
 	#App;
@@ -28,7 +28,7 @@ export default class Simulation {
 	planet;
 	stars = [];
 
-	#vulcanoParticleEffect; // temp
+	#volcanoParticleEffect; // temp
 
 	constructor(_app) {
 		this.#App = _app;
@@ -40,8 +40,8 @@ export default class Simulation {
 		this.#setUpScene();
 		this.spotLight.addToScene(this.scene);
 
-		this.#vulcanoParticleEffect = new VolcanoParticleEffect({renderer});
-		this.#vulcanoParticleEffect.addToScene(this.scene);
+		this.#volcanoParticleEffect = new VolcanoParticleEffect({renderer});
+		this.#volcanoParticleEffect.addToScene(this.scene);
 
 
 
@@ -73,7 +73,7 @@ export default class Simulation {
 
 		if (this.planet.objects.length > 0)
 		{
-			this.#vulcanoParticleEffect.update(this);
+			this.#volcanoParticleEffect.update(this);
 		}
 
 

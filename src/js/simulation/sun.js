@@ -30,7 +30,7 @@ export default class Sun {
 		this.#light.shadow.bias = -0.00001; 
 		this.#light.shadow.normalBias = -2;
 
-		// // Stable: vulcano does not have shadow		
+		// // Stable: volcano does not have shadow		
 		// this.#light.shadow.bias = -0.01;
 		// this.#light.shadow.normalBias = 0.02;
 

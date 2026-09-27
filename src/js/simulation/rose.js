@@ -63,7 +63,7 @@ export default class Rose extends PlanetObject {
 		const rPhi = phi - this.position[1]; // Relative phi
 
 		const patchRadius = this.#hillRadius / (this._planet.baseRadius); // Convert to units of angles
-		const vulcanoRadius = patchRadius;
+		const volcanoRadius = patchRadius;
 
 		let distFromCenter = Math.abs(
 			 Math.sqrt(
@@ -72,9 +72,9 @@ export default class Rose extends PlanetObject {
 			)
 		);
 		
-		const baseWidth = 0.7 * vulcanoRadius;
-		const topWidth = 0.2 * vulcanoRadius;
-		let curEdgeFrac = (distFromCenter - (vulcanoRadius - baseWidth)) / baseWidth;
+		const baseWidth = 0.7 * volcanoRadius;
+		const topWidth = 0.2 * volcanoRadius;
+		let curEdgeFrac = (distFromCenter - (volcanoRadius - baseWidth)) / baseWidth;
 		radius += this.#hillHeight * Math.min((topWidth + 1) * (1 - curEdgeFrac), 1);	
 
 		return radius;

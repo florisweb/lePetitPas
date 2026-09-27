@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Perlin, random, noise3D } from '../random.js';
-import { ActiveVolcano, InActiveVolcano } from './vulcanos.js';
+import { ActiveVolcano, InActiveVolcano } from './volcanos.js';
 import Rose from './rose.js';
 
 import { generatePlanetGeometry } from './geometryGenerator.js';

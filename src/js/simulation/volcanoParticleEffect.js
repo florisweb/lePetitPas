@@ -26,7 +26,7 @@ export default class VolcanoParticleEffect extends ParticleEffect {
 		const positionShader = `
 		  uniform float uDeltaTime;
 		  uniform float uTime;
-		  uniform vec3 vulcanoPos;
+		  uniform vec3 volcanoPos;
 
 		  void main() {
 		    vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -36,8 +36,8 @@ export default class VolcanoParticleEffect extends ParticleEffect {
 		    pos.xyz += vel.xyz * uDeltaTime * 60.0;    
 				if (distance(pos, vec4(0.0)) < 20.0) 
 				{
-					vec3 vulcNormal = normalize(vulcanoPos);
-					pos.xyz = vulcNormal * 19.9;
+					vec3 volcNormal = normalize(volcanoPos);
+					pos.xyz = volcNormal * 19.9;
 				}
 
 		    gl_FragColor = pos;
@@ -52,7 +52,7 @@ export default class VolcanoParticleEffect extends ParticleEffect {
 
 		  uniform float uDeltaTime;
 		  uniform float uTime;
-		  uniform vec3 vulcanoPos;
+		  uniform vec3 volcanoPos;
 			float g = 0.1;
 
 		  void main() {
@@ -69,12 +69,12 @@ export default class VolcanoParticleEffect extends ParticleEffect {
 					vel.xyz = vec3(0.0);
 					if (distance(vel.xyz, vec3(0.0)) < 0.1 && random(uv + uTime) > 0.8) 
 					{
-						vec3 vulcNormal = normalize(vulcanoPos);
-						vel.xyz = vulcNormal * (0.66 + random(uv + uTime + 3.0) * 0.33) * g * 2.0;
+						vec3 volcNormal = normalize(volcanoPos);
+						vel.xyz = volcNormal * (0.66 + random(uv + uTime + 3.0) * 0.33) * g * 2.0;
 
-				    vec3 arbitrary = abs(vulcNormal.x) < 0.9 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
-						vec3 perp1 = normalize(cross(vulcNormal, arbitrary));
-		  		  vec3 perp2 = normalize(cross(vulcNormal, perp1));
+				    vec3 arbitrary = abs(volcNormal.x) < 0.9 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
+						vec3 perp1 = normalize(cross(volcNormal, arbitrary));
+		  		  vec3 perp2 = normalize(cross(volcNormal, perp1));
 						vec2 noise = normalize(vec2(1.0 - 2.0 * random(uv + uTime + 1.0), 1.0 - 2.0 * random(uv + uTime + 2.0))) * 0.03;
 						vel.xyz += perp1.xyz * noise.x + perp2.xyz * noise.y;
 					}
@@ -112,10 +112,10 @@ export default class VolcanoParticleEffect extends ParticleEffect {
 
 		this.#dtPosition.material.uniforms.uDeltaTime = { value: 0.016 };
 		this.#dtPosition.material.uniforms.uTime = { value: 0 };
-		this.#dtPosition.material.uniforms.vulcanoPos = { value: [0.0, 1.0, 0.0] };
+		this.#dtPosition.material.uniforms.volcanoPos = { value: [0.0, 1.0, 0.0] };
 		this.#dtVelocity.material.uniforms.uDeltaTime = { value: 0.016 };
 		this.#dtVelocity.material.uniforms.uTime = { value: 0 };
-		this.#dtVelocity.material.uniforms.vulcanoPos = { value: [0.0, 1.0, 0.0] };
+		this.#dtVelocity.material.uniforms.volcanoPos = { value: [0.0, 1.0, 0.0] };
 
 		this._gpuCompute.init();
 
@@ -192,7 +192,7 @@ export default class VolcanoParticleEffect extends ParticleEffect {
 	}
 
 	update(_simulation) {
-			const vulcPos = _simulation.planet.objects[0].relPosition;
+			const volcPos = _simulation.planet.objects[0].relPosition;
 
 			this.#time += 0.016;
 
@@ -200,8 +200,8 @@ export default class VolcanoParticleEffect extends ParticleEffect {
 			this.#dtPosition.material.uniforms.uTime.value = this.#time;
 			this.#dtVelocity.material.uniforms.uDeltaTime.value = 0.016;
 			this.#dtVelocity.material.uniforms.uTime.value = this.#time;
-			this.#dtVelocity.material.uniforms.vulcanoPos.value = vulcPos;
-			this.#dtPosition.material.uniforms.vulcanoPos.value = vulcPos;
+			this.#dtVelocity.material.uniforms.volcanoPos.value = volcPos;
+			this.#dtPosition.material.uniforms.volcanoPos.value = volcPos;
 
 			this._gpuCompute.compute();
 
