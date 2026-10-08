@@ -43,11 +43,11 @@ export default class PlanetObject {
 
 	focus() {
 		App.simulation.spotLight.highlight(this.position);
-		App.simulation.camera.putObjectInFocus(this);
+		return App.simulation.camera.putObjectInFocus(this);
 	}
 	deFocus() {
-		App.simulation.camera.deFocus();
 		App.simulation.spotLight.hide();
+		return App.simulation.camera.deFocus();
 	}
 
 	animateMeshToCompletionState(_perc) {}

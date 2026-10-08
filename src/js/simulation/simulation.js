@@ -7,8 +7,7 @@ import { random } from '../random.js';
 import Camera from './camera.js';
 import SpotLight from './spotLight.js';
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
-
-
+import { animateSigmoidally } from '../animator.js';
 
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -47,9 +46,6 @@ export default class Simulation {
 
 		this.#defineComposer();
 
-		
-
-
 
 		this.update();
 		renderer.domElement.addEventListener('click', () => this.#App.habitInfoPanel.close());
@@ -58,10 +54,20 @@ export default class Simulation {
 		this.resize();
 	}
 
-	resize() {
+	resize(_resizeDuration = 300) {
 		let panel = document.querySelector('.UIPanel[openState="true"]');
-		if (panel) document.documentElement.style.setProperty('--panelHeight', (panel.offsetHeight - 40) + 'px');
+		if (panel) 
+		{
+			let panelHeight = panel.offsetHeight - 40;
+			document.documentElement.style.setProperty('--panelHeight', panelHeight + 'px');
 
+			const targetTop = -0.5 * panelHeight;
+			let prevTop = parseInt(renderer.domElement.style.top) || targetTop; // If no value is found, assume that we are already in the right spot
+			animateSigmoidally(_resizeDuration, (_perc) => {
+				renderer.domElement.style.top = (prevTop * (1 - _perc) + targetTop * _perc) + 'px'
+			});
+		}
+		
 		renderer.setSize(renderer.domElement.offsetWidth, renderer.domElement.offsetHeight, false); // FIXME
 		this.camera.onResize();
 	}

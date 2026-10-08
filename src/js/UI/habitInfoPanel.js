@@ -41,6 +41,7 @@ export default class HabitInfoPanel extends HTMLElement {
     this.append(this.stateSection);
     this.#update();
 
+    this._canvasResizeDuration = this.#habit.planetObject.focus(); // Set the time it takes to resize the canvas to this panels size
     App.curOpenPanel = this;
     return new Promise((resolve) => this.#openStateResolver = resolve);
   }
@@ -98,7 +99,6 @@ export default class HabitInfoPanel extends HTMLElement {
   }
 
   #update() {
-    this.#habit.planetObject?.focus();
     this.stateSection.updateState(this.#habit, this.#date);
 
     this.querySelector('.habitNameHolder').innerHTML = this.#habit.name;

@@ -7,7 +7,8 @@
 	--screenMargin: 20px;
 	--spaceBackground: rgb(0, 0, 15);
 
-	--panelHeight: 330px;
+	/*--panelHeight: 330px;*/
+	--panelHeight: 0;
 	--UIBorderRad: 10px;
 	
 	/*--navBarHeight: 80px;*/
@@ -200,9 +201,9 @@ canvas {
 
 	canvas {
 		position: fixed;
-		top: 0;
+		top: calc(-0.5 * var(--panelHeight));
 		width: 100vw;
-		height: calc(100vh - var(--panelHeight) + 20px);
+		height: calc(100vh + 20px);
 	}
 
 	

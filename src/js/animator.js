@@ -1,18 +1,21 @@
 
 export function animateLinearily(_duration, _callBack) {
-	let startTime = new Date();
-	let prevTimePerc = 0;
-	let update = () => {
-		let curTimePerc = (new Date() - startTime) / _duration;
-		_callBack(curTimePerc, curTimePerc - prevTimePerc);
-		if (curTimePerc > 1) {
-			_callBack(1, curTimePerc - prevTimePerc);
-			return;
+	return new Promise((resolve) => {
+		let startTime = new Date();
+		let prevTimePerc = 0;
+		let update = () => {
+			let curTimePerc = (new Date() - startTime) / _duration;
+			_callBack(curTimePerc, curTimePerc - prevTimePerc);
+			if (curTimePerc > 1) {
+				_callBack(1, curTimePerc - prevTimePerc);
+				resolve();
+				return;
+			}
+			prevTimePerc = curTimePerc;
+			requestAnimationFrame(update);
 		}
-		prevTimePerc = curTimePerc;
 		requestAnimationFrame(update);
-	}
-	requestAnimationFrame(update);
+	})
 }
 
 export function animateSigmoidally(_duration, _callBack) {

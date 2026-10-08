@@ -31,6 +31,7 @@ export default class Camera {
 		this.controls.autoRotate = true;
 		this.controls.autoRotateSpeed = 0.2;
 		this.controls.minZoom = 5;
+		this.controls.minDistance = 20 * 1.2;
 	}
 
 	update() {
@@ -43,28 +44,38 @@ export default class Camera {
 	}
 
 
+	#curFocusObject;
+
 	putObjectInFocus(_obj, _angle = 0.1 * Math.PI) { // Looks at object from this angle (0 = from the top)
+		this.#curFocusObject = _obj;
+		this.controls.minDistance = 5;
+
 		// Update target
-		let targetPos = _obj.calcPosAtRad(this.#simulation.planet.baseRadius); // Position we want to have in the centre of the screen
+		let targetPos = new THREE.Vector3(..._obj.calcPosAtRad(this.#simulation.planet.baseRadius)); // Position we want to have in the centre of the screen
 		let animateTime = this.panToPosition([
 			_obj.absoluteAnglePos[0],
 			_angle + _obj.absoluteAnglePos[1]
 		], 35);
 
-		this.#animateTargetPos(new THREE.Vector3(...targetPos), animateTime);
+		this.#animateTargetPos(targetPos, animateTime);
+		return animateTime;
 	}
 
-	deFocus() {
+	async deFocus() {
 		let newPos = new THREE.Vector3(0, 0, 0);
 		let animateTime = this.zoomTo(Camera.defaultZoomLevel);
-		this.#animateTargetPos(newPos, animateTime);
+		await this.#animateTargetPos(newPos, animateTime);
+		this.#curFocusObject = null;
+		this.controls.minDistance = 20 * 1.25;
 	}
-	#animateTargetPos(_newPos, _time=200) {
+
+
+	async #animateTargetPos(_newPos, _time=200) {
 		let oldPos = this.controls.target;
 		 
 		let delta = _newPos.clone();
 		delta.sub(oldPos);
-		animateLinearily(_time, (_perc) => {
+		await animateSigmoidally(_time, (_perc) => {
 			let curPos = oldPos.clone();
 			curPos.add(delta.clone().multiplyScalar(_perc));
 			this.controls.target = curPos;

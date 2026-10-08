@@ -133,8 +133,7 @@ export default class VolcanoParticleEffect extends ParticleEffect {
 		      vec4 pos = texture(texturePosition, uv);
 		  		float dist = (distance(pos, vec4(0.0)) - 21.0) / 3.0;
 
-		      
-		      vColor = vec3(0.3, 0.3, 0.3);
+		      	vColor = vec3(0.3, 0.3, 0.3);
 
 		  		if (uv.x < 0.3)
 					{
