@@ -73,6 +73,3 @@ export default class PlanetObject {
 		return wait(duration);
 	}
 }
-
-
-

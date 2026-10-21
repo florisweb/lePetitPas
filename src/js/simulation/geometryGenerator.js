@@ -123,6 +123,50 @@ export function generatePlanetGeometry(radiusFunction, widthSegments = 32, heigh
 
 
 
+export function generateStemGeometry(radFunction, offsetFunction, _length, radialSegments = 16, heightSegments = 32) {
+	const geometry = new THREE.BufferGeometry();
+	const uvs = [];
+	const vertices = [];
+	const indices = [];
+
+	// Generate vertices
+	for (let y = 0; y <= heightSegments; y++) 
+	{
+		const curYFrac = y / heightSegments;
+		const radius = radFunction(1 - curYFrac); // Invert mapping such that yFrac = 1 is at the top 
+		const offset = offsetFunction(1 - curYFrac);
+
+		for (let x = 0; x <= radialSegments; x++) 
+		{
+			const theta = x / radialSegments * 2 * Math.PI;
+
+			const posX = radius * Math.cos(theta) + offset[0];
+			const posY = curYFrac * _length;
+			const posZ = radius * Math.sin(theta) + offset[1];
+
+			vertices.push(posX, posY, posZ);
+			uvs.push(x / radialSegments, curYFrac);
+		}
+	}
+
+	for (let y = 0; y < heightSegments; y++) 
+	{
+		for (let x = 0; x < radialSegments; x++) 
+		{
+			const a = y * (radialSegments + 1) + x;
+			const b = a + radialSegments + 1;
+			indices.push(a, b, a + 1); 
+			indices.push(a + 1, b, b + 1);
+		}
+	}
+	
+	geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+	geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+	geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+	geometry.computeVertexNormals();
+	return geometry;
+}
+
 
 
 

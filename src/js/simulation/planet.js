@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { Perlin, random, noise3D } from '../random.js';
 import { ActiveVolcano, InActiveVolcano } from './volcanos.js';
 import Rose from './rose.js';
+import Baobab from './baobab.js';
+
 
 import { generatePlanetGeometry } from './geometryGenerator.js';
 
@@ -60,6 +62,7 @@ export default class Planet {
 		{
 			case "inactiveVolcano": objectConstructor = InActiveVolcano; break;
 			case "rose": objectConstructor = Rose; break;
+			case "baobab": objectConstructor = Baobab; break;
 			default:
 			case "activeVolcano": objectConstructor = ActiveVolcano; break;
 		}

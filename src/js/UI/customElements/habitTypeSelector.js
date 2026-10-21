@@ -37,15 +37,13 @@ export default class HabitTypeSelector extends HTMLElement {
         <img src='images/roseIcon.png'>
         <a class='typeName'>Rose</a>
         <a class='typeDescription'>caring: "It is the time you have wasted for your rose that makes your rose so important." [XXI]</a>
-      </label>
-    `;
-    // <hr><input type='radio' id="typeSelect.baobab" name="typeSelect" value="baobab">
-    // <label for="typeSelect.baobab">
-    //     <img src='images/baobabIcon.png'>
-    //     <a class='typeName'>Baobab</a>
-    //     <a class='typeDescription'>dicipline: some things are always bad, and must be removed, lest they fester and tear your planet apart.</a>
-    //   </label>
-  
+      </label><hr>
+      <input type='radio' id="typeSelect.baobab" name="typeSelect" value="baobab">
+      <label for="typeSelect.baobab">
+        <img src='images/baobabIcon.png'>
+        <a class='typeName'>Baobab</a>
+        <a class='typeDescription'>dicipline: some things are always bad, and must be removed, lest they fester and tear your planet apart.</a>
+      </label>`;
 
      this.querySelectorAll('input[type="radio"]').forEach((rad) => {
       rad.addEventListener('change', () => this.setAttribute('value', rad.value));

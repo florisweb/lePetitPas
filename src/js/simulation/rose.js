@@ -3,7 +3,8 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 
 import { Perlin, random } from '../random.js';
 import Planet from './planet.js';
-import { generatePatchGeometry } from './geometryGenerator.js';
+import { generatePatchGeometry, generateStemGeometry } from './geometryGenerator.js';
+import { generateHillTexture } from './textureGenerator.js';
 import PlanetObject from './planetObject.js'
 import { animateSigmoidally } from '../animator.js';
 
@@ -43,7 +44,7 @@ export default class Rose extends PlanetObject {
 		let geometry = generatePatchGeometry((theta, phi) => this.#hillRadialFunction(theta, phi), [patchSize, patchSize], this.position, segDensity, this._planet.baseRadius);
 		
 		let material = new THREE.MeshLambertMaterial({
-			map: this.#createHillTexture(),
+			map: generateHillTexture()
 		});
 
 		material.side = THREE.DoubleSide; // Fix cliping issues
@@ -80,31 +81,6 @@ export default class Rose extends PlanetObject {
 		return radius;
 	}
 
-	#createHillTexture() {
-		const canvas = document.createElement('canvas');
-		canvas.width = 128;
-		canvas.height = 128;
-		const ctx = canvas.getContext('2d');
-
-		const minRadPerc = 0.2;
-		for (let x = 0; x < canvas.width; x++)
-		{
-			let rx = (x - canvas.width / 2) / canvas.width;
-			for (let y = 0; y < canvas.height; y++)
-			{
-				let ry = (y - canvas.height / 2) / canvas.height;
-				let dist = Math.sqrt(rx**2 + ry**2) * Math.sqrt(2);
-				const colorP = 1 - 1 / (1 + Math.exp(10 * (dist - 0.5))) + 0.2 * (1 + Perlin.get(rx * 5, ry * 5));
-
-				ctx.fillStyle = 'rgb(' + Math.round(colorP * 195 + 40) + ', ' +  Math.round(colorP * 100 + 135) + ', ' + Math.round(colorP * 215 + 20) + ')';
-
-				ctx.fillRect(x, y, 1, 1);
-			}
-		}
-	
-		const texture = new THREE.CanvasTexture(canvas);
-		return texture;
-	}
 
 
 
@@ -116,57 +92,11 @@ export default class Rose extends PlanetObject {
 		return [Math.cos(_yFrac * 2 * Math.PI) * 0.15, Math.sin(_yFrac * Math.PI) * 0.1]; // offset in xz plane
 	}
 
-	#createStemGeometry(_height, _thickness) {
-		const radialSegments = 16;
-		const heightSegments = 32;
-
-		const geometry = new THREE.BufferGeometry();
-		const uvs = [];
-		const vertices = [];
-		const indices = [];
-
-
-		// Generate vertices
-		for (let y = 0; y <= heightSegments; y++) 
-		{
-			const curYFrac = y / heightSegments;
-			const radius = this.#stemRadFunc(1 - curYFrac); // Invert mapping such that yFrac = 1 is at the top 
-			const offset = this.#stemOffsetFunc(1 - curYFrac);
-
-			for (let x = 0; x <= radialSegments; x++) 
-			{
-				const theta = x / radialSegments * 2 * Math.PI;
-
-				const posX = radius * Math.cos(theta) + offset[0];
-				const posY = curYFrac * _height;
-				const posZ = radius * Math.sin(theta) + offset[1];
-
-				vertices.push(posX, posY, posZ);
-				uvs.push(x / radialSegments, curYFrac);
-			}
-		}
-
-		for (let y = 0; y < heightSegments; y++) 
-		{
-			for (let x = 0; x < radialSegments; x++) 
-			{
-				const a = y * (radialSegments + 1) + x;
-				const b = a + radialSegments + 1;
-				indices.push(a, b, a + 1); 
-				indices.push(a + 1, b, b + 1);
-			}
-		}
-		
-		geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
-		geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
-		geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
-		geometry.computeVertexNormals();
-		return geometry;
-	}
+	
 
 	
 	#createStemMesh() {
-		let geometry = this.#createStemGeometry(this.#stemLength);
+		let geometry = generateStemGeometry(p => this.#stemRadFunc(p), p => this.#stemOffsetFunc(p), this.#stemLength);
 		let material = new THREE.MeshLambertMaterial({color: 0x50c040});
 
 		material.side = THREE.DoubleSide; // Fix cliping issues
