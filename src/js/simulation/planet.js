@@ -34,6 +34,7 @@ export default class Planet {
 	baseRadius = 20;
 
 	#mesh;
+	#outlineMesh;
 	#group;
 	#coreMesh;
 	#creationTime = new Date();
@@ -46,6 +47,7 @@ export default class Planet {
 		this.#generateMesh();
 
 		this.#group = new THREE.Group();
+		// this.#group.add(this.#outlineMesh);
 		this.#group.add(this.#mesh);
 		this.#group.add(this.#coreMesh);
 	}
@@ -81,17 +83,35 @@ export default class Planet {
 
 	#generateMesh() {
 		const geometry = generatePlanetGeometry((theta, phi) => this.radialFunction(theta, phi), Planet.segCount * 2, Planet.segCount);
-		let material = new THREE.MeshLambertMaterial({color: 0xffffff});
-		material.side = THREE.DoubleSide; // Fix cliping issues
+		let material = new THREE.MeshLambertMaterial({
+			color: 0xffffff, 
+			side: THREE.DoubleSide,
+			depthWrite: true
+		});
 
 		this.#mesh = new THREE.Mesh(geometry, material);
+		// this.#outlineMesh = new THREE.Mesh(
+		//   geometry,
+		//   new THREE.MeshBasicMaterial({
+		//     color: 0x333333,
+		//     side: THREE.FrontSide,
+		//     depthTest: true,
+		//   })
+		// );
+		// this.#outlineMesh.scale.setScalar(1.01); // Increase for a thicker outline
+		// this.#outlineMesh.renderOrder = 0;
+		// this.#mesh.renderOrder = 1;
+
+
 		this.#mesh.castShadow = true;
 		this.#mesh.receiveShadow = true;
 
 		this.#mesh.position.x = 0;
 		this.#mesh.position.z = 0;
 		this.#mesh.position.y = 0;
-		this.#mesh.rotateZ(0.1 * random() * Math.PI * 2);
+		const rotAngle = 0.1 * random() * Math.PI * 2;
+		this.#mesh.rotateZ(rotAngle);
+		// this.#outlineMesh.rotateZ(rotAngle);
 
 		const coreGeometry = new THREE.SphereGeometry(this.baseRadius * 1.02, Planet.segCount * 2, Planet.segCount);
 		const coreMaterial = new THREE.MeshStandardMaterial({

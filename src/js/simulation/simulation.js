@@ -43,7 +43,6 @@ export default class Simulation {
 		this.#volcanoParticleEffect.addToScene(this.scene);
 
 
-
 		this.#defineComposer();
 
 
@@ -82,33 +81,8 @@ export default class Simulation {
 			this.#volcanoParticleEffect.update(this);
 		}
 
-
-
 		this.camera.update();
-		// renderer.render(scene, camera.camera);
 		this.#composer.render();
-
-
-		// let centerPos = new THREE.Vector3(0, 0, 0);
-		// let center = centerPos.project(camera.camera);	
-		// for (let i = 0; i < trackedElements.length; i++)
-		// {
-		// 	let absPos = new THREE.Vector3(...planet.objects[i].relPosition).multiplyScalar(1.2);
-		// 	let relPxPos = absPos.project(camera.camera);
-		// 	const attachedOnLeft = relPxPos.x < 0;
-			
-		// 	const objX = (1 + relPxPos.x) / 2 * renderer.domElement.width;
-		// 	const objY = (1 - relPxPos.y) / 2 * renderer.domElement.height;
-		// 	const labelX = objX + 50 * (attachedOnLeft ? -1 : 1);
-
-		// 	trackedElements[i].style.left = labelX + 'px';
-		// 	trackedElements[i].style.top = objY + 'px';
-
-			
-		// 	let dz = (center.z - relPxPos.z);
-		// 	trackedElements[i].classList.toggle('hide', dz < 0 || center.z > 0.9985 || center.z < 0.995);
-		// 	trackedElements[i].classList.toggle('attachedOnLeft', attachedOnLeft);
-		// }
 
 		requestAnimationFrame(() => this.update());
 	}
@@ -131,7 +105,10 @@ export default class Simulation {
 
 	#setUpScene() {
 		this.scene = new THREE.Scene();
-		this.scene.background = new THREE.Color(0x000010); // Deep dark blue
+		// this.scene.background = new THREE.Color(0x000010); // Dark mode
+		this.scene.background = new THREE.Color(0x101010);
+		// this.scene.background = new THREE.Color(0xfffffa); // Light mode
+
 
 		this.#defineLighting();
 
@@ -150,12 +127,12 @@ export default class Simulation {
 	#defineLighting() {
 		this.sun = new Sun({camera: this.camera});
 		this.sun.addToScene(this.scene);
-		window.sun = this.sun;
 
+		const dist = 100;
+		const intensity = 400; 
 		for (let a = 0; a < Math.PI * 2; a += Math.PI * 2 / 3)
 		{
-			const spotLight = new THREE.SpotLight( 0xffffff, 400 );
-			const dist = 100;
+			let spotLight = new THREE.SpotLight( 0xffffff, intensity );
 			spotLight.position.set( Math.cos(a) * dist, 0, Math.sin(a) * dist );
 			spotLight.castShadow = true;
 			spotLight.lookAt(0, 0, 0);
@@ -163,6 +140,22 @@ export default class Simulation {
 			spotLight.shadow.normalBias = -2;
 			this.scene.add(spotLight);
 		}
+
+		let spotLight = new THREE.SpotLight( 0xffffff, intensity );
+		spotLight.position.set(0, dist, 0 );
+		spotLight.castShadow = true;
+		spotLight.lookAt(0, 0, 0);
+		spotLight.shadow.bias = -0.00001; 
+		spotLight.shadow.normalBias = -2;
+		this.scene.add(spotLight);
+
+		spotLight = new THREE.SpotLight( 0xffffff, intensity );
+		spotLight.position.set(0, -dist, 0 );
+		spotLight.castShadow = true;
+		spotLight.lookAt(0, 0, 0);
+		spotLight.shadow.bias = -0.00001; 
+		spotLight.shadow.normalBias = -2;
+		this.scene.add(spotLight);
 	}
 }
 
