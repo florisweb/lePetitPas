@@ -187,11 +187,17 @@ export default class Baobab extends PlanetObject {
 
 
 	#createBranchGeometry(_generationsToTip, _subBranchCount, _radius, _curLength, _startPos, _startNormal) {
-		let geometries = [];		
+		let geometries = [];
+
+		let actualBranchCount = Math.ceil((1 - random()**2) * _subBranchCount);
+
 
 		const nextGenerationRadius = 0.7 * _radius;
 		const nextGenLength = 0.7 * _curLength;
-		let curGeo = generateStemGeometry(p => _radius * p + nextGenerationRadius * (1 - p), p => [0, 0], _curLength);		
+
+		let radiusFunction = p => _radius * p + nextGenerationRadius * (1 - p);
+		if (_generationsToTip === 0) radiusFunction = p => p > 0.1 ? (_radius * p + nextGenerationRadius * (1 - p)) : 0; // Fill ends of tip
+		let curGeo = generateStemGeometry(radiusFunction, p => [0, 0], _curLength);		
 	
 		const quaternion = new THREE.Quaternion();
 		quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), _startNormal);
@@ -222,9 +228,9 @@ export default class Baobab extends PlanetObject {
 		const circleRadius = Math.sin(theta);
 		const circleCenter = n.clone().multiplyScalar(Math.cos(theta));
 
-		for (let b = 0; b < _subBranchCount; b++)
+		for (let b = 0; b < actualBranchCount; b++)
 		{
-			const phi = 2 * Math.PI * b / _subBranchCount;
+			const phi = 2 * Math.PI * b / actualBranchCount + (1 - 2 * random()) * Math.PI * 0.2;
 		  	let curNormal = circleCenter.clone()
 			    .addScaledVector(t, circleRadius * Math.cos(phi))
 			    .addScaledVector(u, circleRadius * Math.sin(phi));
@@ -324,51 +330,4 @@ export default class Baobab extends PlanetObject {
 	animateMeshToCompletionState(_perc) {
 		
 	}
-}
-
-
-
-
-
-
-function orientFlowerHead(planetNormal, theta, phi) {
-	const n = planetNormal.clone().normalize();
-
-	// Choose a fixed reference direction.
-	// This defines where theta = 0 is.
-	const reference = Math.abs(n.y) < 0.999
-		? new THREE.Vector3(0, 1, 0)
-		: new THREE.Vector3(1, 0, 0);
-
-	// Two axes tangent to the planet at this point
-	const tangentX = new THREE.Vector3()
-		.crossVectors(reference, n)
-		.normalize();
-
-	const tangentY = new THREE.Vector3()
-		.crossVectors(n, tangentX)
-		.normalize();
-
-	// Direction around the planet's local tangent plane
-	const tangentDirection = tangentX.clone()
-		.multiplyScalar(Math.cos(theta))
-		.add(
-		  tangentY.clone().multiplyScalar(Math.sin(theta))
-		);
-
-	// Combine horizontal tilt and outward/upward direction
-	const flowerDirection = tangentDirection
-		.multiplyScalar(Math.cos(phi))
-		.add(
-		  n.clone().multiplyScalar(Math.sin(phi))
-		)
-		.normalize();
-
-	const rotation = new THREE.Quaternion()
-		.setFromUnitVectors(
-		  new THREE.Vector3(0, 1, 0),
-		  flowerDirection
-		);
-
-	return rotation;
 }
