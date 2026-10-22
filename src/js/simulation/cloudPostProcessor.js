@@ -23,12 +23,61 @@ class CloudShader extends ShaderPass {
 export default class CloudPostProcessor {
 	_pixelPass;
 	#composer;
+	_cloudTexture;
+	#createCloudTexture() {
+		const size = 128;
+		const width = size;
+		const height = size;
+		const depth = size;
+		const data = new Uint8Array(width * height * depth);
+		const sharpness = 5;
+
+		// Example: fill with a constant density.
+		let points = [];
+		for (let i = 0; i < 10; i++) points.push([0.5 + (1 - 2 * Math.random()) * 0.5 * 0.5, 0.5 + (1 - 2 * Math.random()) * 0.5 * 0.5, 0.5 + (1 - 2 * Math.random()) * 0.5 * 0.5]);
+
+		for (let x = 0; x < width; x++)
+		{
+			for (let y = 0; y < height; y++)
+			{
+				for (let z = 0; z < depth; z++)
+				{
+					const index = x + width * y + width * height * z;
+					let minDistSqrt = Infinity;
+
+					for (let i = 0; i < points.length; i++)
+					{
+						let distSqrt = (points[i][0] - x/width)**2 + (points[i][1] - y/height)**2 + (points[i][2] - z/depth)**2;
+						if (distSqrt > minDistSqrt) continue;
+						minDistSqrt = distSqrt;
+					}
+
+					let density = Math.min(Math.max(0.05 - Math.sqrt(minDistSqrt), 0) * sharpness, 1);
+					data[index] = Math.round(density * 255);
+				}
+			}
+		}
+		window.data = data;
+
+
+		this._cloudTexture = new THREE.Data3DTexture(data, width, height, depth);
+		this._cloudTexture.format = THREE.RedFormat;
+		this._cloudTexture.type = THREE.UnsignedByteType;
+		this._cloudTexture.minFilter = THREE.LinearFilter;
+		this._cloudTexture.magFilter = THREE.LinearFilter;
+		this._cloudTexture.wrapS = THREE.ClampToEdgeWrapping;
+		this._cloudTexture.wrapT = THREE.ClampToEdgeWrapping;
+		this._cloudTexture.wrapR = THREE.ClampToEdgeWrapping;
+		this._cloudTexture.unpackAlignment = 1;
+		this._cloudTexture.needsUpdate = true;
+	}
 	
 	constructor({simulation, renderer, composer}) {
 		this.#composer = composer;
 
-		
-		let geometry = new THREE.SphereGeometry(30, 64, 64);
+		this.#createCloudTexture();
+
+
 
 
 		// Particle rendering material
@@ -39,8 +88,9 @@ export default class CloudPostProcessor {
 			    invProjection: {value: new THREE.Matrix4()},
 			    cameraWorld: {value: new THREE.Matrix4()},
 			    cloudCameraPosition: {value: new THREE.Vector3()},
-			    zNear: {value: simulation.camera.camera.near},
-			    zFar: {value: simulation.camera.camera.far}
+			    cloudTexture: {value: this._cloudTexture},
+			    // zNear: {value: simulation.camera.camera.near},
+			    // zFar: {value: simulation.camera.camera.far}
 			},
 			vertexShader: `
 			    varying vec2 vUv;
@@ -54,18 +104,23 @@ export default class CloudPostProcessor {
 			    uniform sampler2D tDiffuse;
 			    uniform sampler2D depthTexture;
 			    varying vec2 vUv;
-			    uniform float zNear;
-			    uniform float zFar;
+			    // uniform float zNear;
+			    // uniform float zFar;
 
 			    uniform mat4 invProjection;
 				uniform mat4 cameraWorld;
 				uniform vec3 cloudCameraPosition;
+
+				uniform sampler3D cloudTexture;
 				
-				float minDensity = 0.1;
-				float DensityScalar = 0.1;
+				float minDensity = 0.0;
+				float DensityScalar = 0.5;
 
+				float cloudBoxSize = 500.0;
 
-			    
+			    vec3 worldToTexturePos(vec3 worldPos) {
+					return (worldPos + cloudBoxSize / 2.0) / cloudBoxSize;
+			    }
 				vec3 worldPositionFromDepth(vec2 uv, float depth) {
 				  vec4 clip = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 				  vec4 view = invProjection * clip;
@@ -74,21 +129,18 @@ export default class CloudPostProcessor {
 				  return (cameraWorld * view).xyz;
 				}
 
-				float rand(vec2 co){
-				    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-				}
-
 				float sampleCloudDensity(vec3 position) {
-					// float4 textureVal = vec4(1.0, 0.0, 0.0, 0.0);
-					float textureVal = rand(position.xy);
+					vec3 normalizedPosition = worldToTexturePos(position);
+					if (length(normalizedPosition - vec3(0.5)) > 0.5) return 0.0;
+
+					float textureVal = texture(cloudTexture, normalizedPosition).r;
+					
 					float density = max(0.0, textureVal - minDensity) * DensityScalar;
 					return density;
 				}
 
 			    void main() {
 			      	vec4 color = texture2D(tDiffuse, vUv);
-					
-					
 					
 					
 					float depth = texture2D(depthTexture, vUv).r;
@@ -101,10 +153,9 @@ export default class CloudPostProcessor {
 					vec3 rayDirection = ray / maxDistance;
 
 
-
 					float curDist = 0.0;
-					float maxDist = maxDistance;
-					float stepSize = maxDist / 10.0; // 10: defines the amount of samples
+					float maxDist = min(maxDistance, 1000.0);
+					float stepSize = maxDist / 200.0; // /x: defines the amount of samples
 
 					float totalDensity = 0.0;
 					while (curDist < maxDist)
@@ -116,7 +167,7 @@ export default class CloudPostProcessor {
 					}
 
 					float transmittance = exp(-totalDensity);
-					gl_FragColor = vec4(color.rgb * transmittance, 1.0);
+					gl_FragColor = vec4(color.rgb * transmittance + (1.0 - transmittance) * vec3(1.0), 1.0);
 					
 
 
