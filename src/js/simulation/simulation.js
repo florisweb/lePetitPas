@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import Star from './star.js';
 import Sun from './sun.js';
 import Planet from './planet.js';
+
 import { random } from '../random.js';
 import Camera from './camera.js';
 import SpotLight from './spotLight.js';
@@ -12,6 +13,8 @@ import { animateSigmoidally } from '../animator.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import CloudPostProcessor from './cloudPostProcessor.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 
 import VolcanoParticleEffect from './volcanoParticleEffect.js';
@@ -19,7 +22,7 @@ import VolcanoParticleEffect from './volcanoParticleEffect.js';
 export default class Simulation {
 	#App;
 	camera;
-	#composer;
+	composer;
 	scene;
 
 	spotLight;
@@ -82,24 +85,50 @@ export default class Simulation {
 		}
 
 		this.camera.update();
-		this.#composer.render();
+		this.composer.render();
 
 		requestAnimationFrame(() => this.update());
 	}
 
 	#defineComposer() {
-		this.#composer = new EffectComposer(renderer);
-		const renderPass = new RenderPass(this.scene, this.camera.camera);
-		this.#composer.addPass(renderPass);
+		// this.#composer = new EffectComposer(renderer);
+		// const renderPass = new RenderPass(this.scene, this.camera.camera);
+		// this.#composer.addPass(renderPass);
+		// this.cloudPostProcessor.addToComposer(this.#composer);
+		// this.#composer.addPass(new OutputPass());
 
-		const bloomPass = new UnrealBloomPass(
-		  new THREE.Vector2(window.innerWidth, window.innerHeight),
-		  0.5,    // strength
-		  0.01,    // radius
-		  // 0.85    // threshold
-		  0.5    // threshold
+
+		const target = new THREE.WebGLRenderTarget(
+		  window.innerWidth,
+		  window.innerHeight
 		);
+
+		target.depthTexture = new THREE.DepthTexture(
+		  window.innerWidth,
+		  window.innerHeight,
+		  THREE.UnsignedIntType
+		);
+		this.composer = new EffectComposer(renderer, target);
+
+		this.cloudPostProcessor = new CloudPostProcessor({renderer, composer: this.composer, simulation: this});
+
+
+		const renderPass = new RenderPass(this.scene, this.camera.camera);
+		this.composer.addPass(renderPass);
+		this.cloudPostProcessor.addToComposer(this.composer);
+		this.composer.addPass(new OutputPass());
+
+
+
+		// const bloomPass = new UnrealBloomPass(
+		//   new THREE.Vector2(window.innerWidth, window.innerHeight),
+		//   0.5,    // strength
+		//   0.01,    // radius
+		//   // 0.85    // threshold
+		//   0.5    // threshold
+		// );
 		// this.#composer.addPass(bloomPass);
+
 	}
 
 
@@ -116,7 +145,6 @@ export default class Simulation {
 
 		this.planet = new Planet();
 		this.planet.addToScene(this.scene);
-
 
 		for (let i = 0; i < 500; i++)
 		{

@@ -158,7 +158,8 @@ export default class VolcanoParticleEffect extends ParticleEffect {
 		      gl_FragColor = vec4(vColor, (1.0 - 0.0) * (0.5 - dist));
 		    }
 		  `,
-		  transparent: true,
+		  transparent: false, // TEMP
+		  // transparent: true,
 		  emissiveIntensity: 2.0
 		});
 
