@@ -62,6 +62,7 @@ export function generatePlanetGeometry(radiusFunction, widthSegments = 32, heigh
 	const geometry = new THREE.BufferGeometry();
 	const vertices = [];
 	const indices = [];
+	const uvs = [];
 
 	// Generate vertices
 	for (let y = 0; y <= heightSegments; y++) 
@@ -81,6 +82,7 @@ export function generatePlanetGeometry(radiusFunction, widthSegments = 32, heigh
 			const posZ = radius * Math.sin(phi) * Math.sin(theta);
 
 			vertices.push(posX, posY, posZ);
+			uvs.push(x / (widthSegments + 1), y / heightSegments);
 		}
 	}
 	// Generate indices for triangles
@@ -110,8 +112,10 @@ export function generatePlanetGeometry(radiusFunction, widthSegments = 32, heigh
 		indices.push(lt, lb, rb);
 	}
 
+
 	geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
 	geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+	geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
 	geometry.computeVertexNormals();
 
 	return geometry;

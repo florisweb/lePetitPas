@@ -1,7 +1,22 @@
+@font-face {
+  font-family: CurFont; /* set name */
+  src: url(fonts/Bilbo-Regular.ttf); 
+}
+
+@font-face {
+  font-family: HeaderFont; /* set name */
+  src: url(fonts/theBrendan.otf); 
+}
+
 * {
 	box-sizing: border-box;
-	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	/*font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;*/
+	font-family: CurFont;
 }
+
+
+
+
 
 :root {
 	--screenMargin: 20px;
@@ -260,3 +275,46 @@ canvas {
 		display: none;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+body.lightTheme {
+	background: #F3E0C8;
+}
+
+
+
+:root {
+	--textColor: #321;
+}
+
+body.lightTheme habit-list-panel {
+	background: none !important;
+}
+
+body.lightTheme #header {
+	display: none;
+}
+
+body.lightTheme habit-element, 
+body.lightTheme habit-create-button {
+	--textColor: #321;
+}
+body.lightTheme habit-create-button {
+	--textColor: #321;
+}
+
+body.lightTheme habit-progress-dial {
+	--progressBackColor: #765;
+}
+
+

@@ -27,9 +27,11 @@
 }
 
 .UIPanel .panelTitle {
-	font-size: 18px;
-	color: #ccc;
+	/*font-size: 18px;*/
+	font-size: 27px;
+	color: var(--textColor);
 	margin-bottom: 5px;	
+	font-family: HeaderFont;
 }
 
 
@@ -148,7 +150,6 @@ habit-list-panel horizontal-infinite-scroller {
 
 habit-list-panel habit-element {
 	margin-bottom: 5px;
-	--textColor: #ccc;
 }
 habit-list-panel habit-element {
 	margin-top: 10px;

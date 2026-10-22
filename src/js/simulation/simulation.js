@@ -99,15 +99,17 @@ export default class Simulation {
 		  // 0.85    // threshold
 		  0.5    // threshold
 		);
-		this.#composer.addPass(bloomPass);
+		// this.#composer.addPass(bloomPass);
 	}
 
 
 	#setUpScene() {
 		this.scene = new THREE.Scene();
 		// this.scene.background = new THREE.Color(0x000010); // Dark mode
-		this.scene.background = new THREE.Color(0x101010);
+		// this.scene.background = new THREE.Color(0x101010);
 		// this.scene.background = new THREE.Color(0xfffffa); // Light mode
+		this.scene.background = new THREE.Color(0xF3E0C8); // Cream
+		
 
 
 		this.#defineLighting();
@@ -129,7 +131,7 @@ export default class Simulation {
 		this.sun.addToScene(this.scene);
 
 		const dist = 100;
-		const intensity = 400; 
+		const intensity = 4000; // 400 
 		for (let a = 0; a < Math.PI * 2; a += Math.PI * 2 / 3)
 		{
 			let spotLight = new THREE.SpotLight( 0xffffff, intensity );

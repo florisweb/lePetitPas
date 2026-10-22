@@ -2,7 +2,10 @@ import * as THREE from 'three';
 import { Perlin, random } from '../random.js';
 import Planet from './planet.js';
 import { generatePatchGeometry } from './geometryGenerator.js';
+import { generateVulcanoTexture } from './textureGenerator.js';
+
 import PlanetObject from './planetObject.js'
+
 
 export default class BaseVolcano extends PlanetObject {
 	_mesh;
@@ -72,38 +75,10 @@ export default class BaseVolcano extends PlanetObject {
 		return generatePatchGeometry((theta, phi) => radialFunction(theta, phi), [patchSize, patchSize], this.position, segDensity, this._planet.baseRadius);
 	}
 
-	#createTexture() {
-		const canvas = document.createElement('canvas');
-		canvas.width = 128;
-		canvas.height = 128;
-		const ctx = canvas.getContext('2d');
-
-		const minRadPerc = 0.3;
-		for (let x = 0; x < canvas.width; x++)
-		{
-			let rx = (x - canvas.width / 2) / canvas.width;
-			for (let y = 0; y < canvas.height; y++)
-			{
-				let ry = (y - canvas.height / 2) / canvas.height;
-				let dist = Math.sqrt(rx**2 + ry**2) * Math.sqrt(2);
-				const colorP = 1 / (1 + Math.exp(10 * (dist - 0.5))) + 0.2 * (1 + Perlin.get(rx * 5, ry * 5));
-				let color = Math.round((1 - Math.min(colorP, 1)) * 235 + 20);
-
-				ctx.fillStyle = 'rgb(' + color + ', ' + color + ', ' + color + ')';
-
-				ctx.fillRect(x, y, 1, 1);
-			}
-		}
-	
-		const texture = new THREE.CanvasTexture(canvas);
-		return texture;
-	}
-
 	_generateVolcMesh({radius}) {
-		const volcTexture = this.#createTexture();
 		let volcGeo = this._generateGeometry({radius, segDensityMultiplier: 4}, (theta, phi) => this._volcRadialFunction(theta, phi));
 		let volcMaterial = new THREE.MeshLambertMaterial({
-			map: volcTexture,
+			map: generateVulcanoTexture(),
 		});
 
 		volcMaterial.side = THREE.DoubleSide; // Fix cliping issues

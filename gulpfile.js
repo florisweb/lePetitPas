@@ -19,6 +19,10 @@ async function images() {
   return gulp.src(['src/images/*'])
     .pipe(gulp.dest("dist/images"));
 }
+async function fonts() {
+  return gulp.src(['src/fonts/*'])
+    .pipe(gulp.dest("dist/fonts"));
+}
 async function manifest() {
   return gulp.src(['src/manifest.json'])
     .pipe(gulp.dest("dist"));
@@ -36,7 +40,7 @@ function css() {
     .pipe(gulp.dest("dist"));
 }
 
-let compile = gulp.series(main, javascript, css, images, manifest);
+let compile = gulp.series(main, javascript, css, images, fonts, manifest);
 export default gulp.series(compile, watch);
 
 
