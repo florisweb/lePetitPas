@@ -116,9 +116,6 @@ export default class Simulation {
 		const renderPass = new RenderPass(this.scene, this.camera.camera);
 		this.composer.addPass(renderPass);
 		this.cloudPostProcessor.addToComposer(this.composer);
-		this.composer.addPass(new OutputPass());
-
-
 
 		// const bloomPass = new UnrealBloomPass(
 		//   new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -127,7 +124,17 @@ export default class Simulation {
 		//   // 0.85    // threshold
 		//   0.5    // threshold
 		// );
-		// this.#composer.addPass(bloomPass);
+
+		const bloomPass = new UnrealBloomPass(
+		  new THREE.Vector2(window.innerWidth, window.innerHeight),
+		  0.1,    // strength
+		  0.01,    // radius
+		  0.8    // threshold
+		);
+		this.composer.addPass(bloomPass);
+
+
+		this.composer.addPass(new OutputPass());
 
 	}
 
@@ -135,9 +142,9 @@ export default class Simulation {
 	#setUpScene() {
 		this.scene = new THREE.Scene();
 		// this.scene.background = new THREE.Color(0x000010); // Dark mode
-		// this.scene.background = new THREE.Color(0x101010);
+		this.scene.background = new THREE.Color(0x101010);
 		// this.scene.background = new THREE.Color(0xfffffa); // Light mode
-		this.scene.background = new THREE.Color(0xF3E0C8); // Cream
+		// this.scene.background = new THREE.Color(0xF3E0C8); // Cream
 		
 
 
@@ -159,7 +166,7 @@ export default class Simulation {
 		this.sun.addToScene(this.scene);
 
 		const dist = 100;
-		const intensity = 4000; // 400 
+		const intensity = 1000; // 400 
 		for (let a = 0; a < Math.PI * 2; a += Math.PI * 2 / 3)
 		{
 			let spotLight = new THREE.SpotLight( 0xffffff, intensity );

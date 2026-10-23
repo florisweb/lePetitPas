@@ -10,10 +10,12 @@
 
 * {
 	box-sizing: border-box;
-	/*font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;*/
-	font-family: CurFont;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
 
+body.lightTheme * {
+	font-family: CurFont;
+}
 
 
 
@@ -292,8 +294,7 @@ body.lightTheme {
 }
 
 
-
-:root {
+body.lightTheme {
 	--textColor: #321;
 }
 

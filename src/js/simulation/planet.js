@@ -104,12 +104,12 @@ export default class Planet {
 		this.#outlineMesh = new THREE.Mesh(
 		  geometry,
 		  new THREE.MeshBasicMaterial({
-		    color: 0x332313, //0x333333,
+		    color: 0x332323, //0x333333,
 		    side: THREE.FrontSide,
 		    depthTest: true,
 		  })
 		);
-		this.#outlineMesh.scale.setScalar(1.01); // Increase for a thicker outline
+		this.#outlineMesh.scale.setScalar(1.005); // Increase for a thicker outline
 		this.#outlineMesh.renderOrder = 0;
 		this.#mesh.renderOrder = 1;
 

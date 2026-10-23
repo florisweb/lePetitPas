@@ -27,10 +27,13 @@
 }
 
 .UIPanel .panelTitle {
-	/*font-size: 18px;*/
-	font-size: 27px;
+	font-size: 18px;
 	color: var(--textColor);
 	margin-bottom: 5px;	
+}
+
+body.lightTheme .UIPanel .panelTitle {
+	font-size: 27px;
 	font-family: HeaderFont;
 }
 
