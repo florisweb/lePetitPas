@@ -2,9 +2,11 @@ import * as THREE from 'three';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
 class CloudShader extends ShaderPass {
-	constructor(_config, _camera) {
+	constructor(_config, _simulation) {
 		super(_config)
-		this.camera = _camera;
+		this.simulation = _simulation;
+		this.light = _simulation.sun.mesh;
+		this.camera = _simulation.camera.camera;
 	}
 	render(renderer, writeBuffer, readBuffer, deltaTime, maskActive) {
 		this.uniforms.depthTexture.value = readBuffer.depthTexture;
@@ -13,6 +15,7 @@ class CloudShader extends ShaderPass {
 		this.uniforms.invProjection.value.copy(this.camera.projectionMatrixInverse);
 		this.uniforms.cameraWorld.value.copy(this.camera.matrixWorld);
 		this.uniforms.cloudCameraPosition.value.setFromMatrixPosition(this.camera.matrixWorld);
+		this.uniforms.lightPosition.value = this.light.position;
 		super.render(renderer, writeBuffer, readBuffer, deltaTime, maskActive);
 	}
 }
@@ -50,9 +53,7 @@ export default class CloudPostProcessor {
 		);
 		pointTexture.needsUpdate = true;
 
-		
-		window.pointsData = pointsData;
-
+	
 		const size = 512;
 		const target = new THREE.WebGL3DRenderTarget(size, size, size);
 		target.texture.minFilter = THREE.LinearFilter;
@@ -82,7 +83,6 @@ export default class CloudPostProcessor {
 		    uniform float sliceZ;
 		    uniform vec2 resolution;
 		    uniform int cloudPointCount;
-		    // uniform float cloudPoints[` + 3 * cloudPointCount + `];
 		    uniform sampler2D cloudPointTexture;
 		    float cloudRad = 1.0; // Defines the radius from a point at which the cloud density = 0
 		    float cloudSharpness = 50.0;
@@ -142,11 +142,9 @@ export default class CloudPostProcessor {
 			    cloudCameraPosition: {value: new THREE.Vector3()},
 			    cloudTexture: {value: null},
 			    cloudBoxSize: {value: this._cloudBoxSize},
-			    minDensity: {value: 0.8}, 
-			    densityScalar: {value: 0.2},
-			    // cloudTexture: {value: this._cloudTexture},
-			    // zNear: {value: simulation.camera.camera.near},
-			    // zFar: {value: simulation.camera.camera.far}
+			    minDensity: {value: 0.9}, 
+			    densityScalar: {value: 1.0},
+			    lightPosition: {value: new THREE.Vector3()}
 			},
 			vertexShader: `
 			    varying vec2 vUv;
@@ -157,20 +155,24 @@ export default class CloudPostProcessor {
 			    }
 			`,
 			fragmentShader: `
-			  uniform float cloudBoxSize;
 			  uniform sampler2D tDiffuse;
 			  uniform sampler2D depthTexture;
+				uniform sampler3D cloudTexture;
 
 		    varying vec2 vUv;
 
 		    uniform mat4 invProjection;
 				uniform mat4 cameraWorld;
 				uniform vec3 cloudCameraPosition;
+				uniform vec3 lightPosition;
 
-				uniform sampler3D cloudTexture;
-				
+
+				uniform float cloudBoxSize;
 				uniform float minDensity;
 				uniform float densityScalar;
+				float cloudLightAbsorption = 0.2;
+				float cloudLightCoef = 0.5;
+
 
 		    vec3 worldToTexturePos(vec3 worldPos) {
 					return (worldPos + cloudBoxSize / 2.0) / cloudBoxSize;
@@ -193,6 +195,25 @@ export default class CloudPostProcessor {
 					return density;
 				}
 
+				float densityToLight(vec3 position) {
+					vec3 ray = lightPosition - position;
+					float maxDistance = length(ray);
+					vec3 rayDirection = ray / maxDistance;
+					float curDist = 0.0;
+					float maxDist = min(maxDistance, 2.0 * cloudBoxSize); // Only check within the cloudBox
+					float stepSize = maxDist / 30.0; // /x: defines the amount of samples
+
+					float totalDensity = 0.0;
+					while (curDist < maxDist)
+					{	
+						vec3 curPos = rayDirection * curDist + position;
+						float curDensity = sampleCloudDensity(curPos);
+						totalDensity += curDensity * stepSize;
+						curDist += stepSize;
+					}
+					return totalDensity;
+				}
+
 		    void main() {
 	      	vec4 color = texture2D(tDiffuse, vUv);
 					
@@ -204,22 +225,34 @@ export default class CloudPostProcessor {
 
 					float curDist = 0.0;
 					float maxDist = min(maxDistance, 2.0 * cloudBoxSize);
-					float stepSize = maxDist / 200.0; // /x: defines the amount of samples
+					float stepSize = maxDist / 100.0; // /x: defines the amount of samples
 
-					float totalDensity = 0.0;
+					float lightEnergy = 0.0;
+					float transmittance = 1.0;
 					while (curDist < maxDist)
 					{	
 						vec3 curPos = rayDirection * curDist + cloudCameraPosition;
 						float curDensity = sampleCloudDensity(curPos);
-						totalDensity += curDensity * stepSize;
+						if (curDensity > 0.0) {
+							float lightTransmittance = exp(-densityToLight(curPos));
+							lightEnergy += curDensity * stepSize * transmittance * lightTransmittance * cloudLightCoef; // Calculate how much light is added to the path by scattering in it from the light source
+							transmittance *= exp(-curDensity * stepSize * cloudLightAbsorption); // Calculate how much light goes through the cloud (direct ray, so how well can you look through the cloud)
+
+							if (transmittance < 0.01) { // Minor effect as most light is lost anyway
+								break;
+							}
+						}
+
 						curDist += stepSize;
 					}
 
-					float transmittance = exp(-totalDensity);
-					gl_FragColor = vec4(color.rgb * transmittance + (1.0 - transmittance) * vec3(1.0), 1.0);
+				
+					vec3 cloudColor = lightEnergy * vec3(1.0, 0.7, 0.5);
+					vec3 cloudBaseColor = vec3(0.5);
+					gl_FragColor = vec4(color.rgb * transmittance + cloudColor + (1.0 - transmittance) * (1.0 - lightEnergy) * cloudBaseColor, 1.0);
 		    }
 			`
-		}, simulation.camera.camera);
+		}, simulation);
 		
 		this._pixelPass.uniforms.cloudTexture.value = this._cloudTexture;
 	}

@@ -3,6 +3,9 @@ import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflar
 
 
 export default class Sun {
+	get mesh() {
+		return this.#mesh;
+	}
 	#mesh;
 	#light;
 	#sunDistance = 1000;
