@@ -2,7 +2,11 @@ import * as THREE from 'three';
 
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-
+import * as THREE_webGPU from 'three/webgpu';
+import {
+  Fn, If, instanceIndex, storageTexture, textureStore,
+  uvec3, vec4
+} from 'three/tsl';
 
 class CloudShader extends ShaderPass {
 	constructor(_config, _camera) {
@@ -24,60 +28,86 @@ export default class CloudPostProcessor {
 	_pixelPass;
 	#composer;
 	_cloudTexture;
-	#createCloudTexture() {
-		const size = 128;
-		const width = size;
-		const height = size;
-		const depth = size;
-		const data = new Uint8Array(width * height * depth);
-		const sharpness = 5;
-
-		// Example: fill with a constant density.
+	async #createCloudTexture() {
 		let points = [];
-		for (let i = 0; i < 10; i++) points.push([0.5 + (1 - 2 * Math.random()) * 0.5 * 0.5, 0.5 + (1 - 2 * Math.random()) * 0.5 * 0.5, 0.5 + (1 - 2 * Math.random()) * 0.5 * 0.5]);
-
-		for (let x = 0; x < width; x++)
+		const cloudPointCount = 200;
+		for (let i = 0; i < cloudPointCount; i++) 
 		{
-			for (let y = 0; y < height; y++)
-			{
-				for (let z = 0; z < depth; z++)
-				{
-					const index = x + width * y + width * height * z;
-					let minDistSqrt = Infinity;
-
-					for (let i = 0; i < points.length; i++)
-					{
-						let distSqrt = (points[i][0] - x/width)**2 + (points[i][1] - y/height)**2 + (points[i][2] - z/depth)**2;
-						if (distSqrt > minDistSqrt) continue;
-						minDistSqrt = distSqrt;
-					}
-
-					let density = Math.min(Math.max(0.05 - Math.sqrt(minDistSqrt), 0) * sharpness, 1);
-					data[index] = Math.round(density * 255);
-				}
-			}
+			points.push(0.5 + (1 - 2 * Math.random()) * 0.5 * 0.5, 0.5 - 0.1 * Math.random(), 0.5 + (2 * Math.random()**2-1) * 0.5 * 0.5);
 		}
-		window.data = data;
 
+		let pointsData = new Float32Array(points);
+		window.pointsData = pointsData;
 
-		this._cloudTexture = new THREE.Data3DTexture(data, width, height, depth);
-		this._cloudTexture.format = THREE.RedFormat;
-		this._cloudTexture.type = THREE.UnsignedByteType;
-		this._cloudTexture.minFilter = THREE.LinearFilter;
-		this._cloudTexture.magFilter = THREE.LinearFilter;
-		this._cloudTexture.wrapS = THREE.ClampToEdgeWrapping;
-		this._cloudTexture.wrapT = THREE.ClampToEdgeWrapping;
-		this._cloudTexture.wrapR = THREE.ClampToEdgeWrapping;
-		this._cloudTexture.unpackAlignment = 1;
-		this._cloudTexture.needsUpdate = true;
+		const size = 512;
+		const target = new THREE.WebGL3DRenderTarget(size, size, size);
+		target.texture.minFilter = THREE.LinearFilter;
+		target.texture.magFilter = THREE.LinearFilter;
+		target.texture.format = THREE.RedFormat;
+		target.texture.wrapS = THREE.ClampToEdgeWrapping;
+		target.texture.wrapT = THREE.ClampToEdgeWrapping;
+		target.texture.wrapR = THREE.ClampToEdgeWrapping;
+		
+		const sliceMaterial = new THREE.ShaderMaterial({
+		  uniforms: {
+		    sliceZ: {value: 0},
+		    resolution: {value: new THREE.Vector2(size, size)},
+		    cloudPointCount: {value: cloudPointCount},
+		    cloudPoints: {value: pointsData}
+		  },
+		  vertexShader: `
+		    varying vec2 vUv;
+
+		    void main() {
+		      vUv = uv;
+		      gl_Position = vec4(position.xy, 0.0, 1.0);
+		    }
+		  `,
+		  fragmentShader: `
+		    varying vec2 vUv;
+		    uniform float sliceZ;
+		    uniform vec2 resolution;
+		    uniform int cloudPointCount;
+		    uniform float cloudPoints[` + 3 * cloudPointCount + `];
+		    float cloudRad = 0.05;
+		    float cloudSharpness = 1.0;
+
+		    void main() {
+		      	float minDist = 1.0;
+		    	vec3 curVoxPos = vec3(vUv.x, vUv.y, sliceZ);
+		      	for (int p = 0; p < cloudPointCount; p++)
+			    {
+		    		vec3 curPoint = vec3(cloudPoints[3 * p + 0], cloudPoints[3 * p + 1], cloudPoints[3 * p + 2]);
+		    		float curDist = distance(curPoint, curVoxPos);
+		    		if (curDist > minDist) continue;
+		    		minDist = curDist;
+			    }
+
+		  		gl_FragColor = vec4(min(max(cloudRad - minDist, 0.0) * cloudSharpness, 1.0));
+		    }
+		  `
+		});
+
+		const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), sliceMaterial);
+		const sliceScene = new THREE.Scene();
+		sliceScene.add(quad);
+
+		const camera = new THREE.Camera();
+
+		for (let z = 0; z < size; z++) {
+		  sliceMaterial.uniforms.sliceZ.value = z / (size - 1);
+
+		  renderer.setRenderTarget(target, z);
+		  renderer.render(sliceScene, camera);
+		}
+
+		renderer.setRenderTarget(null);
+		this._cloudTexture = target.texture;
 	}
 	
 	constructor({simulation, renderer, composer}) {
 		this.#composer = composer;
-
 		this.#createCloudTexture();
-
-
 
 
 		// Particle rendering material
@@ -88,7 +118,8 @@ export default class CloudPostProcessor {
 			    invProjection: {value: new THREE.Matrix4()},
 			    cameraWorld: {value: new THREE.Matrix4()},
 			    cloudCameraPosition: {value: new THREE.Vector3()},
-			    cloudTexture: {value: this._cloudTexture},
+			    cloudTexture: {value: null},
+			    // cloudTexture: {value: this._cloudTexture},
 			    // zNear: {value: simulation.camera.camera.near},
 			    // zFar: {value: simulation.camera.camera.far}
 			},
@@ -114,7 +145,7 @@ export default class CloudPostProcessor {
 				uniform sampler3D cloudTexture;
 				
 				float minDensity = 0.0;
-				float DensityScalar = 0.5;
+				float DensityScalar = 1.0;
 
 				float cloudBoxSize = 500.0;
 
@@ -183,8 +214,9 @@ export default class CloudPostProcessor {
 			    }
 			`
 		}, simulation.camera.camera);
-		// this._pixelPass.uniforms.depthTexture.value = this.#composer.renderTarget1.depthTexture;
 		
+		this._pixelPass.uniforms.cloudTexture.value = this._cloudTexture;
+
 		// this._shaderMaterial = new THREE.ShaderMaterial({
 		//   uniforms: {
 		//     texturePosition: { value: null },
