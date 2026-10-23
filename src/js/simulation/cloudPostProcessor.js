@@ -1,12 +1,5 @@
 import * as THREE from 'three';
-
-import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import * as THREE_webGPU from 'three/webgpu';
-import {
-  Fn, If, instanceIndex, storageTexture, textureStore,
-  uvec3, vec4
-} from 'three/tsl';
 
 class CloudShader extends ShaderPass {
 	constructor(_config, _camera) {
@@ -14,29 +7,50 @@ class CloudShader extends ShaderPass {
 		this.camera = _camera;
 	}
 	render(renderer, writeBuffer, readBuffer, deltaTime, maskActive) {
-	    this.uniforms.depthTexture.value = readBuffer.depthTexture;
-	    
-	    this.camera.updateMatrixWorld();
+		this.uniforms.depthTexture.value = readBuffer.depthTexture;
+
+		this.camera.updateMatrixWorld();
 		this.uniforms.invProjection.value.copy(this.camera.projectionMatrixInverse);
 		this.uniforms.cameraWorld.value.copy(this.camera.matrixWorld);
 		this.uniforms.cloudCameraPosition.value.setFromMatrixPosition(this.camera.matrixWorld);
-	    super.render(renderer, writeBuffer, readBuffer, deltaTime, maskActive);
-  	}
+		super.render(renderer, writeBuffer, readBuffer, deltaTime, maskActive);
+	}
 }
 
 export default class CloudPostProcessor {
 	_pixelPass;
 	#composer;
 	_cloudTexture;
+	_cloudBoxSize = 500;
+	#planetRadPadding = 0.5; // Defines the area around the planet in units planet radius where no cloud points can be placed
+
 	async #createCloudTexture() {
 		let points = [];
-		const cloudPointCount = 200;
+		const cloudPointCount = 50;
+		let pointsData = new Float32Array(cloudPointCount * 4);
+		const innerRad = (20 / this._cloudBoxSize) * (1 + this.#planetRadPadding);
+		const outerRad = 0.5;
 		for (let i = 0; i < cloudPointCount; i++) 
-		{
-			points.push(0.5 + (1 - 2 * Math.random()) * 0.5 * 0.5, 0.5 - 0.1 * Math.random(), 0.5 + (2 * Math.random()**2-1) * 0.5 * 0.5);
+		{	
+			let theta = Math.random() * 2 * Math.PI;
+			let phi = (Math.random() * 0.5 + 0.5) * Math.PI; // Only allow clouds in the bottom half 
+			let radius = (outerRad - innerRad) * Math.random() + innerRad;
+
+			pointsData[i * 4 + 0] = radius * Math.sin(phi) * Math.cos(theta) + 0.5;
+			pointsData[i * 4 + 1] = radius * Math.cos(phi) + 0.5;
+			pointsData[i * 4 + 2] = radius * Math.sin(phi) * Math.sin(theta) + 0.5;
+			pointsData[i * 4 + 3] = 0.0;
 		}
 
-		let pointsData = new Float32Array(points);
+		const pointTexture = new THREE.DataTexture(
+		  pointsData,
+		  cloudPointCount, 1,
+		  THREE.RGBAFormat,
+		  THREE.FloatType
+		);
+		pointTexture.needsUpdate = true;
+
+		
 		window.pointsData = pointsData;
 
 		const size = 512;
@@ -53,7 +67,7 @@ export default class CloudPostProcessor {
 		    sliceZ: {value: 0},
 		    resolution: {value: new THREE.Vector2(size, size)},
 		    cloudPointCount: {value: cloudPointCount},
-		    cloudPoints: {value: pointsData}
+		    cloudPointTexture: {value: pointTexture}
 		  },
 		  vertexShader: `
 		    varying vec2 vUv;
@@ -68,22 +82,30 @@ export default class CloudPostProcessor {
 		    uniform float sliceZ;
 		    uniform vec2 resolution;
 		    uniform int cloudPointCount;
-		    uniform float cloudPoints[` + 3 * cloudPointCount + `];
-		    float cloudRad = 0.05;
-		    float cloudSharpness = 1.0;
+		    // uniform float cloudPoints[` + 3 * cloudPointCount + `];
+		    uniform sampler2D cloudPointTexture;
+		    float cloudRad = 1.0; // Defines the radius from a point at which the cloud density = 0
+		    float cloudSharpness = 50.0;
+		    float maxDist = 1.0;
+
+		    vec4 getPoint(int i) {
+		      return texelFetch(cloudPointTexture, ivec2(i, 0), 0);
+		    }
 
 		    void main() {
-		      	float minDist = 1.0;
-		    	vec3 curVoxPos = vec3(vUv.x, vUv.y, sliceZ);
-		      	for (int p = 0; p < cloudPointCount; p++)
-			    {
-		    		vec3 curPoint = vec3(cloudPoints[3 * p + 0], cloudPoints[3 * p + 1], cloudPoints[3 * p + 2]);
-		    		float curDist = distance(curPoint, curVoxPos);
-		    		if (curDist > minDist) continue;
-		    		minDist = curDist;
-			    }
+	      	float minDist = maxDist;
+	    		vec3 curVoxPos = vec3(vUv.x, vUv.y, sliceZ);
+	      	for (int p = 0; p < cloudPointCount; p++)
+		    	{
+	    			vec3 curPoint = vec3(getPoint(p));
+	    			float curDist = distance(curPoint, curVoxPos);
+	    			if (curDist > minDist) continue;
+	    			minDist = curDist;
+		    	}
 
-		  		gl_FragColor = vec4(min(max(cloudRad - minDist, 0.0) * cloudSharpness, 1.0));
+		  		// gl_FragColor = vec4(min(max(cloudRad - minDist, 0.0) * cloudSharpness, 1.0));
+		    	// gl_FragColor = vec4(min(max(cloudRad - minDist, 0.0) / cloudRad, 1.0));
+		    	gl_FragColor = vec4((maxDist - minDist) / maxDist);
 		    }
 		  `
 		});
@@ -119,6 +141,9 @@ export default class CloudPostProcessor {
 			    cameraWorld: {value: new THREE.Matrix4()},
 			    cloudCameraPosition: {value: new THREE.Vector3()},
 			    cloudTexture: {value: null},
+			    cloudBoxSize: {value: this._cloudBoxSize},
+			    minDensity: {value: 0.8}, 
+			    densityScalar: {value: 0.2},
 			    // cloudTexture: {value: this._cloudTexture},
 			    // zNear: {value: simulation.camera.camera.near},
 			    // zFar: {value: simulation.camera.camera.far}
@@ -132,26 +157,24 @@ export default class CloudPostProcessor {
 			    }
 			`,
 			fragmentShader: `
-			    uniform sampler2D tDiffuse;
-			    uniform sampler2D depthTexture;
-			    varying vec2 vUv;
-			    // uniform float zNear;
-			    // uniform float zFar;
+			  uniform float cloudBoxSize;
+			  uniform sampler2D tDiffuse;
+			  uniform sampler2D depthTexture;
 
-			    uniform mat4 invProjection;
+		    varying vec2 vUv;
+
+		    uniform mat4 invProjection;
 				uniform mat4 cameraWorld;
 				uniform vec3 cloudCameraPosition;
 
 				uniform sampler3D cloudTexture;
 				
-				float minDensity = 0.0;
-				float DensityScalar = 1.0;
+				uniform float minDensity;
+				uniform float densityScalar;
 
-				float cloudBoxSize = 500.0;
-
-			    vec3 worldToTexturePos(vec3 worldPos) {
+		    vec3 worldToTexturePos(vec3 worldPos) {
 					return (worldPos + cloudBoxSize / 2.0) / cloudBoxSize;
-			    }
+		    }
 				vec3 worldPositionFromDepth(vec2 uv, float depth) {
 				  vec4 clip = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 				  vec4 view = invProjection * clip;
@@ -166,26 +189,21 @@ export default class CloudPostProcessor {
 
 					float textureVal = texture(cloudTexture, normalizedPosition).r;
 					
-					float density = max(0.0, textureVal - minDensity) * DensityScalar;
+					float density = max(0.0, textureVal - minDensity) * densityScalar;
 					return density;
 				}
 
-			    void main() {
-			      	vec4 color = texture2D(tDiffuse, vUv);
-					
+		    void main() {
+	      	vec4 color = texture2D(tDiffuse, vUv);
 					
 					float depth = texture2D(depthTexture, vUv).r;
-					// float view = 1.0 - smoothstep(0.995, 1.0, depth);
-
-		
 					vec3 rayEndPos = worldPositionFromDepth(vUv, depth); // In world coords
 					vec3 ray = rayEndPos - cloudCameraPosition;
 					float maxDistance = length(ray);
 					vec3 rayDirection = ray / maxDistance;
 
-
 					float curDist = 0.0;
-					float maxDist = min(maxDistance, 1000.0);
+					float maxDist = min(maxDistance, 2.0 * cloudBoxSize);
 					float stepSize = maxDist / 200.0; // /x: defines the amount of samples
 
 					float totalDensity = 0.0;
@@ -199,50 +217,11 @@ export default class CloudPostProcessor {
 
 					float transmittance = exp(-totalDensity);
 					gl_FragColor = vec4(color.rgb * transmittance + (1.0 - transmittance) * vec3(1.0), 1.0);
-					
-
-
-					// gl_FragColor = vec4(rayDirection.xyz, 1.0);
-
-
-			  		// Aim: calculate distance from camera to fragment, and integrate over that through our cloud to change the colour
-
-			  		// gl_FragColor = vec4(vec3(depth) * 0.5, 1.0);
-			  	
-			  		// gl_FragColor = vec4(vec3((color.r + color.g + color.b)/3.0), 1.0); // Greyscale
-			  		// color * (0.5 + 0.2 * gl_FragCoord.x);
-			    }
+		    }
 			`
 		}, simulation.camera.camera);
 		
 		this._pixelPass.uniforms.cloudTexture.value = this._cloudTexture;
-
-		// this._shaderMaterial = new THREE.ShaderMaterial({
-		//   uniforms: {
-		//     texturePosition: { value: null },
-		//   },
-		//   vertexShader: `
-		//     uniform sampler2D texturePosition;
-		    
-		//     varying vec3 vColor;
-
-		//     void main() {
-		//        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-		//     }
-		//   `,
-		//   fragmentShader: `
-		//     varying vec3 vColor;
-
-		//     void main() {
-		//       	float dist = distance(gl_FragCoord.xy, vec2(0.5)) / 30.0;
-		     
-		      
-		//   		gl_FragColor = vec4(1.0, 0.0, 0.0, max(1.0 - dist, 0.5));
-		//     }
-		//   `,
-		//   transparent: true,
-		//   emissiveIntensity: 2.0
-		// });
 	}
 
 	addToComposer(_composer) {
@@ -250,23 +229,7 @@ export default class CloudPostProcessor {
 	}
 
 	update(_simulation) {
-		// this._pixelPass.uniforms.depthTexture.value = this.#composer.renderTarget1.depthTexture;
-		
 
-
-		// const volcPos = _simulation.planet.objects[0].relPosition;
-
-		// this.#time += 0.016;
-
-		// this.#dtPosition.material.uniforms.uDeltaTime.value = 0.016;
-		// this.#dtPosition.material.uniforms.uTime.value = this.#time;
-		// this.#dtVelocity.material.uniforms.uDeltaTime.value = 0.016;
-		// this.#dtVelocity.material.uniforms.uTime.value = this.#time;
-		// this.#dtVelocity.material.uniforms.volcanoPos.value = volcPos;
-		// this.#dtPosition.material.uniforms.volcanoPos.value = volcPos;
-
-		// this._gpuCompute.compute();
-		// this._particleShaderMaterial.uniforms.texturePosition.value = this._gpuCompute.getCurrentRenderTarget(this.#dtPosition).texture;
 	}
 }
 
