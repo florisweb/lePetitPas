@@ -24,8 +24,8 @@ export default class CloudPostProcessor {
 	_pixelPass;
 	#composer;
 	_cloudTexture;
-	_cloudBoxSize = 200; //500;
-	#planetRadPadding = 3.0; // Defines the area around the planet in units planet radius where no cloud points can be placed
+	_cloudBoxSize = 100; //500;
+	#planetRadPadding = 0.5; // Defines the area around the planet in units planet radius where no cloud points can be placed
 
 	async #createCloudTexture() {
 		let points = [];
@@ -36,7 +36,7 @@ export default class CloudPostProcessor {
 		for (let i = 0; i < cloudPointCount; i++) 
 		{	
 			let theta = Math.random() * 2 * Math.PI;
-			let phi = (Math.random() * 0.4 + 0.6) * Math.PI; // Only allow clouds in the bottom half 
+			let phi = (Math.random() * 0.1 + 0.5) * Math.PI; // Only allow clouds in the bottom half 
 			let radius = (outerRad - innerRad) * Math.random() + innerRad;
 
 			pointsData[i * 4 + 0] = radius * Math.sin(phi) * Math.cos(theta) + 0.5;
@@ -84,9 +84,8 @@ export default class CloudPostProcessor {
 		    uniform vec2 resolution;
 		    uniform int cloudPointCount;
 		    uniform sampler2D cloudPointTexture;
-		    float cloudRad = 1.0; // Defines the radius from a point at which the cloud density = 0
-		    float cloudSharpness = 50.0;
-		    float maxDist = 1.0;
+		    // float maxDist = 1.0;
+		    float maxDist = 0.5;
 
 		    vec4 getPoint(int i) {
 		      return texelFetch(cloudPointTexture, ivec2(i, 0), 0);
@@ -102,10 +101,9 @@ export default class CloudPostProcessor {
 	    			if (curDist > minDist) continue;
 	    			minDist = curDist;
 		    	}
-
-		  		// gl_FragColor = vec4(min(max(cloudRad - minDist, 0.0) * cloudSharpness, 1.0));
-		    	// gl_FragColor = vec4(min(max(cloudRad - minDist, 0.0) / cloudRad, 1.0));
-		    	gl_FragColor = vec4((maxDist - minDist) / maxDist);
+		  		// gl_FragColor = vec4((maxDist - minDist) / maxDist);
+		  		float normDist = (maxDist - minDist) / maxDist;
+		    	gl_FragColor = vec4(normDist*normDist*normDist*normDist);
 		    }
 		  `
 		});
@@ -142,8 +140,8 @@ export default class CloudPostProcessor {
 			    cloudCameraPosition: {value: new THREE.Vector3()},
 			    cloudTexture: {value: null},
 			    cloudBoxSize: {value: this._cloudBoxSize},
-			    minDensity: {value: 0.7}, 
-			    densityScalar: {value: 0.5},
+			    minDensity: {value: 0.3}, 
+			    densityScalar: {value: 0.05},
 			    lightPosition: {value: new THREE.Vector3()}
 			},
 			vertexShader: `
@@ -170,8 +168,8 @@ export default class CloudPostProcessor {
 				uniform float cloudBoxSize;
 				uniform float minDensity;
 				uniform float densityScalar;
-				float cloudLightAbsorption = 0.5; // Controls how much light is lost due to the clouds
-				float cloudLightCoef = 1.0; // Controls how much the sun's light can penetrate the cloud
+				float cloudLightAbsorption = 20.0; // Controls how much light is lost due to the clouds
+				float cloudLightCoef = 2.0; // Controls how much the sun's light can penetrate the cloud
 
 
 		    vec3 worldToTexturePos(vec3 worldPos) {
@@ -191,8 +189,10 @@ export default class CloudPostProcessor {
 
 					float textureVal = texture(cloudTexture, normalizedPosition).r;
 					
-					float density = max(0.0, textureVal - minDensity) * densityScalar;
-					return density;
+					float density = max(0.0, textureVal - minDensity) * densityScalar / (1.0 - minDensity);
+					float distNorm = distance(position, vec3(0.5)) / cloudBoxSize * 2.0; // Give the cloudBox a fuzzy edge
+					return density * (1.0 - distNorm) * (1.0 - distNorm);
+					// return density;
 				}
 
 				float densityToLight(vec3 position) {
@@ -200,8 +200,8 @@ export default class CloudPostProcessor {
 					float maxDistance = length(ray);
 					vec3 rayDirection = ray / maxDistance;
 					float curDist = 0.0;
-					float maxDist = min(maxDistance, 2.0 * cloudBoxSize); // Only check within the cloudBox
-					float stepSize = maxDist / 30.0; // /x: defines the amount of samples
+					float maxDist = min(maxDistance, cloudBoxSize); // Only check within the cloudBox
+					float stepSize = maxDist / 20.0; // /x: defines the amount of samples
 
 					float totalDensity = 0.0;
 					while (curDist < maxDist)
@@ -247,8 +247,9 @@ export default class CloudPostProcessor {
 					}
 
 				
-					vec3 cloudColor = lightEnergy * vec3(1.0, 0.4, 0.1);
-					vec3 cloudBaseColor = vec3(0.01);
+					vec3 cloudColor = lightEnergy * vec3(1.0, 0.7, 0.5);
+					// vec3 cloudBaseColor = vec3(0.01);
+					vec3 cloudBaseColor = vec3(0.5);
 					gl_FragColor = vec4(color.rgb * transmittance + cloudColor + (1.0 - transmittance) * (1.0 - lightEnergy) * cloudBaseColor, 1.0);
 		    }
 			`

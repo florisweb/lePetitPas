@@ -131,7 +131,7 @@ export default class Simulation {
 		  0.01,    // radius
 		  0.8    // threshold
 		);
-		this.composer.addPass(bloomPass);
+		// this.composer.addPass(bloomPass);
 
 
 		this.composer.addPass(new OutputPass());
@@ -166,7 +166,7 @@ export default class Simulation {
 		this.sun.addToScene(this.scene);
 
 		const dist = 100;
-		const intensity = 1000; // 400 
+		const intensity = 2000; // 400 
 		for (let a = 0; a < Math.PI * 2; a += Math.PI * 2 / 3)
 		{
 			let spotLight = new THREE.SpotLight( 0xffffff, intensity );
