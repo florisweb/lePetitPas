@@ -129,6 +129,7 @@ export default class CloudPostProcessor {
 	// 	this._cloudTexture = target.texture;
 	// }
 
+
 	#createCloudTexture(_boxCountPerAxix = this._cloudSubBoxCountPerAxis) {
 		let pointsData = new Float32Array(_boxCountPerAxix**3 * 4);
 		const boxSize = this._cloudBoxSize / _boxCountPerAxix;
@@ -140,19 +141,18 @@ export default class CloudPostProcessor {
 				{	
 					const index = x + y * _boxCountPerAxix + z * _boxCountPerAxix**2;
 
-					pointsData[index * 4 + 0] = (boxSize * x + random() * boxSize) / this._cloudBoxSize;
-					pointsData[index * 4 + 1] = (boxSize * y + random() * boxSize) / this._cloudBoxSize;
-					pointsData[index * 4 + 2] = (boxSize * z + random() * boxSize) / this._cloudBoxSize;
-
-					// pointsData[index * 4 + 0] = (boxSize * x) / this._cloudBoxSize;
-					// pointsData[index * 4 + 1] = (boxSize * y) / this._cloudBoxSize;
-					// pointsData[index * 4 + 2] = (boxSize * z) / this._cloudBoxSize;
+					// Point relative to box
+					pointsData[index * 4 + 0] = (random() * boxSize) / this._cloudBoxSize;
+					pointsData[index * 4 + 1] = (random() * boxSize) / this._cloudBoxSize;
+					pointsData[index * 4 + 2] = (random() * boxSize) / this._cloudBoxSize;
+					// pointsData[index * 4 + 0] = 0; 
+					// pointsData[index * 4 + 1] = 0; 
+					// pointsData[index * 4 + 2] = 0; 
 					pointsData[index * 4 + 3] = 0.0;
 				}
 			}
 		}
 
-		window.pointsData = pointsData;
 		const pointTexture = new THREE.DataTexture(
 		  pointsData,
 		  pointsData.length / 4, 1,
@@ -174,7 +174,8 @@ export default class CloudPostProcessor {
 		const sliceMaterial = new THREE.ShaderMaterial({
 		  uniforms: {
 		    sliceZ: {value: 0},
-		    resolution: {value: new THREE.Vector2(size, size)},
+		    size: {value: new THREE.Vector3(size)},
+		    boxCountPerAxis: {value: _boxCountPerAxix},
 		    cloudPointCount: {value: Math.round(pointsData.length / 4)},
 		    cloudPointTexture: {value: pointTexture}
 		  },
@@ -189,7 +190,8 @@ export default class CloudPostProcessor {
 		  fragmentShader: `
 		    varying vec2 vUv;
 		    uniform float sliceZ;
-		    uniform vec2 resolution;
+		    uniform vec3 size;
+		    uniform int boxCountPerAxis; 
 		    uniform int cloudPointCount;
 		    uniform sampler2D cloudPointTexture;
 		    float maxDist = 1.0;
@@ -198,15 +200,34 @@ export default class CloudPostProcessor {
 		      return texelFetch(cloudPointTexture, ivec2(i, 0), 0);
 		    }
 
+		    vec3 getRelPoint(vec3 curBoxPos, vec3 deltaBox) {
+		  		int x = int(curBoxPos.x + deltaBox.x) % boxCountPerAxis;
+		  		int y = int(curBoxPos.y + deltaBox.y) % boxCountPerAxis;
+		  		int z = int(curBoxPos.z + deltaBox.z) % boxCountPerAxis;
+		  		
+		  		int curIndex = x + y * boxCountPerAxis + z * boxCountPerAxis * boxCountPerAxis;
+		  		return vec3(getPoint(curIndex)) + deltaBox * 1.0 / float(boxCountPerAxis); // Find point relative to its box and transform that to the curBoxes frame of reference
+		    }
+
 		    void main() {
 	      	float minDist = maxDist;
 	    		vec3 curVoxPos = vec3(vUv.x, vUv.y, sliceZ);
-	      	for (int p = 0; p < cloudPointCount; p++)
+		  		vec3 curBoxIndexPos = floor(curVoxPos*vec3(boxCountPerAxis));
+		  		vec3 curRelVoxPos = curVoxPos - curBoxIndexPos / vec3(boxCountPerAxis);  // Relative to curBox
+		  		
+
+		  		for (int dx = -1; dx < 2; dx++)
 		    	{
-	    			vec4 curPoint = vec4(getPoint(p));
-	    			float curDist = distance(vec3(curPoint), curVoxPos);
-	    			if (curDist > minDist) continue;
-	    			minDist = curDist;
+				  	for (int dy = -1; dy < 2; dy++)
+				    {
+				  		for (int dz = -1; dz < 2; dz++)
+				    	{
+		  			  	vec3 curRelPoint = getRelPoint(curBoxIndexPos, vec3(dx, dy, dz));
+		    				float curDist = distance(curRelPoint, curRelVoxPos);
+			    			if (curDist > minDist) continue;
+			    			minDist = curDist;
+		    			}
+		  			}
 		    	}
 
 		  		float normDist = (maxDist - minDist) / maxDist;
@@ -258,8 +279,8 @@ export default class CloudPostProcessor {
 			    cloudLightAbsorption: {value: 20.0},
 			    cloudLightCoef: {value: 8.6},
 
-			    fineTextureDensityScalar: {value: 0.5},
-			    fineTextureScalar: {value: 2.8},
+			    fineTextureDensityScalar: {value: 0.0}, //0.5
+ 			    fineTextureScalar: {value: 2.8},
 			    fineTextureOffset: {value: new THREE.Vector3(0.0)}, // Change over time to give the idea of drifting clouds?
 			},
 			vertexShader: `
