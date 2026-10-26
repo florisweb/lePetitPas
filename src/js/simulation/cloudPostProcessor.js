@@ -26,24 +26,27 @@ export default class CloudPostProcessor {
 	#composer;
 	_cloudTexture;
 	_cloudBoxSize = 120; //500;
+	// _cloudSubBoxCountPerAxis = 10; // Per axis: so x^3 = actual count
 	#planetRadPadding = 0.5; // Defines the area around the planet in units planet radius where no cloud points can be placed
 
 	async #createCloudTexture() {
 		let points = [];
-		const cloudPointCount = 50;
+		const cloudPointCount = 1000;
 		let pointsData = new Float32Array(cloudPointCount * 4);
 		const innerRad = (20 / this._cloudBoxSize) * (1 + this.#planetRadPadding);
 		const outerRad = 1.0;
 		for (let i = 0; i < cloudPointCount; i++) 
 		{	
-			let theta = random() * 2 * Math.PI;
-			let phi = (random() * 0.1 + 0.5) * Math.PI; // Only allow clouds in the bottom half 
-			let radius = (outerRad - innerRad) * random() + innerRad;
+			const cloudScalar = random()**3 * 0.4 + 0.1;
 
+			const theta = random() * 2 * Math.PI;
+			const phi = (random() * 0.1 + 0.5) * Math.PI; // Only allow clouds in the bottom half 
+			const radius = (outerRad - innerRad) * random() + innerRad;
+			
 			pointsData[i * 4 + 0] = radius * Math.sin(phi) * Math.cos(theta) + 0.5;
 			pointsData[i * 4 + 1] = radius * Math.cos(phi) + 0.5;
 			pointsData[i * 4 + 2] = radius * Math.sin(phi) * Math.sin(theta) + 0.5;
-			pointsData[i * 4 + 3] = 0.0;
+			pointsData[i * 4 + 3] = cloudScalar; // Cloud scalar
 		}
 
 		const pointTexture = new THREE.DataTexture(
@@ -55,7 +58,7 @@ export default class CloudPostProcessor {
 		pointTexture.needsUpdate = true;
 
 	
-		const size = 512;
+		const size = 64;
 		const target = new THREE.WebGL3DRenderTarget(size, size, size);
 		target.texture.minFilter = THREE.LinearFilter;
 		target.texture.magFilter = THREE.LinearFilter;
@@ -97,12 +100,12 @@ export default class CloudPostProcessor {
 	    		vec3 curVoxPos = vec3(vUv.x, vUv.y, sliceZ);
 	      	for (int p = 0; p < cloudPointCount; p++)
 		    	{
-	    			vec3 curPoint = vec3(getPoint(p));
-	    			float curDist = distance(curPoint, curVoxPos);
+	    			vec4 curPoint = vec4(getPoint(p));
+	    			float curDist = distance(vec3(curPoint), curVoxPos) / curPoint.w;
 	    			if (curDist > minDist) continue;
 	    			minDist = curDist;
 		    	}
-		  		// gl_FragColor = vec4((maxDist - minDist) / maxDist);
+
 		  		float normDist = (maxDist - minDist) / maxDist;
 		    	gl_FragColor = vec4(pow(normDist, 3.0));
 		    }
@@ -140,8 +143,9 @@ export default class CloudPostProcessor {
 			    cloudCameraPosition: {value: new THREE.Vector3()},
 			    cloudTexture: {value: null},
 			    cloudBoxSize: {value: this._cloudBoxSize},
-			    minDensity: {value: 0.3}, 
-			    densityScalar: {value: 0.3},
+			    minDensity: {value: 0.1}, 
+			    densityScalar: {value: 0.5},
+			    cloudLightPenetrationCoeff: {value: 20.0},
 			    lightPosition: {value: new THREE.Vector3()}
 			},
 			vertexShader: `
@@ -170,6 +174,8 @@ export default class CloudPostProcessor {
 				uniform float densityScalar;
 				float cloudLightAbsorption = 20.0; // Controls how much light is lost due to the clouds
 				float cloudLightCoef = 20.0; // Controls how much the sun's light can penetrate the cloud
+				uniform float cloudLightPenetrationCoeff;
+				 // = 20.0;
 
 
 		    vec3 worldToTexturePos(vec3 worldPos) {
@@ -233,7 +239,7 @@ export default class CloudPostProcessor {
 						vec3 curPos = rayDirection * curDist + cloudCameraPosition;
 						float curDensity = sampleCloudDensity(curPos);
 						if (curDensity > 0.0) {
-							float lightTransmittance = exp(-40.0 * densityToLight(curPos));
+							float lightTransmittance = exp(-cloudLightPenetrationCoeff * densityToLight(curPos));
 							lightEnergy += curDensity * stepSize * transmittance * lightTransmittance * cloudLightCoef; // Calculate how much light is added to the path by scattering in it from the light source
 							transmittance *= exp(-curDensity * stepSize * cloudLightAbsorption); // Calculate how much light goes through the cloud (direct ray, so how well can you look through the cloud)
 
