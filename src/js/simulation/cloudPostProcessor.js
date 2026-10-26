@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { random } from '../random.js';
 
 class CloudShader extends ShaderPass {
 	constructor(_config, _simulation) {
@@ -24,7 +25,7 @@ export default class CloudPostProcessor {
 	_pixelPass;
 	#composer;
 	_cloudTexture;
-	_cloudBoxSize = 100; //500;
+	_cloudBoxSize = 120; //500;
 	#planetRadPadding = 0.5; // Defines the area around the planet in units planet radius where no cloud points can be placed
 
 	async #createCloudTexture() {
@@ -32,12 +33,12 @@ export default class CloudPostProcessor {
 		const cloudPointCount = 50;
 		let pointsData = new Float32Array(cloudPointCount * 4);
 		const innerRad = (20 / this._cloudBoxSize) * (1 + this.#planetRadPadding);
-		const outerRad = 0.5;
+		const outerRad = 1.0;
 		for (let i = 0; i < cloudPointCount; i++) 
 		{	
-			let theta = Math.random() * 2 * Math.PI;
-			let phi = (Math.random() * 0.1 + 0.5) * Math.PI; // Only allow clouds in the bottom half 
-			let radius = (outerRad - innerRad) * Math.random() + innerRad;
+			let theta = random() * 2 * Math.PI;
+			let phi = (random() * 0.1 + 0.5) * Math.PI; // Only allow clouds in the bottom half 
+			let radius = (outerRad - innerRad) * random() + innerRad;
 
 			pointsData[i * 4 + 0] = radius * Math.sin(phi) * Math.cos(theta) + 0.5;
 			pointsData[i * 4 + 1] = radius * Math.cos(phi) + 0.5;
@@ -103,7 +104,7 @@ export default class CloudPostProcessor {
 		    	}
 		  		// gl_FragColor = vec4((maxDist - minDist) / maxDist);
 		  		float normDist = (maxDist - minDist) / maxDist;
-		    	gl_FragColor = vec4(normDist*normDist*normDist*normDist);
+		    	gl_FragColor = vec4(pow(normDist, 3.0));
 		    }
 		  `
 		});
@@ -129,7 +130,6 @@ export default class CloudPostProcessor {
 		this.#composer = composer;
 		this.#createCloudTexture();
 
-
 		// Particle rendering material
 		this._pixelPass = new CloudShader({
 			uniforms: {
@@ -141,7 +141,7 @@ export default class CloudPostProcessor {
 			    cloudTexture: {value: null},
 			    cloudBoxSize: {value: this._cloudBoxSize},
 			    minDensity: {value: 0.3}, 
-			    densityScalar: {value: 0.05},
+			    densityScalar: {value: 0.3},
 			    lightPosition: {value: new THREE.Vector3()}
 			},
 			vertexShader: `
@@ -169,7 +169,7 @@ export default class CloudPostProcessor {
 				uniform float minDensity;
 				uniform float densityScalar;
 				float cloudLightAbsorption = 20.0; // Controls how much light is lost due to the clouds
-				float cloudLightCoef = 2.0; // Controls how much the sun's light can penetrate the cloud
+				float cloudLightCoef = 20.0; // Controls how much the sun's light can penetrate the cloud
 
 
 		    vec3 worldToTexturePos(vec3 worldPos) {
@@ -190,9 +190,8 @@ export default class CloudPostProcessor {
 					float textureVal = texture(cloudTexture, normalizedPosition).r;
 					
 					float density = max(0.0, textureVal - minDensity) * densityScalar / (1.0 - minDensity);
-					float distNorm = distance(position, vec3(0.5)) / cloudBoxSize * 2.0; // Give the cloudBox a fuzzy edge
-					return density * (1.0 - distNorm) * (1.0 - distNorm);
-					// return density;
+					float distNorm = distance(position, vec3(0.5)) / cloudBoxSize * 2.0;
+					return density * pow(1.0 - distNorm, 3.0); // Give the cloudBox a fuzzy edge
 				}
 
 				float densityToLight(vec3 position) {
@@ -234,7 +233,7 @@ export default class CloudPostProcessor {
 						vec3 curPos = rayDirection * curDist + cloudCameraPosition;
 						float curDensity = sampleCloudDensity(curPos);
 						if (curDensity > 0.0) {
-							float lightTransmittance = exp(-10.0 * densityToLight(curPos));
+							float lightTransmittance = exp(-40.0 * densityToLight(curPos));
 							lightEnergy += curDensity * stepSize * transmittance * lightTransmittance * cloudLightCoef; // Calculate how much light is added to the path by scattering in it from the light source
 							transmittance *= exp(-curDensity * stepSize * cloudLightAbsorption); // Calculate how much light goes through the cloud (direct ray, so how well can you look through the cloud)
 
@@ -247,9 +246,8 @@ export default class CloudPostProcessor {
 					}
 
 				
-					vec3 cloudColor = lightEnergy * vec3(1.0, 0.7, 0.5);
-					// vec3 cloudBaseColor = vec3(0.01);
-					vec3 cloudBaseColor = vec3(0.5);
+					vec3 cloudColor = lightEnergy * vec3(1.0, 0.8, 0.7);
+					vec3 cloudBaseColor = vec3(0.05);
 					gl_FragColor = vec4(color.rgb * transmittance + cloudColor + (1.0 - transmittance) * (1.0 - lightEnergy) * cloudBaseColor, 1.0);
 		    }
 			`
