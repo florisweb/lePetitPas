@@ -83,6 +83,7 @@ export default class Simulation {
 		{
 			this.#volcanoParticleEffect.update(this);
 		}
+		this.cloudPostProcessor.update(this);
 
 		this.camera.update();
 		this.composer.render();

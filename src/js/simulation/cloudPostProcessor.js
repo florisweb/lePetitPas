@@ -162,7 +162,7 @@ export default class CloudPostProcessor {
 		pointTexture.needsUpdate = true;
 
 	
-		const size = 64;
+		const size = 128;
 		const target = new THREE.WebGL3DRenderTarget(size, size, size);
 		target.texture.minFilter = THREE.LinearFilter;
 		target.texture.magFilter = THREE.LinearFilter;
@@ -204,6 +204,9 @@ export default class CloudPostProcessor {
 		  		int x = int(curBoxPos.x + deltaBox.x) % boxCountPerAxis;
 		  		int y = int(curBoxPos.y + deltaBox.y) % boxCountPerAxis;
 		  		int z = int(curBoxPos.z + deltaBox.z) % boxCountPerAxis;
+		  		if (x < 0) x += boxCountPerAxis;
+			  	if (y < 0) y += boxCountPerAxis;
+			  	if (z < 0) z += boxCountPerAxis;
 		  		
 		  		int curIndex = x + y * boxCountPerAxis + z * boxCountPerAxis * boxCountPerAxis;
 		  		return vec3(getPoint(curIndex)) + deltaBox * 1.0 / float(boxCountPerAxis); // Find point relative to its box and transform that to the curBoxes frame of reference
@@ -272,12 +275,12 @@ export default class CloudPostProcessor {
 			    cloudTexture_fine: {value: null},
 			    cloudBoxSize: {value: this._cloudBoxSize},
 			    minDensity: {value: 0.69}, 
-			    densityScalar: {value: 1.4},
+			    densityScalar: {value: 0.3},
 			    cloudLightPenetrationCoeff: {value: 1.0},
 			    lightPosition: {value: new THREE.Vector3()},
 
 			    cloudLightAbsorption: {value: 20.0},
-			    cloudLightCoef: {value: 8.6},
+			    cloudLightCoef: {value: 50.0},
 
 			    fineTextureDensityScalar: {value: 0.0}, //0.5
  			    fineTextureScalar: {value: 2.8},
@@ -317,6 +320,73 @@ export default class CloudPostProcessor {
 				uniform float fineTextureScalar;
 				uniform vec3 fineTextureOffset;
 
+
+				vec2 getIntersectionWithCloudBox(vec3 rayStart, vec3 rayNormal) {
+					// Check whether ray crosses through sphere
+					vec3 sphereCentre = vec3(0.0);
+					float sphereRad = cloudBoxSize / 2.0;
+					float IV = -1000000.0; // Invalid Value
+
+					float upperPlaneY = 0.05 * cloudBoxSize;
+					float bottomPlaneY = -0.15 * cloudBoxSize;
+					float upperPlaneRad = sqrt(pow(sphereRad, 2.0) - pow(upperPlaneY, 2.0));  // Radius of horizontal slice of sphere
+					float bottomPlaneRad = sqrt(pow(sphereRad, 2.0) - pow(bottomPlaneY, 2.0)); 
+					
+					float D = pow(2.0 * dot(rayNormal, rayStart), 2.0) - 4.0*(dot(rayStart, rayStart) - pow(sphereRad, 2.0));
+					if (D <= 0.0) return vec2(IV); // No intersections at all
+					float st1_ = (-2.0*dot(rayNormal, rayStart) - sqrt(D)) / 2.0;
+					float st2_ = (-2.0*dot(rayNormal, rayStart) + sqrt(D)) / 2.0;
+					float st1 = IV;
+					float st2 = IV;
+
+					// Check if the ray that crosses through the sphere does NOT cross through the planes (ie, the surface of the object lies on the sphere)
+					float st1Y = st1_ * rayNormal.y + rayStart.y;
+					if (st1Y > bottomPlaneY && st1Y < upperPlaneY) st1 = st1_;
+					float st2Y = st2_ * rayNormal.y + rayStart.y;
+					if (st2Y > bottomPlaneY && st2Y < upperPlaneY) st2 = st2_;
+
+					float pt1_ = (upperPlaneY - rayStart.y) / rayNormal.y;
+					float pt2_ = (bottomPlaneY - rayStart.y) / rayNormal.y;
+					float pt1 = IV;
+					float pt2 = IV;
+
+					if (pow(rayNormal.x * pt1_ + rayStart.x, 2.0) + pow(rayNormal.z * pt1_ + rayStart.z, 2.0) <= pow(upperPlaneRad, 2.0))
+					{	
+						// Ray intersects with the upper plane
+						pt1 = pt1_;
+					}
+
+					if (pow(rayNormal.x * pt2_ + rayStart.x, 2.0) + pow(rayNormal.z * pt2_ + rayStart.z, 2.0) <= pow(bottomPlaneRad, 2.0))
+					{	
+						// Ray intersects with the bottom plane
+						pt2 = pt2_;
+					}
+
+					float t2 = max(st2, max(pt1, pt2));
+					float t1 = IV;
+					if (st1 == IV)
+					{	
+						if (pt1 == IV) 
+						{
+							t1 = pt2;
+						} else if (pt2 == IV)
+						{
+							t1 = pt1;
+						} else t1 = min(pt1, pt2); 
+					} else {
+						if (pt1 == IV) 
+						{
+							t1 = min(pt2, st1);
+						} else if (pt2 == IV)
+						{
+							t1 = min(pt1, st1);
+						} else t1 = min(st1, min(pt1, pt2)); 
+					}
+				
+					return vec2(t1, t2);
+				}
+
+
 		    vec3 worldToTexturePos(vec3 worldPos) {
 					return mod(worldPos / cloudBoxSize + vec3(0.5), vec3(1.0));
 		    }
@@ -328,24 +398,9 @@ export default class CloudPostProcessor {
 				  return (cameraWorld * view).xyz;
 				}
 
-				// float sampleCloudDensity(vec3 position) {
-				// 	vec3 normalizedPosition = worldToTexturePos(position);
-				// 	if (length(normalizedPosition - vec3(0.5)) > 0.5) return 0.0;
-
-				// 	float textureVal = texture(cloudTexture, normalizedPosition).r;
-					
-				// 	float density = max(0.0, textureVal - minDensity) * densityScalar / (1.0 - minDensity);
-				// 	float distNorm = distance(position, vec3(0.5)) / cloudBoxSize * 2.0;
-				// 	return density * pow(1.0 - distNorm, 3.0); // Give the cloudBox a fuzzy edge
-				// }
-
-
 				float sampleCloudDensity(vec3 position) {
 					vec3 normalizedPosition = worldToTexturePos(position);
 					vec3 normalizedPosition_fine = worldToTexturePos((position + fineTextureOffset) * fineTextureScalar);
-					if (length(normalizedPosition - vec3(0.5)) > 0.5) return 0.0;
-					// if (length(normalizedPosition - vec3(0.5)) < 0.2) return 0.0; // Minimum cloud-free area around planet
-					if (abs(normalizedPosition.y - 0.45) > 0.1) return 0.0; // Define vertical box
 
 					float textureVal = texture(cloudTexture, normalizedPosition).r;
 					float textureVal_fine = texture(cloudTexture_fine, normalizedPosition_fine).r;
@@ -354,7 +409,7 @@ export default class CloudPostProcessor {
 					
 					float density = max(0.0, curDensity - minDensity) * densityScalar / (1.0 - minDensity);
 					float distNorm = distance(position, vec3(0.5)) / cloudBoxSize * 2.0;
-					return density * pow(1.0 - distNorm, 3.0); // Give the cloudBox a fuzzy edge
+					return density; //* pow(1.0 - distNorm, 3.0); // Give the cloudBox a fuzzy edge
 				}
 
 				float densityToLight(vec3 position) {
@@ -385,16 +440,31 @@ export default class CloudPostProcessor {
 					float maxDistance = length(ray);
 					vec3 rayDirection = ray / maxDistance;
 
-					float curDist = 0.0;
-					float maxDist = min(maxDistance, 2.0 * cloudBoxSize);
-					float stepSize = maxDist / 100.0; // /x: defines the amount of samples
+
+					vec3 rayStartPos = cloudCameraPosition;
+					float rayMaxDist = 0.0; // As seen starting from rayStartPos
+
+					vec2 intPoints = getIntersectionWithCloudBox(cloudCameraPosition, rayDirection);
+					if (intPoints.y < 0.0) 
+					{	// No intersections with sphere, or only touching, or only behind the camera
+					} else {
+						float minT = max(intPoints.x, 0.0);
+						rayStartPos = cloudCameraPosition + rayDirection * minT;
+						rayMaxDist = min(intPoints.y, maxDistance) - minT; // As t multiplies a normalised vector, the difference in t is also the length
+					}
+
+
+					float curDist = 0.0; // CurDist and t are equivalent
+					float stepSize = rayMaxDist / 30.0; // /x: defines the amount of samples
 
 					float lightEnergy = 0.0;
 					float transmittance = 1.0;
-					while (curDist < maxDist)
+					float prevDensity = 0.0;
+					while (curDist < rayMaxDist)
 					{	
-						vec3 curPos = rayDirection * curDist + cloudCameraPosition;
+						vec3 curPos = rayDirection * curDist + rayStartPos;
 						float curDensity = sampleCloudDensity(curPos);
+
 						if (curDensity > 0.0) {
 							float lightTransmittance = exp(-cloudLightPenetrationCoeff * densityToLight(curPos));
 							lightEnergy += curDensity * stepSize * transmittance * lightTransmittance * cloudLightCoef; // Calculate how much light is added to the path by scattering in it from the light source
@@ -404,14 +474,14 @@ export default class CloudPostProcessor {
 								break;
 							}
 						}
-
 						curDist += stepSize;
 					}
+
+
 					lightEnergy = min(max(lightEnergy, 0.0), 1.0); // Clamp
 				
 					vec3 cloudColor = lightEnergy * vec3(1.0, 0.8, 0.7);
 					vec3 cloudBaseColor = vec3(0.05);
-					// gl_FragColor = vec4(color.rgb * transmittance + cloudColor + (1.0 - transmittance) * (1.0 - lightEnergy) * cloudBaseColor, 1.0);
 					gl_FragColor = vec4(
 						color.rgb * transmittance + 
 						(1.0 - transmittance) * (
@@ -433,7 +503,7 @@ export default class CloudPostProcessor {
 	}
 
 	update(_simulation) {
-
+		this._pixelPass.uniforms.fineTextureOffset.value.y += 0.1;
 	}
 }
 
