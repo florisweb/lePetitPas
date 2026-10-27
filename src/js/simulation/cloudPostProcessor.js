@@ -26,109 +26,8 @@ export default class CloudPostProcessor {
 	#composer;
 	_cloudTexture;
 	_cloudTexture_fine;
-	_cloudBoxSize = 120; //500;
+	_cloudBoxSize = 100;
 	_cloudSubBoxCountPerAxis = 5; // Per axis: so x^3 = actual count
-	#planetRadPadding = 0.5; // Defines the area around the planet in units planet radius where no cloud points can be placed
-
-	// async #createCloudTexture() {
-	// 	let points = [];
-	// 	const cloudPointCount = 5000;
-	// 	let pointsData = new Float32Array(cloudPointCount * 4);
-	// 	const innerRad = (20 / this._cloudBoxSize) * (1 + this.#planetRadPadding);
-	// 	const outerRad = 1.0;
-	// 	for (let i = 0; i < cloudPointCount; i++) 
-	// 	{	
-	// 		const cloudScalar = random()**5 * 0.4 + 0.1;
-	// 		const theta = random() * 2 * Math.PI;
-	// 		const phi = (random() * 0.1 + 0.5) * Math.PI; // Only allow clouds in the bottom half 
-	// 		const radius = (outerRad - innerRad) * random() + innerRad;
-			
-	// 		pointsData[i * 4 + 0] = radius * Math.sin(phi) * Math.cos(theta) + 0.5;
-	// 		pointsData[i * 4 + 1] = radius * Math.cos(phi) + 0.5;
-	// 		pointsData[i * 4 + 2] = radius * Math.sin(phi) * Math.sin(theta) + 0.5;
-	// 		pointsData[i * 4 + 3] = cloudScalar; // Cloud scalar
-	// 	}
-
-	// 	const pointTexture = new THREE.DataTexture(
-	// 	  pointsData,
-	// 	  cloudPointCount, 1,
-	// 	  THREE.RGBAFormat,
-	// 	  THREE.FloatType
-	// 	);
-	// 	pointTexture.needsUpdate = true;
-
-	
-	// 	const size = 64;
-	// 	const target = new THREE.WebGL3DRenderTarget(size, size, size);
-	// 	target.texture.minFilter = THREE.LinearFilter;
-	// 	target.texture.magFilter = THREE.LinearFilter;
-	// 	target.texture.format = THREE.RedFormat;
-	// 	target.texture.wrapS = THREE.ClampToEdgeWrapping;
-	// 	target.texture.wrapT = THREE.ClampToEdgeWrapping;
-	// 	target.texture.wrapR = THREE.ClampToEdgeWrapping;
-		
-	// 	const sliceMaterial = new THREE.ShaderMaterial({
-	// 	  uniforms: {
-	// 	    sliceZ: {value: 0},
-	// 	    resolution: {value: new THREE.Vector2(size, size)},
-	// 	    cloudPointCount: {value: cloudPointCount},
-	// 	    cloudPointTexture: {value: pointTexture}
-	// 	  },
-	// 	  vertexShader: `
-	// 	    varying vec2 vUv;
-
-	// 	    void main() {
-	// 	      vUv = uv;
-	// 	      gl_Position = vec4(position.xy, 0.0, 1.0);
-	// 	    }
-	// 	  `,
-	// 	  fragmentShader: `
-	// 	    varying vec2 vUv;
-	// 	    uniform float sliceZ;
-	// 	    uniform vec2 resolution;
-	// 	    uniform int cloudPointCount;
-	// 	    uniform sampler2D cloudPointTexture;
-	// 	    // float maxDist = 1.0;
-	// 	    float maxDist = 0.5;
-
-	// 	    vec4 getPoint(int i) {
-	// 	      return texelFetch(cloudPointTexture, ivec2(i, 0), 0);
-	// 	    }
-
-	// 	    void main() {
-	//       	float minDist = maxDist;
-	//     		vec3 curVoxPos = vec3(vUv.x, vUv.y, sliceZ);
-	//       	for (int p = 0; p < cloudPointCount; p++)
-	// 	    	{
-	//     			vec4 curPoint = vec4(getPoint(p));
-	//     			float curDist = distance(vec3(curPoint), curVoxPos) / curPoint.w;
-	//     			if (curDist > minDist) continue;
-	//     			minDist = curDist;
-	// 	    	}
-
-	// 	  		float normDist = (maxDist - minDist) / maxDist;
-	// 	    	gl_FragColor = vec4(pow(normDist, 3.0));
-	// 	    }
-	// 	  `
-	// 	});
-
-	// 	const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), sliceMaterial);
-	// 	const sliceScene = new THREE.Scene();
-	// 	sliceScene.add(quad);
-
-	// 	const camera = new THREE.Camera();
-
-	// 	for (let z = 0; z < size; z++) {
-	// 	  sliceMaterial.uniforms.sliceZ.value = z / (size - 1);
-
-	// 	  renderer.setRenderTarget(target, z);
-	// 	  renderer.render(sliceScene, camera);
-	// 	}
-
-	// 	renderer.setRenderTarget(null);
-	// 	this._cloudTexture = target.texture;
-	// }
-
 
 	#createCloudTexture(_boxCountPerAxix = this._cloudSubBoxCountPerAxis) {
 		let pointsData = new Float32Array(_boxCountPerAxix**3 * 4);
@@ -142,12 +41,9 @@ export default class CloudPostProcessor {
 					const index = x + y * _boxCountPerAxix + z * _boxCountPerAxix**2;
 
 					// Point relative to box
-					pointsData[index * 4 + 0] = (random() * boxSize) / this._cloudBoxSize;
-					pointsData[index * 4 + 1] = (random() * boxSize) / this._cloudBoxSize;
-					pointsData[index * 4 + 2] = (random() * boxSize) / this._cloudBoxSize;
-					// pointsData[index * 4 + 0] = 0; 
-					// pointsData[index * 4 + 1] = 0; 
-					// pointsData[index * 4 + 2] = 0; 
+					pointsData[index * 4 + 0] = random() * boxSize / this._cloudBoxSize;
+					pointsData[index * 4 + 1] = random() * boxSize / this._cloudBoxSize;
+					pointsData[index * 4 + 2] = random() * boxSize / this._cloudBoxSize;
 					pointsData[index * 4 + 3] = 0.0;
 				}
 			}
@@ -162,7 +58,7 @@ export default class CloudPostProcessor {
 		pointTexture.needsUpdate = true;
 
 	
-		const size = 128;
+		const size = 64;
 		const target = new THREE.WebGL3DRenderTarget(size, size, size);
 		target.texture.minFilter = THREE.LinearFilter;
 		target.texture.magFilter = THREE.LinearFilter;
@@ -213,7 +109,8 @@ export default class CloudPostProcessor {
 		    }
 
 		    void main() {
-	      	float minDist = maxDist;
+	      		float minDist = maxDist;
+		  		float minDistSqrt = pow(minDist, 2.0);
 	    		vec3 curVoxPos = vec3(vUv.x, vUv.y, sliceZ);
 		  		vec3 curBoxIndexPos = floor(curVoxPos*vec3(boxCountPerAxis));
 		  		vec3 curRelVoxPos = curVoxPos - curBoxIndexPos / vec3(boxCountPerAxis);  // Relative to curBox
@@ -225,15 +122,16 @@ export default class CloudPostProcessor {
 				    {
 				  		for (int dz = -1; dz < 2; dz++)
 				    	{
-		  			  	vec3 curRelPoint = getRelPoint(curBoxIndexPos, vec3(dx, dy, dz));
-		    				float curDist = distance(curRelPoint, curRelVoxPos);
-			    			if (curDist > minDist) continue;
-			    			minDist = curDist;
+		  			  		vec3 curRelPoint = getRelPoint(curBoxIndexPos, vec3(dx, dy, dz));
+		  					vec3 delta = curRelPoint - curRelVoxPos;
+		    				float curDistSqrt = dot(delta, delta);
+			    			if (curDistSqrt > minDistSqrt) continue;
+			    			minDistSqrt = curDistSqrt;
 		    			}
 		  			}
 		    	}
 
-		  		float normDist = (maxDist - minDist) / maxDist;
+		  		float normDist = 1.0 - sqrt(minDistSqrt) / maxDist;
 		    	gl_FragColor = vec4(pow(normDist, 3.0));
 		    }
 		  `
@@ -274,16 +172,16 @@ export default class CloudPostProcessor {
 			    cloudTexture: {value: null},
 			    cloudTexture_fine: {value: null},
 			    cloudBoxSize: {value: this._cloudBoxSize},
-			    minDensity: {value: 0.69}, 
-			    densityScalar: {value: 0.3},
-			    cloudLightPenetrationCoeff: {value: 1.0},
+			    minDensity: {value: 0.71}, 
+			    densityScalar: {value: 1.17},
+			    cloudLightPenetrationCoeff: {value: 2.0},
 			    lightPosition: {value: new THREE.Vector3()},
 
-			    cloudLightAbsorption: {value: 20.0},
-			    cloudLightCoef: {value: 50.0},
+			    cloudLightAbsorption: {value: 40.0},
+			    cloudLightCoef: {value: 20.0},
 
-			    fineTextureDensityScalar: {value: 0.0}, //0.5
- 			    fineTextureScalar: {value: 2.8},
+			    fineTextureDensityScalar: {value: 0.63},
+ 			    fineTextureScalar: {value: 2.3},
 			    fineTextureOffset: {value: new THREE.Vector3(0.0)}, // Change over time to give the idea of drifting clouds?
 			},
 			vertexShader: `
@@ -295,20 +193,23 @@ export default class CloudPostProcessor {
 			    }
 			`,
 			fragmentShader: `
-			  uniform sampler2D tDiffuse;
-			  uniform sampler2D depthTexture;
+			  	uniform sampler2D tDiffuse;
+			  	uniform sampler2D depthTexture;
 				uniform sampler3D cloudTexture;
 				uniform sampler3D cloudTexture_fine;
 
-		    varying vec2 vUv;
+			    varying vec2 vUv;
 
-		    uniform mat4 invProjection;
+			    uniform mat4 invProjection;
 				uniform mat4 cameraWorld;
 				uniform vec3 cloudCameraPosition;
 				uniform vec3 lightPosition;
 
 
 				uniform float cloudBoxSize;
+				float upperPlaneYUnitsCloudBox = 0.1;
+				float bottomPlaneYUnitsCloudBox = -0.15;
+
 				uniform float minDensity;
 				uniform float densityScalar;
 				uniform float cloudLightAbsorption; // Controls how much light is lost due to the clouds
@@ -321,16 +222,19 @@ export default class CloudPostProcessor {
 				uniform vec3 fineTextureOffset;
 
 
+				float lightRayStepCount = 5.0;
+				float renderRayStepCount = 50.0;
+
+
 				vec2 getIntersectionWithCloudBox(vec3 rayStart, vec3 rayNormal) {
 					// Check whether ray crosses through sphere
-					vec3 sphereCentre = vec3(0.0);
 					float sphereRad = cloudBoxSize / 2.0;
 					float IV = -1000000.0; // Invalid Value
 
-					float upperPlaneY = 0.05 * cloudBoxSize;
-					float bottomPlaneY = -0.15 * cloudBoxSize;
-					float upperPlaneRad = sqrt(pow(sphereRad, 2.0) - pow(upperPlaneY, 2.0));  // Radius of horizontal slice of sphere
-					float bottomPlaneRad = sqrt(pow(sphereRad, 2.0) - pow(bottomPlaneY, 2.0)); 
+					float upperPlaneY = upperPlaneYUnitsCloudBox * cloudBoxSize;
+					float bottomPlaneY = bottomPlaneYUnitsCloudBox * cloudBoxSize;
+					float upperPlaneRadSqrt = pow(sphereRad, 2.0) - pow(upperPlaneY, 2.0);  // Radius of horizontal slice of sphere
+					float bottomPlaneRadSqrt = pow(sphereRad, 2.0) - pow(bottomPlaneY, 2.0); 
 					
 					float D = pow(2.0 * dot(rayNormal, rayStart), 2.0) - 4.0*(dot(rayStart, rayStart) - pow(sphereRad, 2.0));
 					if (D <= 0.0) return vec2(IV); // No intersections at all
@@ -350,15 +254,16 @@ export default class CloudPostProcessor {
 					float pt1 = IV;
 					float pt2 = IV;
 
-					if (pow(rayNormal.x * pt1_ + rayStart.x, 2.0) + pow(rayNormal.z * pt1_ + rayStart.z, 2.0) <= pow(upperPlaneRad, 2.0))
+
+					// Ray intersects with the upper plane					
+					if (pow(rayNormal.x * pt1_ + rayStart.x, 2.0) + pow(rayNormal.z * pt1_ + rayStart.z, 2.0) <= upperPlaneRadSqrt)
 					{	
-						// Ray intersects with the upper plane
 						pt1 = pt1_;
 					}
 
-					if (pow(rayNormal.x * pt2_ + rayStart.x, 2.0) + pow(rayNormal.z * pt2_ + rayStart.z, 2.0) <= pow(bottomPlaneRad, 2.0))
-					{	
-						// Ray intersects with the bottom plane
+					// Ray intersects with the bottom plane
+					if (pow(rayNormal.x * pt2_ + rayStart.x, 2.0) + pow(rayNormal.z * pt2_ + rayStart.z, 2.0) <= bottomPlaneRadSqrt)
+					{
 						pt2 = pt2_;
 					}
 
@@ -389,9 +294,10 @@ export default class CloudPostProcessor {
 				}
 
 
-		    vec3 worldToTexturePos(vec3 worldPos) {
+			    vec3 worldToTexturePos(vec3 worldPos) {
 					return mod(worldPos / cloudBoxSize + vec3(0.5), vec3(1.0));
-		    }
+			    }
+
 				vec3 worldPositionFromDepth(vec2 uv, float depth) {
 				  vec4 clip = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 				  vec4 view = invProjection * clip;
@@ -408,10 +314,17 @@ export default class CloudPostProcessor {
 					float textureVal_fine = texture(cloudTexture_fine, normalizedPosition_fine).r;
 
 					float curDensity = (textureVal + textureVal_fine * fineTextureDensityScalar) / (1.0 + fineTextureDensityScalar);
-					
 					float density = max(0.0, curDensity - minDensity) * densityScalar / (1.0 - minDensity);
-					// float distNorm = distance(position, vec3(0.5)) / cloudBoxSize * 2.0;
-					return density; //* pow(1.0 - distNorm, 3.0); // Give the cloudBox a fuzzy edge
+					
+					
+					float upperPlaneY = upperPlaneYUnitsCloudBox * cloudBoxSize;
+					float bottomPlaneY = bottomPlaneYUnitsCloudBox * cloudBoxSize;
+					float sphereRad = cloudBoxSize / 2.0;
+					float distNormSphere = distance(position, vec3(0.5)) / sphereRad;
+					float distNormPlaneTop = (upperPlaneY - position.y) / (upperPlaneY - bottomPlaneY);
+					float distNormPlaneBottom = (position.y - bottomPlaneY) / (upperPlaneY - bottomPlaneY);
+
+					return density * pow(1.0 - distNormSphere, 3.0) * distNormPlaneTop * distNormPlaneBottom; // Give the cloudBox a fuzzy edge
 				}
 
 				float densityToLight(vec3 position) {
@@ -432,12 +345,12 @@ export default class CloudPostProcessor {
 					}
 
 					float curDist = 0.0;
-					float stepSize = rayMaxDist / 20.0; // /x: defines the amount of samples
+					float stepSize = rayMaxDist / lightRayStepCount;
 
 					float totalDensity = 0.0;
 					while (curDist < rayMaxDist)
 					{	
-						vec3 curPos = rayDirection * curDist + position;
+						vec3 curPos = rayDirection * curDist + rayStartPos;
 						float curDensity = sampleCloudDensity(curPos);
 						totalDensity += curDensity * stepSize;
 						curDist += stepSize;
@@ -445,8 +358,8 @@ export default class CloudPostProcessor {
 					return totalDensity;
 				}
 
-		    void main() {
-	      	vec4 color = texture2D(tDiffuse, vUv);
+			    void main() {
+		      		vec4 color = texture2D(tDiffuse, vUv);
 					
 					float depth = texture2D(depthTexture, vUv).r;
 					vec3 rayEndPos = worldPositionFromDepth(vUv, depth); // In world coords
@@ -469,7 +382,7 @@ export default class CloudPostProcessor {
 
 
 					float curDist = 0.0; // CurDist and t are equivalent
-					float stepSize = rayMaxDist / 30.0; // /x: defines the amount of samples
+					float stepSize = rayMaxDist / renderRayStepCount; // /x: defines the amount of samples
 
 					float lightEnergy = 0.0;
 					float transmittance = 1.0;
@@ -504,7 +417,7 @@ export default class CloudPostProcessor {
 						), 
 						1.0
 					);
-		    }
+		    	}
 			`
 		}, simulation);
 		
@@ -517,7 +430,7 @@ export default class CloudPostProcessor {
 	}
 
 	update(_simulation) {
-		this._pixelPass.uniforms.fineTextureOffset.value.y += 0.1;
+		this._pixelPass.uniforms.fineTextureOffset.value.y += 0.05;
 	}
 }
 

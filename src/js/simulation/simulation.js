@@ -42,8 +42,8 @@ export default class Simulation {
 		this.#setUpScene();
 		this.spotLight.addToScene(this.scene);
 
-		this.#volcanoParticleEffect = new VolcanoParticleEffect({renderer});
-		this.#volcanoParticleEffect.addToScene(this.scene);
+		// this.#volcanoParticleEffect = new VolcanoParticleEffect({renderer});
+		// this.#volcanoParticleEffect.addToScene(this.scene);
 
 
 		this.#defineComposer();
@@ -74,31 +74,34 @@ export default class Simulation {
 		this.camera.onResize();
 	}
 
+	#updateCount = 0;
+	#prevTime = new Date();
 	update() {
+		this.#updateCount++;
 		this.planet.update();
 		this.sun.update();
 		for (let star of this.stars) star.update();
 
 		if (this.planet.objects.length > 0)
 		{
-			this.#volcanoParticleEffect.update(this);
+			// this.#volcanoParticleEffect.update(this);
 		}
 		this.cloudPostProcessor.update(this);
 
 		this.camera.update();
 		this.composer.render();
 
+		if (this.#updateCount % 100 === 0)
+		{
+			let dt = (new Date() - this.#prevTime) / 100;
+			this.#prevTime = new Date();
+			document.querySelector('#FPSHolder').innerHTML = 'FPS: ' + Math.round(1000 / dt * 100) / 100;
+		}
+
 		requestAnimationFrame(() => this.update());
 	}
 
 	#defineComposer() {
-		// this.#composer = new EffectComposer(renderer);
-		// const renderPass = new RenderPass(this.scene, this.camera.camera);
-		// this.#composer.addPass(renderPass);
-		// this.cloudPostProcessor.addToComposer(this.#composer);
-		// this.#composer.addPass(new OutputPass());
-
-
 		const target = new THREE.WebGLRenderTarget(
 		  window.innerWidth,
 		  window.innerHeight
@@ -126,14 +129,13 @@ export default class Simulation {
 		//   0.5    // threshold
 		// );
 
-		const bloomPass = new UnrealBloomPass(
-		  new THREE.Vector2(window.innerWidth, window.innerHeight),
-		  0.1,    // strength
-		  0.01,    // radius
-		  0.8    // threshold
-		);
+		// const bloomPass = new UnrealBloomPass(
+		//   new THREE.Vector2(window.innerWidth, window.innerHeight),
+		//   0.1,    // strength
+		//   0.01,    // radius
+		//   0.8    // threshold
+		// );
 		// this.composer.addPass(bloomPass);
-
 
 		this.composer.addPass(new OutputPass());
 
@@ -142,12 +144,7 @@ export default class Simulation {
 
 	#setUpScene() {
 		this.scene = new THREE.Scene();
-		// this.scene.background = new THREE.Color(0x000010); // Dark mode
 		this.scene.background = new THREE.Color(0x101010);
-		// this.scene.background = new THREE.Color(0xfffffa); // Light mode
-		// this.scene.background = new THREE.Color(0xF3E0C8); // Cream
-		
-
 
 		this.#defineLighting();
 

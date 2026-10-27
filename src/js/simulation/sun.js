@@ -79,8 +79,8 @@ export default class Sun {
 	update() {
 		this.#sunAngle += this.#sunSpeed;
 		this.#sunAngle = this.#sunAngle % (2 * Math.PI);
-		this.#mesh.position.set(Math.sin(this.#sunAngle) * this.#sunDistance, 0.2 * this.#sunDistance, Math.cos(this.#sunAngle) * this.#sunDistance);
-		this.#light.position.set(Math.sin(this.#sunAngle) * (this.#sunDistance - this.#sunRad), 0.1 * this.#sunDistance, Math.cos(this.#sunAngle) * (this.#sunDistance - this.#sunRad));
+		this.#mesh.position.set(Math.sin(this.#sunAngle) * this.#sunDistance, 0.0 * this.#sunDistance, Math.cos(this.#sunAngle) * this.#sunDistance);
+		this.#light.position.set(Math.sin(this.#sunAngle) * (this.#sunDistance - this.#sunRad), 0.0 * this.#sunDistance, Math.cos(this.#sunAngle) * (this.#sunDistance - this.#sunRad));
 
 
 		// const sunPos = this.#mesh.position.clone();
