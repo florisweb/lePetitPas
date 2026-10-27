@@ -376,7 +376,9 @@ export default class CloudPostProcessor {
 					} else {
 						if (pt1 == IV) 
 						{
-							t1 = min(pt2, st1);
+							if (pt2 == IV) {
+								t1 = st1;
+							} else t1 = min(pt2, st1);
 						} else if (pt2 == IV)
 						{
 							t1 = min(pt1, st1);
@@ -408,7 +410,7 @@ export default class CloudPostProcessor {
 					float curDensity = (textureVal + textureVal_fine * fineTextureDensityScalar) / (1.0 + fineTextureDensityScalar);
 					
 					float density = max(0.0, curDensity - minDensity) * densityScalar / (1.0 - minDensity);
-					float distNorm = distance(position, vec3(0.5)) / cloudBoxSize * 2.0;
+					// float distNorm = distance(position, vec3(0.5)) / cloudBoxSize * 2.0;
 					return density; //* pow(1.0 - distNorm, 3.0); // Give the cloudBox a fuzzy edge
 				}
 
