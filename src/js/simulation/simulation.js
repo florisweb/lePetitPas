@@ -66,7 +66,7 @@ export default class Simulation {
 			const targetTop = -0.5 * panelHeight;
 			let prevTop = parseInt(renderer.domElement.style.top) || targetTop; // If no value is found, assume that we are already in the right spot
 			animateSigmoidally(_resizeDuration, (_perc) => {
-				renderer.domElement.style.top = (prevTop * (1 - _perc) + targetTop * _perc) + 'px'
+				renderer.domElement.style.top = (prevTop * (1 - _perc) + targetTop * _perc) + 'px';
 			});
 		}
 		
@@ -211,7 +211,6 @@ document.body.onscroll = (_e) => {
 	let scroller = document.getElementById('scroller');
 	if (!scroller) return;
 	renderer.domElement.style.height = Math.round(scroller.getBoundingClientRect().y + 30) + 'px';
-	// renderer.domElement.height = Math.round(scroller.getBoundingClientRect().y + 30);
 	resize();
 };
 
@@ -219,18 +218,5 @@ document.body.onscroll = (_e) => {
 
 
 
-
-
-
-
-
 window.THREE = THREE;
-
-
-// const trackedElements = document.querySelectorAll('.panel.tracked');
-// for (let i = 0; i < trackedElements.length; i++)
-// {
-// 	trackedElements[i].addEventListener('click', () => camera.panToObject(planet.objects[i]));
-// }
-
 

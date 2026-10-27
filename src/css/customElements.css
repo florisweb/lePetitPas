@@ -317,7 +317,7 @@ habit-value-type-selector .configSelector .configPage.hide {
 
 	display: grid;
 	grid-template-areas: "leftPanel ring rightPanel";
-	grid-template-columns: auto 60% auto;
+	grid-template-columns: 1fr 3fr 1fr;
 }
 
 .habitStateSection .progressRingHolder {

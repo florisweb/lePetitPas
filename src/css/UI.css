@@ -238,4 +238,27 @@ habit-overview-panel .calendarHolder {
 
 
 
+@media screen and (min-width: 600px) {
+	canvas {
+		top: 0 !important;
+	}
+
+	.UIPanel {
+		--UIPanelMaxWidth: 350px;
+		margin-left: 50px;
+		max-width: var(--UIPanelMaxWidth);
+		transform: translateY(50%);
+		bottom: 50vh;
+		border-radius: 20px;
+		padding-bottom: 20px;
+	}
+	.UIPanel[openState="false"] {
+		bottom: 50vh;
+	}
+
+	.habitStateSection {
+		width: calc(var(--UIPanelMaxWidth) - 2 * var(--horizontalPanelPadding)) !important;
+	}
+}
+
 
