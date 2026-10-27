@@ -418,12 +418,24 @@ export default class CloudPostProcessor {
 					vec3 ray = lightPosition - position;
 					float maxDistance = length(ray);
 					vec3 rayDirection = ray / maxDistance;
+
+					vec3 rayStartPos = position;
+
+					float rayMaxDist = 0.0; // As seen starting from rayStartPos
+					vec2 intPoints = getIntersectionWithCloudBox(rayStartPos, rayDirection);
+					if (intPoints.y < 0.0) 
+					{	// No intersections with sphere, or only touching, or only behind the camera
+					} else {
+						float minT = max(intPoints.x, 0.0);
+						rayStartPos = position + rayDirection * minT;
+						rayMaxDist = min(intPoints.y, maxDistance) - minT; // As t multiplies a normalised vector, the difference in t is also the length
+					}
+
 					float curDist = 0.0;
-					float maxDist = min(maxDistance, cloudBoxSize); // Only check within the cloudBox
-					float stepSize = maxDist / 20.0; // /x: defines the amount of samples
+					float stepSize = rayMaxDist / 20.0; // /x: defines the amount of samples
 
 					float totalDensity = 0.0;
-					while (curDist < maxDist)
+					while (curDist < rayMaxDist)
 					{	
 						vec3 curPos = rayDirection * curDist + position;
 						float curDensity = sampleCloudDensity(curPos);
