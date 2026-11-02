@@ -108,6 +108,7 @@ export default class HabitInfoPanel extends HTMLElement {
     switch (this.#habit.type) {
       case "inactiveVolcano": src = './images/inactiveVolcanoIcon.png'; break;
       case "rose": src = './images/roseIcon.png'; break;
+      case "baobab": src = './images/baobabIcon.png'; break;
       default:
       case "activeVolcano": src = './images/activeVolcanoIcon.png'; break;
     }
