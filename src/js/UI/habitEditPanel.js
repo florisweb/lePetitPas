@@ -51,10 +51,15 @@ export default class HabitEditPanel extends HTMLElement {
     this.classList.add('UIPanel');
     this.openState = false;
     this.innerHTML = `
-      <input class='nameField panelTitle inputField' placeholder='Habit name...'></input>
-      <input class='descriptionField inputField' placeholder='Description...'></input>
+      <div class='stickyPanelHeader'>
+        <input class='nameField panelTitle inputField' placeholder='Habit name...'></input>
+        <input class='descriptionField inputField' placeholder='Description...'></input>
+      </div>
       <habit-type-selector></habit-type-selector>
-      <habit-value-type-selector></habit-value-type-selector>
+      <div class='valueTypeSelector'>
+        <div class='header'>Value type</div>
+        <habit-value-type-selector></habit-value-type-selector>
+      </div>
       <button class='saveButton' filled>Save</button>
       <button class='cancelButton'>cancel</button>
     `;

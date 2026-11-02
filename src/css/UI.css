@@ -16,6 +16,9 @@
 	border-radius: 20px 20px 0 0;
 	color: var(--textColor);
 
+	max-height: 65vh;
+	overflow: auto;
+
 	transition: opacity .3s, bottom .3s;
 }
 
@@ -31,12 +34,32 @@
 	color: var(--textColor);
 	margin-bottom: 5px;	
 }
+.UIPanel:has(> .stickyPanelHeader) {
+	padding-top: 0;
+}
+.UIPanel .stickyPanelHeader {
+	position: sticky;
+	margin-left: calc(-1 * var(--horizontalPanelPadding));
+	padding: var(--horizontalPanelPadding);
+	padding-top: 25px;
+	width: calc(100% + 2 * var(--horizontalPanelPadding));
+
+	backdrop-filter: blur(50px);
+	top: 0;
+	z-index: 1000;
+	padding-bottom: 10px;
+}
+
 
 body.lightTheme .UIPanel .panelTitle {
 	font-size: 27px;
 	font-family: HeaderFont;
 }
 
+.UIPanel .header {
+	font-size: 14px;
+	color: var(--headerTextColor);
+}
 
 /* ------ HABIT INFO PANEL ------ */
 habit-info-panel {
@@ -164,25 +187,25 @@ habit-list-panel habit-element {
 habit-edit-panel.UIPanel {
 	display: grid;
 	grid-template-areas: 
-		"nameInput nameInput"
-		"descriptionInput descriptionInput"
+		"stickyPanelHeader stickyPanelHeader"
 		"typeInput typeInput"
 		"valueTypeInput valueTypeInput"
 		"cancelButton saveButton";
 	grid-template-columns: 50% 50%;
-	grid-template-rows: 30px 30px auto 40px;
+	grid-template-rows: 85px auto auto 40px;
 
 	padding-bottom: calc(var(--navBarHeight) + 40px);
 }
+habit-edit-panel .stickyPanelHeader {
+	grid-area: stickyPanelHeader;
 
+}
 
-habit-edit-panel .nameField {
-	grid-area: nameInput;
+habit-edit-panel .stickyPanelHeader .nameField {
 	width: 100%;
 }
 
-habit-edit-panel .descriptionField {
-	grid-area: descriptionInput;
+habit-edit-panel .stickyPanelHeader .descriptionField {
 	font-size: 15px;
 	height: 30px;
 	margin-top: -5px;
@@ -195,18 +218,27 @@ habit-edit-panel habit-type-selector {
 }
 
 
-habit-edit-panel habit-value-type-selector {
+habit-edit-panel .valueTypeSelector {
+	margin-top: 20px;
 	grid-area: valueTypeInput;
-	margin-top: 10px;
 }
+habit-edit-panel .valueTypeSelector .header {
+	margin-bottom: 5px;
+}
+habit-edit-panel habit-value-type-selector {
+}
+
+
+
+
 
 habit-edit-panel button.saveButton {
 	grid-area: saveButton;
-	margin-top: 15px;
+	margin-top: 20px;
 }
 habit-edit-panel button.cancelButton {
 	grid-area: cancelButton;
-	margin-top: 15px;
+	margin-top: 20px;
 }
 
 
@@ -252,9 +284,11 @@ habit-overview-panel .calendarHolder {
 		border-radius: 20px;
 		padding-bottom: 20px;
 	}
+
 	.UIPanel[openState="false"] {
 		bottom: 50vh;
 	}
+
 
 	.habitStateSection {
 		width: calc(var(--UIPanelMaxWidth) - 2 * var(--horizontalPanelPadding)) !important;

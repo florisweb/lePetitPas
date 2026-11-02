@@ -280,33 +280,62 @@ habit-type-selector hr {
 
 
 
-habit-value-type-selector {
-	border: 1px solid blue;
-}
-
 habit-value-type-selector select {
-	width: 100%;
+	margin-bottom: 5px;
+	height: 30px;
+	padding: 0 10px;
+	line-height: 30px;
+	
+	display: inline-block;
+
 	background: none;
+	border-radius: 5px;
+	font-size: 14px;
 	color: var(--textColor);
 }
 
 habit-value-type-selector .configSelector {
 	width: 100%;
-	border: 1px solid red;
 }
 
 
 habit-value-type-selector .configSelector .configPage {
-	border: 1px solid green;
-	transition: opacity .3s, margin-top .3s;
+	position: relative;
+	translate: 0 0;
+	display: grid;
+	grid-template-columns: auto auto;
+	grid-row-gap: 5px;
+	transition: opacity .3s, translate .3s, display .3s allow-discrete;
 }
 
 habit-value-type-selector .configSelector .configPage.hide {
-	margin-top: -10px;
+	translate: 0 -10px;
 	pointer-events: none;
 	opacity: 0;
+	display: none;
 }
 
+habit-value-type-selector .configSelector .configPage label {
+	line-height: 30px;
+}
+habit-value-type-selector .configSelector .configPage input { 
+	display: inline-block;
+	height: 30px;
+	padding: 10px;
+	margin-left: auto;
+	
+	border: 1px solid #eee;
+	border-radius: 5px;
+
+	background: none;	
+	color: var(--textColor);
+	font-size: 13px;
+	text-align: center;
+	max-width: 100px;
+}
+habit-value-type-selector .configSelector .configPage input[type=number]::-webkit-inner-spin-button {
+	background: red;
+}
 
 
 
